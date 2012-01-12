@@ -1,0 +1,4 @@
+
+useDynLib(RcppSMC)
+
+export(pfEx)

@@ -1,0 +1,17 @@
+Package: RcppSMC
+Type: Package
+Title: Rcpp bindings for Sequential Monte Carlo 
+Version: 0.0.1
+Date: $Date$
+Author: Dirk Eddelbuettel
+Maintainer: Dirk Eddelbuettel <edd@debian.org>
+Description: This package provides R with access to the Sequential Monte
+ Carlo Template Classes by Johansen (J Stat Soft, 2009, v30, i6).
+ .
+ At present, this is a proof of concept. SMCTC uses GSL RNGs which we can
+ easily swap for R RNGs. Further integration pending.
+License: GPL (>= 2)
+LazyLoad: yes
+Depends: Rcpp (>= 0.9.0), methods
+LinkingTo: Rcpp
+

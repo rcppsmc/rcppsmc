@@ -1,0 +1,9 @@
+2012-01-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Initial commit to R-Forge; package is still very bare but at least
+	passes R CMD check now that it has a man page too
+
+2012-01-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Bare-bones wrapping of Adam Johansen's nice SMCTC library described
+	in his 2009 paper in the Journal of Statistical Software paper
