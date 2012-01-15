@@ -1,3 +1,14 @@
+2012-01-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/rareEventsEx.cpp: Adapted main() from rare-events/main.cc in
+	the SMCTC sources
+	* src/simfunctions.hh: Also imported from rare-events/, and renamed
+	fInitialize to fInitializMC as the library already fInitialize
+	* src/simfunctions.hh: Dito
+	* src/markovchains/markovchain.h: Also imported from rare-events/
+	* R/rareEvents.R: Added minimal wrapper function
+	* man/rareEvents.Rd: Added minimal manual page
+
 2012-01-11  Dirk Eddelbuettel  <edd@debian.org>
 
 	* Initial commit to R-Forge; package is still very bare but at least

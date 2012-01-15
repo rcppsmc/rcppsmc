@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pf.cpp: Rcpp wrapper for SMC library -- first example
+// pf.cpp: Rcpp wrapper for SMC library -- first example of Johansen (2009)
 //
 // Copyright (C) 2012         Dirk Eddelbuettel
 //
@@ -20,7 +20,7 @@
 // along with RInside.  If not, see <http://www.gnu.org/licenses/>.
 // from examples/pf/pfexample.cc; pffuncs.cc and pffuncs.hh also used
 
-// RcppSMC builds on and wrap SMCTC which is
+// RcppSMC builds on top of, and wrap, SMCTC which is
 //
 //   Copyright Adam Johansen, 2008.
 //
