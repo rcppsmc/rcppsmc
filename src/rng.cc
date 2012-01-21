@@ -1,3 +1,4 @@
+#if 0
 #include <iostream>
 #include <cstring>
 
@@ -244,3 +245,4 @@ namespace smc {
 	return gsl_rng_uniform(pWorkspace); 
     }
 }
+#endif

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
-#include <gsl/gsl_randist.h>
+//#include <gsl/gsl_randist.h>
+#include <Rcpp.h>
 
 #include "smctc.hh"
 #include "simfunctions.hh"
@@ -18,10 +19,14 @@ double logDensity(long lTime, const mChain<double> & X)
   mElement<double> *x = X.GetElement(0);
   mElement<double> *y = x->pNext;
   //Begin with the density exluding the effect of the potential
-  lp = log(gsl_ran_ugaussian_pdf(x->value));
+  //lp = log(gsl_ran_ugaussian_pdf(x->value));
+  Rcpp::NumericVector z = Rcpp::dnorm( Rcpp::NumericVector(x->value), 0.0, 1.0);
+  lp = log( Rcpp::as<double>( z ));
 
   while(y) {
-    lp += log(gsl_ran_ugaussian_pdf(y->value - x->value));
+    //lp += log(gsl_ran_ugaussian_pdf(y->value - x->value));
+    z = Rcpp::dnorm( Rcpp::NumericVector(y->value - x->value), 0.0, 1.0);
+    lp += log( Rcpp::as<double>(z));
     x = y;
     y = x->pNext;
   }

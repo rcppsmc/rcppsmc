@@ -1,3 +1,4 @@
+#if 0
 //  SMCTC: rng.hh  
 //
 //   Copyright Adam Johansen, 2008.
@@ -119,4 +120,5 @@ namespace smc {
 }
  
  
+#endif
 #endif

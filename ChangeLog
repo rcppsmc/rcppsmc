@@ -1,3 +1,20 @@
+2012-01-21  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Version 0.0.2
+
+	* inst/include/rngR.h: New implementation of the RNG class, relying
+	solely on R thus removing the need to build against the GSL
+
+	* inst/include/rng.hh: #ifdef'ed out as GNU GSL RNGs no longer used
+	* src/rng.cc: Idem
+	* src/simfunctions.cc: Idem; and two calls changed from GSL to R
+
+	* inst/include/sampler.hh: Comment out ctor with GSL RNG type
+	* inst/include/smctc.hh: Include new rngR.h instead of rng.hh
+	* src/pffuncs.cc: Idem
+
+	* src/Makevars: Remove GSL vars for compilation
+
 2012-01-15  Dirk Eddelbuettel  <edd@debian.org>
 
 	* src/rareEventsEx.cpp: Adapted main() from rare-events/main.cc in

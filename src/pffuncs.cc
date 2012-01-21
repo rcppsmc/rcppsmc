@@ -1,9 +1,10 @@
 #include <iostream>
 #include <cmath>
-#include <gsl/gsl_randist.h>
+//#include <gsl/gsl_randist.h>
 
 #include "smctc.hh"
 #include "pffuncs.hh"
+#include "rngR.h"
 
 using namespace std;
 

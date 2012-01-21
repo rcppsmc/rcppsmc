@@ -91,7 +91,7 @@ namespace smc {
       ///Create an particle system containing lSize uninitialised particles with the specified mode.
       sampler(long lSize, HistoryType htHistoryMode);
       ///Create an particle system constaining lSize uninitialised particles with the specified mode and random number generator.
-      sampler(long lSize, HistoryType htHistoryMode, const gsl_rng_type* rngType, unsigned long nSeed);
+      // -- no GSL  sampler(long lSize, HistoryType htHistoryMode, const gsl_rng_type* rngType, unsigned long nSeed);
       ///Dispose of a sampler.
       ~sampler();
       ///Calculates and Returns the Effective Sample Size.
@@ -172,6 +172,7 @@ namespace smc {
     dResampleThreshold = 0.5 * N;
   }
 
+#if 0
   /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
   /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
   /// store the particle set and to initialise a random number generator.
@@ -200,7 +201,7 @@ namespace smc {
     rtResampleMode = SMC_RESAMPLE_STRATIFIED;
     dResampleThreshold = 0.5 * N;
   }
-
+#endif
 
   template <class Space>
   sampler<Space>::~sampler()
