@@ -1,3 +1,17 @@
+2012-03-13  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
+	* DESCRIPTION: Version 0.0.3
+
+	* NAMESPACE: Added blockpfGaussianOpt.
+	* inst/include/blockpfguassianopt.hh: Declarations for univariate
+	block-sampling particle filter implementation.
+	* src/blockpfguassianopt.cc: Main file for univariate block-sampling
+	particle filter implementation.
+	* src/blockpfguassianoptfuncs.cc: Internal functions for same.
+	* R/blockpfguassianopt.R: Minimal wrapper and output plotting for
+	same.
+	* doc/blockpfguassianopt.Rd: Added minimal documentation.
+
 2012-01-21  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.0.2

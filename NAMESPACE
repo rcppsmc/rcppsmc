@@ -1,5 +1,6 @@
 
 useDynLib(RcppSMC)
 
-export(pfEx,
+export(blockpfGaussianOpt,
+       pfEx,
        rareEventsEx)
