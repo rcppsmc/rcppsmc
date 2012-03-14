@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 //#include <gsl/gsl_randist.h>
 
 #include "rngR.h"
@@ -39,10 +40,10 @@ void fMoveBSPFG(long lTime, smc::particle<vector<double> > & pFrom, smc::rng *pR
     long lag = min(lTime,lLag);
 
     //These structures should really be made static 
-    double* mu = new double[lag+1];
-    double* sigma = new double[lag+1];
-    double* sigmah = new double[lag+1];
-    double* mub = new double[lag+1];
+    std::vector<double> mu(lag+1);
+    std::vector<double> sigma(lag+1);
+    std::vector<double> sigmah(lag+1);
+    std::vector<double> mub(lag+1);
 
     // Forward filtering
     mu[0] = cv_to->at(lTime-lag);
@@ -66,8 +67,4 @@ void fMoveBSPFG(long lTime, smc::particle<vector<double> > & pFrom, smc::rng *pR
     // Importance weighting
     pFrom.AddToLogWeight(-0.5 * pow(y[int(lTime)] - mu[lag-1],2.0) / (sigmah[lag]+1) );
 
-    delete [] mu;
-    delete [] sigma;
-    delete [] sigmah;
-    delete [] mub;
 }
