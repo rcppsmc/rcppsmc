@@ -8,10 +8,9 @@ Maintainer: Dirk Eddelbuettel <edd@debian.org>
 Description: This package provides R with access to the Sequential Monte
  Carlo Template Classes by Johansen (J Stat Soft, 2009, v30, i6).
  .
-  At present, this is a proof of concept. 
- Further integration pending.
+ At present, this is a proof of concept; further integration and extensions
+ are pending.
 License: GPL (>= 2)
 LazyLoad: yes
 Depends: Rcpp (>= 0.9.0), methods
 LinkingTo: Rcpp
-Packaged: 2012-03-13 17:50:23 UTC; adamj
