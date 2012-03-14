@@ -7,7 +7,7 @@
   Gaussian model. This is intended only to illustrate the potential of block
   sampling; one would not ordinarily use a particle filter for a model in
   which analytic solutions are available. The 'optimal' block sampler in the
-  sense of (Doucet, Briers and Senecal, 2006) can be implemented in this case.
+  sense of Doucet, Briers and Senecal (2006) can be implemented in this case.
 }
 \usage{
   blockpfGaussianOpt(data, particles=1000, lag=5, plot=FALSE) 
