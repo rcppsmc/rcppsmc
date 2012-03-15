@@ -1,3 +1,7 @@
+2012-03-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/pf.cpp: Another new/delete cleanup
+
 2012-03-15  Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* Standardized file extensions .h and .cpp
@@ -5,9 +9,11 @@
 	src/blockpfgaussianopt.cpp.
 	* src/pffuncs.cpp merged into src/pf.cpp.
 
+2012-03-13  Dirk Eddelbuettel  <edd@debian.org>
+	
+	* src/blockpfgaussianoptfuncs.cc: minor new/delete fix
+	
 2012-03-13  Adam Johansen <a.m.johansen@warwick.ac.uk>
-
-	* DESCRIPTION: Version 0.0.3
 
 	* NAMESPACE: Added blockpfGaussianOpt.
 	* inst/include/blockpfguassianopt.hh: Declarations for univariate

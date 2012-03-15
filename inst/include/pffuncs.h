@@ -1,4 +1,4 @@
-#include "smctc.hh"
+#include "smctc.h"
 
 class cv_state
 {

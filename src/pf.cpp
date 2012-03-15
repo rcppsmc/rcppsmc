@@ -96,7 +96,7 @@ long load_data(char const * szName, cv_obs** yp)
   FILE * fObs = fopen(szName,"rt");
   if (!fObs)
     throw SMC_EXCEPTION(SMCX_FILE_NOT_FOUND, "Error: pf assumes that the current directory contains an appropriate data file called data.csv\nThe first line should contain a constant indicating the number of data lines it contains.\nThe remaining lines should contain comma-separated pairs of x,y observations.");
-  char* szBuffer = new char[1024];
+  char szBuffer[1024];
   char* rc = fgets(szBuffer, 1024, fObs);
   if (rc==NULL)
     throw SMC_EXCEPTION(SMCX_FILE_NOT_FOUND, "Error: no data found.");
@@ -108,11 +108,9 @@ long load_data(char const * szName, cv_obs** yp)
     {
       rc = fgets(szBuffer, 1024, fObs);
       (*yp)[i].x_pos = strtod(strtok(szBuffer, ",\r\n "), NULL);
-      (*yp)[i].y_pos = strtod(strtok(NULL, ",\r\n "), NULL);
+      (*yp)[i].y_pos = strtod(strtok(szBuffer, ",\r\n "), NULL);
     }
   fclose(fObs);
-
-  delete [] szBuffer;
 
   return lIterates;
 }
