@@ -1,3 +1,10 @@
+2012-03-15  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
+	* Standardized file extensions .h and .cpp
+	* src/blockpfgaussianoptfuncs.cpp merged into
+	src/blockpfgaussianopt.cpp.
+	* src/pffuncs.cpp merged into src/pf.cpp.
+
 2012-03-13  Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* DESCRIPTION: Version 0.0.3

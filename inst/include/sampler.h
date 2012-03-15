@@ -30,11 +30,11 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "rng.hh"
-#include "history.hh"
-#include "moveset.hh"
-#include "particle.hh"
-#include "smc-exception.hh"
+#include "rng.h"
+#include "history.h"
+#include "moveset.h"
+#include "particle.h"
+#include "smc-exception.h"
 
 ///Specifiers for various resampling algorithms:
 enum ResampleType { SMC_RESAMPLE_MULTINOMIAL = 0, 

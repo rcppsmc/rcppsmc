@@ -30,7 +30,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "simfunctions.hh"
+#include "simfunctions.h"
 
 ///Length of Markov Chain
 long lChainLength = 15;

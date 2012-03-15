@@ -1,4 +1,4 @@
-#include "smc-exception.hh"
+#include "smc-exception.h"
 
 //! \file
 //! \brief The untemplated smc::exception class is implemented here.

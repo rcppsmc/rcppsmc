@@ -3,13 +3,6 @@
 
  * Maybe remove example 2 from the JSS paper
 
- * Should src/* files be named *.cc or *.cpp or mixed?  DE doesn't
-   care much either way, but prefers consistency -- so far it's *.cc
-   for the SMC code.
-
- * Dito for headers: DE mostly uses .h out of convention; .hh or .hpp
-   actually make more sense; whatever works with Emacs is fine by me
-
  * For blockpfGaussianOpt, we could be fancy and return an S3 object
    with a plot method.  Maybe later.
 

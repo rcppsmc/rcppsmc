@@ -5,8 +5,8 @@
 //! \file
 //! \brief This file contains the untemplated functions used for dealing with random number generation.
 
-#include "rng.hh"
-#include "smctc.hh"
+#include "rng"
+#include "smctc"
 
 namespace smc {
     ///The GSL provides a mechanism for obtaining a list of available random number generators.

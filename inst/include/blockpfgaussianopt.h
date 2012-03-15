@@ -1,4 +1,4 @@
-#include "smctc.hh"
+#include "smctc.h"
 #include <vector>
 
 using namespace std;

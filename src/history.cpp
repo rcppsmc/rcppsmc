@@ -1,4 +1,4 @@
-#include "smctc.hh"
+#include "smctc.h"
 
 //! \file
 //! \brief This file contains the untemplated functions used for storing the history of the system.

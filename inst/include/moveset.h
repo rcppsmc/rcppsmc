@@ -27,7 +27,7 @@
 #ifndef __SMC_MOVESET_HH
 #define __SMC_MOVESET_HH 1.0
 
-#include "particle.hh"
+#include "particle.h"
 //#include "rng.hh"
 
 namespace smc {

@@ -3,8 +3,8 @@
 //#include <gsl/gsl_randist.h>
 #include <Rcpp.h>
 
-#include "smctc.hh"
-#include "simfunctions.hh"
+#include "smctc.h"
+#include "simfunctions.h"
 
 using namespace std;
 
