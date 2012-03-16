@@ -1,3 +1,11 @@
+2012-03-16  Adam Johansen <a.m.johansen@warwick.ac.uk>
+	* NAMESPACE: Added pfNonlinBS.
+	* src/pfnonlinbS.cpp: Bootstrap particle nonlinear particle filter
+	example.
+	* inst/include/pfnonlinbs.h: Header for the same.
+	* R/pfNonlinBS.R: Minimal wrapper and output for the same.
+	* man/pfNonlinBS.Rd: Minimal documentation for the same.
+
 2012-03-15  Dirk Eddelbuettel  <edd@debian.org>
 
 	* src/pf.cpp: Another new/delete cleanup
