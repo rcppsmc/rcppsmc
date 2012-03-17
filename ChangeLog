@@ -1,4 +1,5 @@
 2012-03-17  Adam Johansen <a.m.johansen@warwick.ac.uk>
+	* man/pfEx.Rd updated to reflect previous changes.
 
 	* NAMESPACE removed rareEvents
 	* src/rareEvents.cpp moved to src/rareEvents.

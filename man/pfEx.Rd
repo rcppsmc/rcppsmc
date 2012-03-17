@@ -13,7 +13,7 @@
   estimation process. 
 }
 \usage{
-  pfEx(data, particles=1000, plot=FALSE) 
+  pfEx(data, particles=1000, plot=FALSE, onlinePlot) 
   pfExOnlinePlot(xm, ym)
 }
 \arguments{
@@ -23,6 +23,9 @@
   \item{particles}{An integer specifying the number of particles.}
   \item{plot}{A boolean variable describing whether plot should
     illustrate the estimated path along with the data.}
+  \item{onlinePlot}{A user-supplied callback function which is called with the
+  x and y position vectors during each iteration of the algorithm; see
+  pfExOnlinePlot for a simple example.}
   \item{xm}{Vector with x position.}
   \item{ym}{Vector with y position.}
 }
@@ -50,6 +53,7 @@
 \examples{
 \dontrun{
   res <- pfEx(plot=TRUE)
+  res <- pfEx(onlinePlot=pfExOnlinePlot)
 }
 }
 \author{Adam M. Johansen for SMCTC, Dirk Eddelbuettel for the RcppSMC wrapper.}
