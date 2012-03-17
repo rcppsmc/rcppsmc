@@ -1,8 +1,11 @@
 2012-03-16  Dirk Eddelbuettel  <edd@dexter>
 
-	* src/pf.cpp: Changed to get example data from R and pass it to a
-	vector of cv_obs
-	* R/pfEx.R: Added a helper func. to read data, restructured pfEx()
+	* src/pf.cpp:
+	  - Changed to get example data from R and pass to vector of cv_obs
+	  - Added optional plotting callback to visualize estimation progress
+	* R/pfEx.R:
+	  - Added a helper func. to read data, restructured pfEx()
+	  - Support optional plotting callback; provided sample function
 	* man/pfEx.Rd: Updated accordingly
 
 2012-03-16  Adam Johansen <a.m.johansen@warwick.ac.uk>

@@ -1,14 +1,20 @@
 \name{pfEx}
 \alias{pfEx}
+\alias{pfExOnlinePlot}
 \title{Particle Filter Example}
 \description{
   The \code{pfEx} function provides a simple example for
   \pkg{RcppSMC}. It is based on the first example in \code{SMCTC} and
   the discussion in Section 5.1 of Johansen (2009). A simple 'vehicle
   tracking' problem of 100 observations is solved with 1000 particles.
+
+  The \code{pfExOnlinePlot} function provides a simple default
+  \sQuote{online} plotting function that is invoked during the
+  estimation process. 
 }
 \usage{
   pfEx(data, particles=1000, plot=FALSE) 
+  pfExOnlinePlot(xm, ym)
 }
 \arguments{
   \item{data}{A two-column matrix or dataframe containing x and y
@@ -17,6 +23,8 @@
   \item{particles}{An integer specifying the number of particles.}
   \item{plot}{A boolean variable describing whether plot should
     illustrate the estimated path along with the data.}
+  \item{xm}{Vector with x position.}
+  \item{ym}{Vector with y position.}
 }
 \value{
   The function returns a \code{data.frame} containing as many rows as in
@@ -28,6 +36,10 @@
   \pkg{RcppSMC}. It is based on the \code{pf} example in the
   \code{SMCTC} library, and discussed in the Section 5.1 of his
   corresponding paper (Johansen, 2009).
+
+  Using the simple \code{pfExOnlinePlot} function illustrates how
+  callbacks into R, for example for plotting,  can be made during the
+  operation of SMC algorithm.
 }
 \references{
   A. M. Johansen. SMCTC: Sequential Monte Carlo in C++.

@@ -3,5 +3,6 @@ useDynLib(RcppSMC)
 
 export(blockpfGaussianOpt,
        pfEx,
+       pfExOnlinePlot,
        pfNonlinBS,
        rareEventsEx)

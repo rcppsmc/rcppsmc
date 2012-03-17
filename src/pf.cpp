@@ -51,7 +51,7 @@ double integrand_var_y(const cv_state&, void*);
 
 // pf() function callable from R via Rcpp:: essentially the same as main() from pf.cc 
 // minor interface change to pass data down as matrix, rather than a filename
-extern "C" SEXP pf(SEXP dataS, SEXP partS) { 	
+extern "C" SEXP pf(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) { 	
 
     long lIterates;
 
@@ -59,6 +59,8 @@ extern "C" SEXP pf(SEXP dataS, SEXP partS) {
 
         //std::string filename = Rcpp::as<std::string>(fileS);
         unsigned long lNumber = Rcpp::as<unsigned long>(partS);
+        bool useF = Rcpp::as<bool>(usefS);
+        Rcpp::Function f(funS);
 
         // Load observations -- or rather copy them in from R
         //lIterates = load_data(filename.c_str(), &y);
@@ -87,6 +89,8 @@ extern "C" SEXP pf(SEXP dataS, SEXP partS) {
             Xv(n) = Sampler.Integrate(integrand_var_x, (void*)&Xm(n));
             Ym(n) = Sampler.Integrate(integrand_mean_y, NULL);
             Yv(n) = Sampler.Integrate(integrand_var_y, (void*)&Ym(n));
+
+            if (useF) f(Xm, Xv, Ym, Yv);
         }
 
         return Rcpp::DataFrame::create(Rcpp::Named("Xm") = Xm,
