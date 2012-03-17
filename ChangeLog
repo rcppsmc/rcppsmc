@@ -1,3 +1,13 @@
+2012-03-17  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
+	* NAMESPACE removed rareEvents
+	* src/rareEvents.cpp moved to src/rareEvents.
+	* src/simfunctions.cpp idem.
+	* inst/include/simfunctions.h moved to inst/include/rareEvents.
+	* inst/include/markovchains idem
+	* man/rareEventsEx.Rd moved to man/rareEvents.
+	* R/rareEventsEx.R moved to R/rareEvents.
+	
 2012-03-16  Dirk Eddelbuettel  <edd@dexter>
 
 	* src/pf.cpp:

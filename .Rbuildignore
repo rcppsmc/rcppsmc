@@ -1,1 +1,4 @@
 src/compareGSLtoR
+src/rareEvents
+inst/include/rareEvents
+man/rareEvents
