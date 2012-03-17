@@ -1,4 +1,5 @@
 2012-03-17  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
 	* man/pfEx.Rd updated to reflect previous changes.
 
 	* NAMESPACE removed rareEvents
@@ -8,7 +9,7 @@
 	* inst/include/markovchains idem
 	* man/rareEventsEx.Rd moved to man/rareEvents.
 	* R/rareEventsEx.R moved to R/rareEvents.
-	
+
 2012-03-16  Dirk Eddelbuettel  <edd@dexter>
 
 	* src/pf.cpp:

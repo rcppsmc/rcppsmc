@@ -5,10 +5,12 @@ Version: 0.0.3
 Date: $Date$
 Author: Dirk Eddelbuettel and Adam M. Johansen
 Maintainer: Dirk Eddelbuettel <edd@debian.org>
-Description: This package provides R with access to the Sequential Monte
- Carlo Template Classes by Johansen (J Stat Soft, 2009, v30, i6).
+Description: This package provides R with access to the Sequential 
+ Monte Carlo Template Classes by Johansen (Journal of Statistical 
+ Software, 2009, v30, i6).
  .
- At present, this is a proof of concept; further integration and extensions
+ At present, additional examples have been added, and the first example 
+ from the JSS paper has been extended. Further integration and extensions
  are pending.
 License: GPL (>= 2)
 LazyLoad: yes
