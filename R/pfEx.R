@@ -44,7 +44,7 @@ getEx1Data <- function() {
 }
 
 pfExOnlinePlot <- function(xm, ym) {
-    plot(xm, ym, ylim=c(-7,0), xlim=c(2,14))
+    plot(xm, ym, xlim=c(-7,0), ylim=c(2,14))
     Sys.sleep(0.05)
 }
 

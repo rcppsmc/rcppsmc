@@ -90,7 +90,7 @@ extern "C" SEXP pf(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) {
             Ym(n) = Sampler.Integrate(integrand_mean_y, NULL);
             Yv(n) = Sampler.Integrate(integrand_var_y, (void*)&Ym(n));
 
-            if (useF) f(Xm, Xv, Ym, Yv);
+            if (useF) f(Xm, Ym);
         }
 
         return Rcpp::DataFrame::create(Rcpp::Named("Xm") = Xm,
