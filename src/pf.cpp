@@ -2,7 +2,8 @@
 //
 // pf.cpp: Rcpp wrapper for SMC library -- first example of Johansen (2009)
 //
-// Copyright (C) 2012         Dirk Eddelbuettel
+// Copyright (C) 2008         Adam Johansen
+// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -17,14 +18,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with RInside.  If not, see <http://www.gnu.org/licenses/>.
+// along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
 // from examples/pf/pfexample.cc; pffuncs.cc and pffuncs.hh also used
-
-// RcppSMC builds on top of, and wraps, SMCTC which is
-//
-//   Copyright Adam Johansen, 2008.
-//
-// and released under GPL-3, see the copyright headers in inst/include/ 
 
 #include <Rcpp.h>
 
