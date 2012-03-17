@@ -8,13 +8,12 @@
   tracking' problem of 100 observations is solved with 1000 particles.
 }
 \usage{
-  pfEx(filename="", particles=1000, plot=FALSE) 
+  pfEx(data, particles=1000, plot=FALSE) 
 }
 \arguments{
-  \item{filename}{A character variable describing path and filename of a
-    data file in the format described in the \pkg{SMCTC}
-    documentation. Note we may replace this with a direct transfer of a
-    data matrix.}
+  \item{data}{A two-column matrix or dataframe containing x and y
+    values. The default data set from Johansen (2009) is used as the
+    default if no data is supplied.}
   \item{particles}{An integer specifying the number of particles.}
   \item{plot}{A boolean variable describing whether plot should
     illustrate the estimated path along with the data.}

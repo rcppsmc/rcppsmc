@@ -3,7 +3,10 @@
 
  * Maybe remove example 2 from the JSS paper
 
- * For blockpfGaussianOpt, we could be fancy and return an S3 object
+ * Maybe rename example 1 from the JSS paper -- what would be a good
+   name instead of 'pfEx'? Idem for the C++ code.
+
+ * For blockpfGaussianOpt et al, we could be fancy and return an S3 object
    with a plot method.  Maybe later.
 
  * Once we are happy with the GSL -> R rng switch, we can remove all

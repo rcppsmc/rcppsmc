@@ -1,4 +1,12 @@
+2012-03-16  Dirk Eddelbuettel  <edd@dexter>
+
+	* src/pf.cpp: Changed to get example data from R and pass it to a
+	vector of cv_obs
+	* R/pfEx.R: Added a helper func. to read data, restructured pfEx()
+	* man/pfEx.Rd: Updated accordingly
+
 2012-03-16  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
 	* NAMESPACE: Added pfNonlinBS.
 	* src/pfnonlinbS.cpp: Bootstrap particle nonlinear particle filter
 	example.
@@ -18,9 +26,9 @@
 	* src/pffuncs.cpp merged into src/pf.cpp.
 
 2012-03-13  Dirk Eddelbuettel  <edd@debian.org>
-	
+
 	* src/blockpfgaussianoptfuncs.cc: minor new/delete fix
-	
+
 2012-03-13  Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* NAMESPACE: Added blockpfGaussianOpt.

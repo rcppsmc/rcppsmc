@@ -1,21 +1,31 @@
 
-pfEx<- function(filename="", particles=1000, plot=FALSE) {
+pfEx<- function(data, particles=1000, plot=FALSE) {
 
-    if (filename=="") {
-        filename <- system.file("sampleData", "pf-data.csv", package="RcppSMC")
-    }
-    res <- .Call("pf", filename, particles, package="RcppSMC")
+    # if no data supplied, use default
+    if (missing(data)) data <- getEx1Data()
+
+    # more eloquent tests can be added
+    stopifnot(nrow(data) > 0,
+              ncol(data) == 2,
+              colnames(data) == c("x", "y"))
+
+    res <- .Call("pf", as.matrix(data), particles, package="RcppSMC")
 
     if (plot) {
       ## plot 5.1 from vignette / paper
-      data <- read.table(file=filename, skip=1, header=FALSE,
-                         col.names=c("x","y"), sep="")
-      with(data, plot(x,y,col="red"))
+      with(data, plot(x, y, col="red"))
       with(res, lines(Xm, Ym, lty="dashed"))
     }
 
     invisible(res)
 }
 
+# simple convenience function, should probably make the data a
+# data component of the package...
+getEx1Data <- function() {
+    file <- system.file("sampleData", "pf-data.csv", package="RcppSMC")
+    dat <- read.table(file, skip=1, header=FALSE, col.names=c("x","y"))
+    invisible(dat)
+}
 
 

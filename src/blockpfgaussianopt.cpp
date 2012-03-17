@@ -11,7 +11,7 @@ using namespace std;
 ///The observations
 namespace BSPFG {
 Rcpp::NumericVector y;
-};
+}
 
 long lLag = 1;
 

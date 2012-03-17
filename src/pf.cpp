@@ -39,8 +39,10 @@
 using namespace std;
 
 ///The observations
-cv_obs * y;
-long load_data(char const * szName, cv_obs** y);
+//cv_obs * y;
+//Rcpp::NumericMatrix y;
+std::vector<cv_obs> y;
+//long load_data(char const * szName, cv_obs** y);
 
 double integrand_mean_x(const cv_state&, void*);
 double integrand_mean_y(const cv_state&, void*);
@@ -48,17 +50,25 @@ double integrand_var_x(const cv_state&, void*);
 double integrand_var_y(const cv_state&, void*);
 
 // pf() function callable from R via Rcpp:: essentially the same as main() from pf.cc 
-extern "C" SEXP pf(SEXP fileS, SEXP partS) { 	
+// minor interface change to pass data down as matrix, rather than a filename
+extern "C" SEXP pf(SEXP dataS, SEXP partS) { 	
 
     long lIterates;
 
     try {
 
-        std::string filename = Rcpp::as<std::string>(fileS);
+        //std::string filename = Rcpp::as<std::string>(fileS);
         unsigned long lNumber = Rcpp::as<unsigned long>(partS);
 
-        //Load observations
-        lIterates = load_data(filename.c_str(), &y);
+        // Load observations -- or rather copy them in from R
+        //lIterates = load_data(filename.c_str(), &y);
+        Rcpp::NumericMatrix dat = Rcpp::NumericMatrix(dataS); // so we expect a matrix
+        lIterates = dat.nrow();
+        y.reserve(lIterates);
+        for (long i = 0; i < lIterates; ++i) {
+            y[i].x_pos = dat(i,0);
+            y[i].y_pos = dat(i,1);
+        }
 
         //Initialise and run the sampler
         smc::sampler<cv_state> Sampler(lNumber, SMC_HISTORY_NONE);  
@@ -91,6 +101,7 @@ extern "C" SEXP pf(SEXP fileS, SEXP partS) {
     return R_NilValue;          	// to provide a return 
 }
 
+#if 0
 long load_data(char const * szName, cv_obs** yp)
 {
   FILE * fObs = fopen(szName,"rt");
@@ -114,6 +125,7 @@ long load_data(char const * szName, cv_obs** yp)
 
   return lIterates;
 }
+#endif
 
 double integrand_mean_x(const cv_state& s, void *)
 {
@@ -160,7 +172,13 @@ double Delta = 0.1;
 ///  \param X     The state to consider 
 double logLikelihood(long lTime, const cv_state & X)
 {
-  return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y[lTime].x_pos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y[lTime].y_pos)/scale_y,2) / nu_y));
+    //return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y[lTime].x_pos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y[lTime].y_pos)/scale_y,2) / nu_y));
+
+    //double y_xpos = y(lTime,0); 
+    //double y_ypos = y(lTime,1); 
+    //return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y_xpos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y_ypos)/scale_y,2) / nu_y));
+    
+    return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y[lTime].x_pos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y[lTime].y_pos)/scale_y,2) / nu_y));
 }
 
 ///A function to initialise particles

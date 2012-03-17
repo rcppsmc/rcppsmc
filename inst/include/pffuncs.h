@@ -25,4 +25,6 @@ extern double nu_x;
 extern double nu_y;
 extern double Delta;
 
-extern cv_obs * y; 
+//extern cv_obs * y; 
+//extern Rcpp::NumericMatrix y;
+extern std::vector<cv_obs> y;
