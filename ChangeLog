@@ -1,3 +1,8 @@
+2012-03-18 Adam Johansen <a.m.johansen@warwick.ac.uk>
+	* src/bspfGaussianOptimal.R tweaked plotting.
+	* src/pfNonlinBS.R fixed plotting bug.
+	* deprecated moved all rareEvents files here.
+
 2012-03-17  Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* man/pfEx.Rd updated to reflect previous changes.
