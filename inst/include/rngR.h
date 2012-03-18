@@ -18,7 +18,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with RInside.  If not, see <http://www.gnu.org/licenses/>.
-// from examples/pf/pfexample.cc; pffuncs.cc and pffuncs.hh also used
 
 // RcppSMC builds on top of, and wraps, SMCTC which is
 //
