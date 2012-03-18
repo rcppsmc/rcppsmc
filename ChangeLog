@@ -1,5 +1,5 @@
 2012-03-18 Adam Johansen <a.m.johansen@warwick.ac.uk>
-	* src/bspfGaussianOptimal.R tweaked plotting.
+	* src/bspfGaussianOptimal.R tweaked & standardised plotting.
 	* src/pfNonlinBS.R fixed plotting bug.
 	* deprecated moved all rareEvents files here.
 
