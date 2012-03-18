@@ -7,7 +7,7 @@
 //    Bayesian state estimation", Gordon Salmond and Smith, 
 //    IEE PROCEEDINGS-F 140(2):107-113, 1993
 //
-// Copyright (C) 2008         Adam Johansen
+// Copyright (C) 2008-2009    Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.

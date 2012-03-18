@@ -1,6 +1,6 @@
 //   SMCTC: particle.hh
 //
-//   Copyright Adam Johansen, 2008.
+//   Copyright Adam Johansen, 2008-2009.
 // 
 //   This file is part of SMCTC.
 //

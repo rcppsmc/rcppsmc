@@ -21,7 +21,7 @@
 
 // RcppSMC builds on top of, and wraps, SMCTC which is
 //
-//   Copyright Adam Johansen, 2008.
+//   Copyright Adam Johansen, 2008-2009.
 //
 // and released under GPL-3, see the copyright headers in inst/include/ 
 //

@@ -3,7 +3,7 @@
 //
 //     The principle header file for the SMC template class.
 //
-//     Copyright Adam Johansen, 2008
+//     Copyright Adam Johansen, 2008-2009
 //
 //
 //   This file is part of SMCTC.

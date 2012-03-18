@@ -1,8 +1,8 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pffuncs.h: Rcpp wrapper for SMC library -- first example of Johansen (2009)
+// pflineart.h: Rcpp wrapper for SMC library -- first example of Johansen (2009)
 //
-// Copyright (C) 2008         Adam Johansen
+// Copyright (C) 2008-2009    Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
