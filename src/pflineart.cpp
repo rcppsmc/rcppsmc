@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pf.cpp: Rcpp wrapper for SMC library -- first example of Johansen (2009)
+// pflineart.cpp: Rcpp wrapper for SMC library -- first example of Johansen (2009)
 //
 // Copyright (C) 2008         Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
@@ -23,7 +23,7 @@
 #include <Rcpp.h>
 
 #include "smctc.h"
-#include "pffuncs.h"
+#include "pflineart.h"
 #include "rngR.h"
 
 #include <cstdio> 
@@ -45,7 +45,7 @@ double integrand_var_y(const cv_state&, void*);
 
 // pf() function callable from R via Rcpp:: essentially the same as main() from pf.cc 
 // minor interface change to pass data down as matrix, rather than a filename
-extern "C" SEXP pf(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) { 	
+extern "C" SEXP pfLineartBS(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) { 	
 
     long lIterates;
 

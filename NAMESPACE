@@ -2,7 +2,7 @@
 useDynLib(RcppSMC)
 
 export(blockpfGaussianOpt,
-       pfEx,
+       pfLineartBS,
        pfExOnlinePlot,
        pfNonlinBS)
 

@@ -1,9 +1,9 @@
-\name{pfEx}
-\alias{pfEx}
+\name{pfLineartBS}
+\alias{pfLineartBS}
 \alias{pfExOnlinePlot}
 \title{Particle Filter Example}
 \description{
-  The \code{pfEx} function provides a simple example for
+  The \code{pfLineartBS} function provides a simple example for
   \pkg{RcppSMC}. It is based on the first example in \code{SMCTC} and
   the discussion in Section 5.1 of Johansen (2009). A simple 'vehicle
   tracking' problem of 100 observations is solved with 1000 particles.
@@ -13,7 +13,7 @@
   estimation process. 
 }
 \usage{
-  pfEx(data, particles=1000, plot=FALSE, onlinePlot) 
+  pfLineartBS(data, particles=1000, plot=FALSE, onlinePlot) 
   pfExOnlinePlot(xm, ym)
 }
 \arguments{
@@ -35,8 +35,9 @@
   \eqn{y}{y} coordinates as well as the estimated velocity in these two directions.
 }
 \details{
-  The \code{pfEx} function provides a simple example for
-  \pkg{RcppSMC}. It is based on the \code{pf} example in the
+  The \code{pfLineartBS} function provides a simple example for
+  \pkg{RcppSMC}. The model is linear with t-distributed innovations.
+  It is based on the \code{pf} example in the
   \code{SMCTC} library, and discussed in the Section 5.1 of his
   corresponding paper (Johansen, 2009).
 
@@ -52,8 +53,8 @@
 \seealso{The SMCTC paper and code at \url{http://www.jstatsoft.org/v30/i06/paper}.}
 \examples{
 \dontrun{
-  res <- pfEx(plot=TRUE)
-  res <- pfEx(onlinePlot=pfExOnlinePlot)
+  res <- pfLineartBS(plot=TRUE)
+  res <- pfLineartBS(onlinePlot=pfExOnlinePlot)
 }
 }
 \author{Adam M. Johansen for SMCTC, Dirk Eddelbuettel for the RcppSMC wrapper.}

@@ -1,5 +1,5 @@
 
-pfEx<- function(data, particles=1000, plot=FALSE, onlinePlot) {
+pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
 
     # if no data supplied, use default
     if (missing(data)) data <- getEx1Data()
@@ -20,7 +20,7 @@ pfEx<- function(data, particles=1000, plot=FALSE, onlinePlot) {
               colnames(data) == c("x", "y"),
               class(onlinePlot) == "function")
 
-    res <- .Call("pf", as.matrix(data),
+    res <- .Call("pfLineartBS", as.matrix(data),
                  particles,
                  useOnline,
                  onlinePlot,
