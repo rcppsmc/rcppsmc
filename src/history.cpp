@@ -2,7 +2,7 @@
 //
 // history.cpp: Rcpp integration of SMC library -- sampler history
 //
-// Copyright (C) 2008-2009    Adam Johansen
+// Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
