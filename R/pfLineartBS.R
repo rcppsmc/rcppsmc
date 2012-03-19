@@ -2,7 +2,7 @@
 pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
 
     # if no data supplied, use default
-    if (missing(data)) data <- getEx1Data()
+    if (missing(data)) data <- getPfLineartBSData()
 
     if (missing(onlinePlot)) {
         useOnline <- FALSE
@@ -11,7 +11,7 @@ pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
         useOnline <- TRUE
         # set up x11
         x11(width=3,height=3)
-        par(mar=c(3,3,1,1),cex=0.8, pch=19)
+        par(mar=c(3,3,1,1),cex=0.8, pch=19, ask=FALSE)
     }
 
     # more eloquent tests can be added
@@ -37,14 +37,18 @@ pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
 
 # simple convenience function, should probably make the data a
 # data component of the package...
-getEx1Data <- function() {
+getPfLineartBSData <- function() {
     file <- system.file("sampleData", "pf-data.csv", package="RcppSMC")
     dat <- read.table(file, skip=1, header=FALSE, col.names=c("x","y"))
     invisible(dat)
 }
 
-pfExOnlinePlot <- function(xm, ym) {
+pfLineartBSOnlinePlot <- function(xm, ym) {
+    # FIXME: xlim and ylim should be dependent on data, but of course
+    # the online algorithm does not "know" the full dataset as it
+    # works its way through
     plot(xm, ym, xlim=c(-7,0), ylim=c(2,14))
+    # FIXME sleep time should also be a variable
     Sys.sleep(0.05)
 }
 

@@ -3,6 +3,6 @@ useDynLib(RcppSMC)
 
 export(blockpfGaussianOpt,
        pfLineartBS,
-       pfExOnlinePlot,
+       pfLineartBSOnlinePlot,
        pfNonlinBS)
 

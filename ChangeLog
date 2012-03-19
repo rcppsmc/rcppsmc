@@ -1,3 +1,8 @@
+2012-03-18  Dirk Eddelbuettel  <edd@debian.org>
+
+	* R/pfLineartBS.R: Adjust naming of the two helper functions
+	* man/pfLineartBS.Rd: Idem
+
 2012-03-18 Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* src/pfEx.cpp renamed to pflineartbs.cpp

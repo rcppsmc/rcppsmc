@@ -1,6 +1,6 @@
 \name{pfLineartBS}
 \alias{pfLineartBS}
-\alias{pfExOnlinePlot}
+\alias{pfLineartBSOnlinePlot}
 \title{Particle Filter Example}
 \description{
   The \code{pfLineartBS} function provides a simple example for
@@ -8,13 +8,13 @@
   the discussion in Section 5.1 of Johansen (2009). A simple 'vehicle
   tracking' problem of 100 observations is solved with 1000 particles.
 
-  The \code{pfExOnlinePlot} function provides a simple default
+  The \code{pfLineartBSOnlinePlot} function provides a simple default
   \sQuote{online} plotting function that is invoked during the
   estimation process. 
 }
 \usage{
   pfLineartBS(data, particles=1000, plot=FALSE, onlinePlot) 
-  pfExOnlinePlot(xm, ym)
+  pfLineartBSOnlinePlot(xm, ym)
 }
 \arguments{
   \item{data}{A two-column matrix or dataframe containing x and y
@@ -52,10 +52,8 @@
 }
 \seealso{The SMCTC paper and code at \url{http://www.jstatsoft.org/v30/i06/paper}.}
 \examples{
-\dontrun{
   res <- pfLineartBS(plot=TRUE)
-  res <- pfLineartBS(onlinePlot=pfExOnlinePlot)
-}
+  res <- pfLineartBS(onlinePlot=pfLineartBSOnlinePlot)
 }
 \author{Adam M. Johansen for SMCTC, Dirk Eddelbuettel for the RcppSMC wrapper.}
 \keyword{programming}

@@ -1,9 +1,9 @@
 \name{pfNonlinBS}
 \alias{pfNonlinBS}
-\title{Block Sampling Particle Filter (Linear Gaussian Model; Optimal Proposal)}
+\title{Nonlinear Block Sampling Particle Filter (Non-Linear / Non-Gaussian State Space)}
 \description{
-  The \code{blockpfGaussianOpt} function provides a simple example for
-  \pkg{RcppSMC}. It is a simple "bootstrap" particle filter which employs
+  The \code{pfNonlinBS} function provides a simple example for
+  \pkg{RcppSMC}. It is a simple \dQuote{bootstrap} particle filter which employs
   multinomial resampling after each iteration applied to the common nonlinear
   state space model following Gordon, Salmond and Smith (1993).
 }
