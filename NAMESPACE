@@ -4,5 +4,8 @@ useDynLib(RcppSMC)
 export(blockpfGaussianOpt,
        pfLineartBS,
        pfLineartBSOnlinePlot,
-       pfNonlinBS)
+       pfNonlinBS,
+       simGaussian,
+       simLineart,
+       simNonlin)
 

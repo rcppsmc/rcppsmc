@@ -1,3 +1,12 @@
+2012-03-19  Adam Johansen <a.m.johansen@warwick.ac.uk>
+	* R/simGaussian.R Added data-simulating function
+	* R/simLineart.R Idem
+	* R/simNonlin.R Idem
+	* man/blockpfGaussianOpt.Rd Added simulator doc and example usage.
+	* man/pfLineartBS.Rd Idem
+	* man/pfNonlinBS.Rd Idem
+	* NAMESPACE Added data-simulating functions to namespace
+
 2012-03-18  Dirk Eddelbuettel  <edd@debian.org>
 
 	* R/pfLineartBS.R: Adjust naming of the two helper functions
