@@ -65,5 +65,5 @@
   res <- pfLineartBS(plot=TRUE)
   res <- pfLineartBS(onlinePlot=pfLineartBSOnlinePlot)
 }
-\author{Adam M. Johansen for SMCTC, Dirk Eddelbuettel for the RcppSMC wrapper.}
+\author{Adam M. Johansen and Dirk Eddelbuettel}
 \keyword{programming}

@@ -1,17 +1,15 @@
 simLineart <- function(len = 250)
 {
-  sim <- c();
-  
-  statex <- cumsum(rnorm(len));
-  statey <- cumsum(rnorm(len));
+  sim <- c()
 
-  datax  <- statex + rt(len,df=4);
-  datay  <- statey + rt(len,df=4);
+  statex <- cumsum(rnorm(len))
+  statey <- cumsum(rnorm(len))
 
-  sim$state <- c(statex,statey);
-  dim(sim$state) <- c(2,2);
-  sim$data  <- c(datax,datay);
-  dim(sim$data) <- c(2,2);
+  datax  <- statex + rt(len,df=4)
+  datay  <- statey + rt(len,df=4)
 
-  invisible(sim);
+  sim$state <- matrix(cbind(statex,statey), ncol=2, dimnames=list(NULL, c("x", "y")))
+  sim$data  <- matrix(cbind(datax,datay), ncol=2, dimnames=list(NULL, c("x", "y")))
+
+  invisible(sim)
 }

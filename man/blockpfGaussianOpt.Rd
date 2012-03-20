@@ -40,8 +40,9 @@
   which the state evolution and observation equations are:
   	x(n) = x(n-1) + e(n) and 
 	y(n) = x(n) + f(n)
-  where e(n) and f(n) are mutually-independent standard normal random variables. The 'optimal'
-  block-sampling proposal described by (Doucet et al., 2006) is employed.
+  where e(n) and f(n) are mutually-independent standard normal random
+  variables. The 'optimal' block-sampling proposal described by Doucet
+  et al (2006) is employed. 
 
   The \code{simGaussian} function simulates from the same model returning both
   the state and observation vectors.
@@ -55,5 +56,5 @@
   sim <- simGaussian(len=250)
   res <- blockpfGaussianOpt(sim$data,lag=5,plot=TRUE)
 }
-\author{Adam M. Johansen}
+\author{Adam M. Johansen and Dirk Eddelbuettel}
 \keyword{programming}
