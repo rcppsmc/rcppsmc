@@ -1,6 +1,6 @@
 simLineart <- function(len = 250)
 {
-  sim <- c()
+  sim <- list()
 
   statex <- cumsum(rnorm(len))
   statey <- cumsum(rnorm(len))

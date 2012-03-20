@@ -1,6 +1,6 @@
 simNonlin <- function(len = 50)
 {
-   sim <- c()
+   sim <- list()
 
    innovations <- rnorm(len) * sqrt(10)
    sim$state[1] <- innovations[1]
