@@ -1,0 +1,64 @@
+
+===== Summary =====
+
+Version 0.1.0 provides the initial release of RcppSMC, an integration of the
+SMCTC template classes for Sequential Monte Carlo and Particle Filters
+(Johansen, 2009, J Statistical Software, 30:6) with the Rcpp package for R/C++
+Integration (Eddelbuettel and Francois, 2011, J Statistical Software, 40:8).
+
+RcppSMC allows for easier and more direct access from R to the computational
+core of the SMC algorithm.
+
+===== Overview =====
+
+Sequential Monte Carlo methods are a very general class of Monte Carlo
+methods for sampling from sequences of distributions. Simple examples of
+these algorithms are used very widely in the tracking and signal processing
+literature. Recent developments illustrate that these techniques have much
+more general applicability, and can be applied very effectively to
+statistical inference problems. Unfortunately, these methods are often
+perceived as being computationally expensive and difficult to implement. 
+
+By combining the SMCTC with the 'glue' provided by Rcpp, a tighter
+integration with R is achieved.  This allows the applied researcher
+interested in Sequential Monte Carlo and Particle Filter methods to more
+easily vary input data, summarize outputs, plot results and so on.
+
+As a concrete example, figure 5.1 of Johansen (2009) which illustrates a
+Particle Filter for a two-dimensional linear time fit, is reproduced by
+
+   res <- pfLineartBS(plot=TRUE)
+
+where we select the optional plot. Moreover, progress during the model fit
+can also be visualized (using callbacks into R from C++ which Rcpp provides)
+via 
+
+   res <- pfLineartBS(onlinePlot=pfLineartBSOnlinePlot)
+
+where pfLineartBSOnlinePlot() is a default plotting function provided for
+this example by the package.
+
+Two more 'classic' examples from the literature have been added to the
+package:
+
+   blockpfGaussianOpt()   provides the Block Sampling Particle Filter by
+      Doucet, Briers and Senecal (2006, JCGS)
+
+   pfNonlineBS() provides the Nonlinear Bootstrap Particle Filter by 
+      Gordon, Salmond and Smith (1993, IEE Proceedings-F)
+
+We intend to add more example and illustrations over time.  
+
+
+===== Support =====
+
+Questions about RcppSMC should be directed to the Rcpp-devel mailing list
+    https://lists.r-forge.r-project.org/cgi-bin/mailman/listinfo/rcpp-devel
+
+
+
+ -- Dirk Eddelbuettel and Adam Johansen
+    March 2012
+
+
+
