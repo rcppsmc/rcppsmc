@@ -22,10 +22,11 @@ perceived as being computationally expensive and difficult to implement.
 By combining the SMCTC with the 'glue' provided by Rcpp, a tighter
 integration with R is achieved.  This allows the applied researcher
 interested in Sequential Monte Carlo and Particle Filter methods to more
-easily vary input data, summarize outputs, plot results and so on.
+easily vary input data, summarize outputs, plot results and so on. 
 
 As a concrete example, figure 5.1 of Johansen (2009) which illustrates a
-Particle Filter for a two-dimensional linear time fit, is reproduced by
+Particle Filter for a two-dimensional linear state space model with
+non-Gaussian observation error, is reproduced by
 
    res <- pfLineartBS(plot=TRUE)
 
@@ -41,13 +42,22 @@ this example by the package.
 Two more 'classic' examples from the literature have been added to the
 package:
 
-   blockpfGaussianOpt()   provides the Block Sampling Particle Filter by
-      Doucet, Briers and Senecal (2006, JCGS)
+   blockpfGaussianOpt()   provides the Block Sampling Particle Filter of
+      Doucet, Briers and Senecal (2006, JCGS 15:693) in the context of a 
+      univariate linear Gaussian model.
 
-   pfNonlineBS() provides the Nonlinear Bootstrap Particle Filter by 
-      Gordon, Salmond and Smith (1993, IEE Proceedings-F)
+   pfNonlinBS() provides the Bootstrap Particle Filter of
+      Gordon, Salmond and Smith (1993, IEE Proceedings-F 140:107)
+      in the context of the ubiquitous nonlinear model which was used in
+      section 4.1 of that paper.
 
-We intend to add more example and illustrations over time.  
+These examples are hopefully of some pedagogic interest and provide templates
+which can be used to guide the implementation of more complicated algorithms
+using the Rcpp/SMCTC-combination.
+
+We intend to add more example and illustrations over time and aim ultimately 
+to provide a framework to support the straightforward implementation of SMC
+algorithms which exploits the powerful combination of R and C++.
 
 
 ===== Support =====
