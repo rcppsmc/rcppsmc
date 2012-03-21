@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "rng.h"
+#include "rngR.h"
 #include "history.h"
 #include "moveset.h"
 #include "particle.h"

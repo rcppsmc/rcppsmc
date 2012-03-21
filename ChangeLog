@@ -1,8 +1,16 @@
+2012-03-21  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/rng.cpp: Moved old GSL-based RNG code to deprecated/
+	* inst/include/rng.h: Idem
+	* man/pfLineartBS.Rd: Callback-to-R example only if interactive()
+
 2012-03-21  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
 	* R/pfLineartBS.R Added function to dynamically set the range of
 	the online plot.
 
 2012-03-19  Adam Johansen <a.m.johansen@warwick.ac.uk>
+
 	* R/simGaussian.R Added data-simulating function
 	* R/simLineart.R Idem
 	* R/simNonlin.R Idem
@@ -16,7 +24,7 @@
 	* R/pfLineartBS.R: Adjust naming of the two helper functions
 	* man/pfLineartBS.Rd: Idem
 
-2012-03-18 Adam Johansen <a.m.johansen@warwick.ac.uk>
+2012-03-18  Adam Johansen <a.m.johansen@warwick.ac.uk>
 
 	* src/pfEx.cpp renamed to pflineartbs.cpp
 	* inst/include/pffuncs.h renamed to pflineartbs.h

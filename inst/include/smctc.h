@@ -98,7 +98,6 @@
 #include <cstdlib>
 #include <iostream>
 
-//#include <gsl/gsl_rng.h>
 #include "rngR.h"
 
 #include "smc-exception.h"

@@ -2,7 +2,8 @@
 //
 // rngR.h: Rcpp wrapper for SMC library -- R-only RNG class
 //
-// Copyright (C) 2012         Dirk Eddelbuettel
+// Copyright (C) 2008 - 2009  Adam Johansen
+// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -19,17 +20,6 @@
 // You should have received a copy of the GNU General Public License
 // along with RInside.  If not, see <http://www.gnu.org/licenses/>.
 
-// RcppSMC builds on top of, and wraps, SMCTC which is
-//
-//   Copyright Adam Johansen, 2008-2009.
-//
-// and released under GPL-3, see the copyright headers in inst/include/ 
-//
-// The main reason rngR.h was written was to provide a drop-in replacement,
-// maintaining the same API, but not requiring the GNU GSL -- as GNU R 
-// already provides what we need.  The text below is very lightly edited, and 
-// if it refers to the GSL was probably written by Adam Johansen for SMCTC.
-// I added a few comments with handle 'DEdd'   -- Dirk Eddelbuettel, Jan 2012
 
 //! \file 
 //! \brief Random number generation.
@@ -43,8 +33,8 @@
 #include <Rcpp.h>
 
 namespace smc {
-    ///A gsl-rng information handling class (not templated)
-    ///DEdd: Now essentially empty
+    /// A GSL-RNG information handling class (not templated)
+    /// Now essentially empty as using R RNGs requires less state
     class gslrnginfo {
     private:
         ///This is a null terminated array of the available random number generators.
@@ -54,7 +44,7 @@ namespace smc {
 
     protected:
         gslrnginfo() { 
-            // DEdd: nothing to do for us
+            // Nothing to do for us
         }
 
     public:
@@ -78,7 +68,7 @@ namespace smc {
     ///A random number generator class.
 
     ///    At present this serves as a wrapper for the gsl random number generation code.
-    ///    DEdd: Rewritten for R package using R's RNGs
+    ///    Rewritten for R package using R's RNGs
     class rng {
     private:
         ///This is the type of random number generator underlying the class.
@@ -86,7 +76,7 @@ namespace smc {
         ///This is a pointer to the internal workspace of the rng including its current state.
         //gsl_rng* pWorkspace;
 
-        Rcpp::RNGScope *scopeptr; 	// DEdd: RNGScope saves and later restores R's RNG state 
+        Rcpp::RNGScope *scopeptr; 	// RNGScope saves and later restores R's RNG state 
 
     public:
         ///Initialise the random number generator using default settings

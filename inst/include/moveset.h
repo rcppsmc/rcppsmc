@@ -28,7 +28,6 @@
 #define __SMC_MOVESET_HH 1.0
 
 #include "particle.h"
-//#include "rng.hh"
 
 namespace smc {
   /// A template class for a set of moves for use in an SMC samplers framework.

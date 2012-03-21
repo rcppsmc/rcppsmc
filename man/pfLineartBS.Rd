@@ -63,7 +63,8 @@
 \seealso{The SMCTC paper and code at \url{http://www.jstatsoft.org/v30/i06/paper}.}
 \examples{
   res <- pfLineartBS(plot=TRUE)
-  res <- pfLineartBS(onlinePlot=pfLineartBSOnlinePlot)
+  if (interactive()) ## if not running R CMD check etc
+     res <- pfLineartBS(onlinePlot=pfLineartBSOnlinePlot)
 }
 \author{Adam M. Johansen and Dirk Eddelbuettel}
 \keyword{programming}
