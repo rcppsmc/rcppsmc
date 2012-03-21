@@ -45,26 +45,20 @@ getPfLineartBSData <- function() {
 
 pfLineartRange <- function(min,max)
 {
-   if(min > 0)
-   {
-	rmin = exp(floor(log(min)))
-   }
-   else if (min < 0) {
-   	rmin = -exp(ceiling(log(-min)))
-   }
-   else {
-   	rmin = 0
+   if(min > 0) {
+      rmin = exp(floor(log(min)))
+   } else if (min < 0) {
+      rmin = -exp(ceiling(log(-min)))
+   } else {
+      rmin = 0
    }
 
-   if(max > 0) 
-   {  
-	rmax = exp(ceiling(log(max)))
-   }
-   else if (max < 0){
-   	rmax = exp(floor(log(-max)))
-   }
-   else {
-   	rmax = 0;
+   if(max > 0) {  
+      rmax = exp(ceiling(log(max)))
+   } else if (max < 0){
+      rmax = exp(floor(log(-max)))
+   } else {
+      rmax = 0;
    }
 
    invisible(c(rmin,rmax))
