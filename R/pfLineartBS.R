@@ -43,11 +43,38 @@ getPfLineartBSData <- function() {
     invisible(dat)
 }
 
+pfLineartRange <- function(min,max)
+{
+   if(min > 0)
+   {
+	rmin = exp(floor(log(min)))
+   }
+   else if (min < 0) {
+   	rmin = -exp(ceiling(log(-min)))
+   }
+   else {
+   	rmin = 0
+   }
+
+   if(max > 0) 
+   {  
+	rmax = exp(ceiling(log(max)))
+   }
+   else if (max < 0){
+   	rmax = exp(floor(log(-max)))
+   }
+   else {
+   	rmax = 0;
+   }
+
+   invisible(c(rmin,rmax))
+}
+
 pfLineartBSOnlinePlot <- function(xm, ym) {
     # FIXME: xlim and ylim should be dependent on data, but of course
     # the online algorithm does not "know" the full dataset as it
     # works its way through
-    plot(xm, ym, xlim=c(-7,0), ylim=c(2,14))
+    plot(xm, ym, xlim = pfLineartRange(min(xm),max(xm)), ylim=pfLineartRange(min(xm),max(ym)))
     # FIXME sleep time should also be a variable
     Sys.sleep(0.05)
 }

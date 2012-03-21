@@ -1,3 +1,7 @@
+2012-03-21  Adam Johansen <a.m.johansen@warwick.ac.uk>
+	* R/pfLineartBS.R Added function to dynamically set the range of
+	the online plot.
+
 2012-03-19  Adam Johansen <a.m.johansen@warwick.ac.uk>
 	* R/simGaussian.R Added data-simulating function
 	* R/simLineart.R Idem
