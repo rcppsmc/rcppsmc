@@ -336,7 +336,7 @@ namespace smc {
      //Normalise the weights to sensible values....
      double dMaxWeight = -std::numeric_limits<double>::infinity();
      for(int i = 0; i < N; i++)
-       dMaxWeight = max(dMaxWeight, pParticles[i].GetLogWeight());
+       dMaxWeight = std::max(dMaxWeight, pParticles[i].GetLogWeight());
      for(int i = 0; i < N; i++)
        pParticles[i].SetLogWeight(pParticles[i].GetLogWeight() - (dMaxWeight));
 

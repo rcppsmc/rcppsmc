@@ -1,7 +1,11 @@
+2012-05-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/include/sampler.h: Use explicit std::max() for g++-4.7
+
 2012-03-21  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.1.0
-	
+
 	* src/rng.cpp: Moved old GSL-based RNG code to deprecated/
 	* inst/include/rng.h: Idem
 	* man/pfLineartBS.Rd: Callback-to-R example only if interactive()
