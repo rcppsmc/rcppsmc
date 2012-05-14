@@ -1,3 +1,7 @@
+2012-05-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Version 0.1.1
+
 2012-05-13  Dirk Eddelbuettel  <edd@debian.org>
 
 	* inst/include/sampler.h: Use explicit std::max() for g++-4.7
