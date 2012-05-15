@@ -1,3 +1,9 @@
+0.1.1	2012-05-14
+
+    o   Version 0.1.1 
+
+    o   Minor g++-4.7 build fix of using std::max() explicitly
+
 0.1.0	2012-03-21
 
     o   Version 0.1.0 and initial CRAN upload
