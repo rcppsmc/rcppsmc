@@ -1,3 +1,9 @@
+2013-02-11  Adam Johansen  <a.m.johansen@warwick.ac.uk>
+
+	* DESCRIPTION: Version 0.1.1.2 as minor dev version, next release as 0.1.2
+
+	* R/pfNonlinBS.R: Automatically simulate data, and warn, if none supplied.
+
 2013-02-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.1.1.1 as minor dev version, next release as 0.1.2
