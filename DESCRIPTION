@@ -1,7 +1,7 @@
 Package: RcppSMC
 Type: Package
 Title: Rcpp bindings for Sequential Monte Carlo
-Version: 0.1.1
+Version: 0.1.1.1
 Date: $Date$
 Author: Dirk Eddelbuettel and Adam M. Johansen
 Maintainer: Dirk Eddelbuettel <edd@debian.org>
