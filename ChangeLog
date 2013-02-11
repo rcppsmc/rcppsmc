@@ -1,3 +1,9 @@
+2013-02-10  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Version 0.1.1.1 as minor dev version, next release as 0.1.2
+
+	* R/pfNonlinBS.R: Corrected test for missing data in call
+
 2012-05-14  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.1.1
