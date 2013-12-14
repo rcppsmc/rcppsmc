@@ -9,8 +9,8 @@ pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
         onlinePlot <- function() { NULL }
     } else {
         useOnline <- TRUE
-        # set up x11
-        x11(width=3,height=3)
+        # set up graphics window
+        dev.new(width=3,height=3)
         par(mar=c(3,3,1,1),cex=0.8, pch=19, ask=FALSE)
     }
 

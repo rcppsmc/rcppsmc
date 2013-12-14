@@ -1,4 +1,4 @@
-src/compareGSLtoR
-deprecated
 ^.*\.Rproj$
 ^\.Rproj\.user$
+.travis.yml
+deprecated
