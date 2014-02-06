@@ -14,5 +14,5 @@ Description: This package provides R with access to the Sequential
  and extensions are planned.
 License: GPL (>= 2)
 LazyLoad: yes
-Depends: Rcpp (>= 0.9.0), methods
+Imports: Rcpp (>= 0.11.0), methods
 LinkingTo: Rcpp
