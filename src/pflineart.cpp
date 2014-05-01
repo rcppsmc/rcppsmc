@@ -76,7 +76,12 @@ extern "C" SEXP pfLineartBS(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) {
 
         Rcpp::NumericVector Xm(lIterates), Xv(lIterates), Ym(lIterates), Yv(lIterates);
 
-        for(int n=0; n < lIterates; ++n) {
+        Xm(0) = Sampler.Integrate(integrand_mean_x, NULL);
+        Xv(0) = Sampler.Integrate(integrand_var_x, (void*)&Xm(0));
+        Ym(0) = Sampler.Integrate(integrand_mean_y, NULL);
+        Yv(0) = Sampler.Integrate(integrand_var_y, (void*)&Ym(0));
+
+        for(int n=1; n < lIterates; ++n) {
             Sampler.Iterate();
       
             Xm(n) = Sampler.Integrate(integrand_mean_x, NULL);

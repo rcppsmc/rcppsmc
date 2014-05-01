@@ -1,3 +1,8 @@
+2014-05-01  Adam M. Johansen  <a.m.johansen@warwick.ac.uk>
+
+	* src/pflineart.cpp: Bug fix reduces number of calls of
+	Sampler.iterate() by 1; resolves memory overrun issue.
+
 2014-02-06  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Now Imports: rather than Depends: on Rcpp (and
