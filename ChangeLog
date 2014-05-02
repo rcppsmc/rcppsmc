@@ -1,3 +1,7 @@
+2014-05-02  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/include/sampler.h: Also delete pParticles in destructor
+
 2014-05-01  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.1.3

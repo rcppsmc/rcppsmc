@@ -208,11 +208,13 @@ namespace smc {
   {
        delete pRng;
 
-       if(dRSWeights)
+       if (pParticles)
+         delete [] pParticles;
+       if (dRSWeights)
 	 delete [] dRSWeights;
-       if(uRSCount)
+       if (uRSCount)
 	 delete [] uRSCount;
-       if(uRSIndices)
+       if (uRSIndices)
 	 delete [] uRSIndices;
   }
 

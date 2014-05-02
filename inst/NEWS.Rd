@@ -2,6 +2,12 @@
 \title{News for Package 'RcppSMC}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+\section{Changes in RcppSMC version 0.1.4 (2014-xx-yy)}{
+  \itemize{
+    \item Added missing delete operator to destructor in \code{sampler} 
+  }
+}
+
 \section{Changes in RcppSMC version 0.1.3 (2014-05-01)}{
   \itemize{
     \item Bugfix in \code{Sampler.iterate()} for memory overrun detected by valgrind
