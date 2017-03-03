@@ -3,7 +3,7 @@ pfNonlinBS <- function(data, particles=500, plot=FALSE) {
          warning("data argument contained no data, using data simulated from the model.")
          data <- simNonlin(len=50)$data
     }
-    res <- .Call("pfNonlinBS", data, particles, package="RcppSMC")
+    res <- .Call("pfNonlinBS", data, particles, PACKAGE="RcppSMC")
 
     time <- 1:length(data);
     if (plot) {

@@ -24,7 +24,7 @@ pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
                  particles,
                  useOnline,
                  onlinePlot,
-                 package="RcppSMC")
+                 PACKAGE="RcppSMC")
 
     if (plot) {
         ## plot 5.1 from vignette / paper
