@@ -1,6 +1,17 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
 
+\section{Changes in RcppSMC version 0.1.5 (2016-03-03)}{
+  \itemize{
+    \item Correct \code{.Call} to use \code{PACKAGE=} argument
+    \item \code{DESCRIPTION}, \code{NAMESPACE}, \code{README.md} changes
+    to comply with current \code{R CMD check} levels
+    \item Added file \code{init.c} with calls to \code{R_registerRoutines()}
+    \code{and R_useDynamicSymbols()}
+    \item Updated \code{.travis.yml} file for continuous integration
+  }
+}
+
 \section{Changes in RcppSMC version 0.1.4 (2014-05-02)}{
   \itemize{
     \item Added missing delete operator to destructor in \code{sampler} 
