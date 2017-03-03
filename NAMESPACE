@@ -1,14 +1,18 @@
 
-useDynLib(RcppSMC)
+useDynLib("RcppSMC")
 
-import(methods)
-importFrom(Rcpp, evalCpp)               # with Rcpp 0.11.0
+import("methods")
+importFrom("Rcpp", "evalCpp")               # with Rcpp 0.11.0
+importFrom("grDevices", "dev.new")
+importFrom("graphics", "lines", "par", "plot", "points", "polygon")
+importFrom("stats", "rnorm", "rt")
+importFrom("utils", "read.table")
 
-export(blockpfGaussianOpt,
-       pfLineartBS,
-       pfLineartBSOnlinePlot,
-       pfNonlinBS,
-       simGaussian,
-       simLineart,
-       simNonlin)
+export("blockpfGaussianOpt",
+       "pfLineartBS",
+       "pfLineartBSOnlinePlot",
+       "pfNonlinBS",
+       "simGaussian",
+       "simLineart",
+       "simNonlin")
 

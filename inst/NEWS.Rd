@@ -1,6 +1,5 @@
 \name{NEWS}
-\title{News for Package 'RcppSMC}
-\newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\title{News for Package \pkg{RcppSMC}}
 
 \section{Changes in RcppSMC version 0.1.4 (2014-05-02)}{
   \itemize{
@@ -16,10 +15,10 @@
 
 \section{Changes in RcppSMC version 0.1.2 (2014-02-06)}{
   \itemize{
-    \item Updated for \cpkg{Rcpp} 0.11.0 with explicit \code{importFrom}
+    \item Updated for \CRANpkg{Rcpp} 0.11.0 with explicit \code{importFrom}
     in \code{NAMESPACE} and corresponding versioned \code{Imports:} in \code{DESCRIPTION};
     also removed linking instruction from \code{src/Makevars} as no it
-    is longer needed with this new \cpkg{Rcpp} version
+    is longer needed with this new \CRANpkg{Rcpp} version
     \item Addded GitHub / Travis CI support
     \item Use more portable \code{dev.new()} rather than \code{x11()} in \code{pfLinearBS.R}
     \item Applied some corrections to \code{pfNonlinBS.R} example

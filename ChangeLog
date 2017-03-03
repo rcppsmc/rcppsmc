@@ -1,3 +1,24 @@
+2017-03-03  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Date, Version): Version 0.1.5
+	(Title): Use 'Title Case'
+	(Description): No 'This package'
+
+	* inst/NEWS.Rd: Use \CRANpkg{} macro
+
+	* NAMESPACE: Declare additional Imports
+
+	* README.md: Switch to canonical URLs, update JSS paper URL
+
+	* src/init.c (R_init_RcppSMC): Call R_registerRoutines()
+	and R_useDynamicSymbols()
+
+	* R/pfNonlinBS.R (pfNonlinBS): Use PACKAGE= with .Call()
+	* R/bspfGaussianOptimal.R (blockpfGaussianOpt): Idem
+	* R/pfLineartBS.R (onlinePlot): Idem
+
+	* .travis.yml: Switch to using run.sh for Travis CI
+
 2014-05-02  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Version 0.1.4
