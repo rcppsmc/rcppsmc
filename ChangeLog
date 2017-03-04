@@ -1,3 +1,7 @@
+2017-03-04  Dirk Eddelbuettel  <edd@debian.org>
+
+	* NAMESPACE: Use .registration=TRUE on useDynLib
+
 2017-03-03  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Date, Version): Version 0.1.5

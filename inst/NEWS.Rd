@@ -1,7 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
 
-\section{Changes in RcppSMC version 0.1.5 (2016-03-03)}{
+\section{Changes in RcppSMC version 0.1.6 (2017-xx-yy)}{
+  \itemize{
+    \item Also use \code{.registration=TRUE} in \code{useDynLib} in
+    \code{NAMESPACE} 
+  }
+}
+  
+\section{Changes in RcppSMC version 0.1.5 (2017-03-03)}{
   \itemize{
     \item Correct \code{.Call} to use \code{PACKAGE=} argument
     \item \code{DESCRIPTION}, \code{NAMESPACE}, \code{README.md} changes
