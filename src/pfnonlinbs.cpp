@@ -8,7 +8,7 @@
 //    IEE PROCEEDINGS-F 140(2):107-113, 1993
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2012 - 2013  Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2012 - 2017  Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -47,7 +47,7 @@ namespace nonlinbs {
 using namespace std;
 using namespace nonlinbs;
 
-extern "C" SEXP pfNonlinBS(SEXP dataS, SEXP partS) {
+extern "C" SEXP pfNonlinBS_impl(SEXP dataS, SEXP partS) {
     long lNumber = Rcpp::as<long>(partS);
 
     y = Rcpp::NumericVector(dataS);

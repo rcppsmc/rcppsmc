@@ -3,7 +3,7 @@
 // pflineart.cpp: Rcpp wrapper for SMC library -- first example of Johansen (2009)
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2012 - 2017  Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -45,7 +45,7 @@ double integrand_var_y(const cv_state&, void*);
 
 // pf() function callable from R via Rcpp:: essentially the same as main() from pf.cc 
 // minor interface change to pass data down as matrix, rather than a filename
-extern "C" SEXP pfLineartBS(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) { 	
+extern "C" SEXP pfLineartBS_impl(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) { 	
 
     long lIterates;
 

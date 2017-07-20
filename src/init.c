@@ -8,18 +8,19 @@
 */
 
 /* .Call calls */
-extern SEXP blockpfGaussianOpt(SEXP, SEXP, SEXP);
-extern SEXP pfLineartBS(SEXP, SEXP, SEXP, SEXP);
-extern SEXP pfNonlinBS(SEXP, SEXP);
+extern SEXP blockpfGaussianOpt_impl(SEXP, SEXP, SEXP);
+extern SEXP pfLineartBS_impl(SEXP, SEXP, SEXP, SEXP);
+extern SEXP pfNonlinBS_impl(SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"blockpfGaussianOpt", (DL_FUNC) &blockpfGaussianOpt, 3},
-    {"pfLineartBS",        (DL_FUNC) &pfLineartBS,        4},
-    {"pfNonlinBS",         (DL_FUNC) &pfNonlinBS,         2},
+    {"blockpfGaussianOpt_impl", (DL_FUNC) &blockpfGaussianOpt_impl, 3},
+    {"pfLineartBS_impl",        (DL_FUNC) &pfLineartBS_impl,        4},
+    {"pfNonlinBS_impl",         (DL_FUNC) &pfNonlinBS_impl,         2},
     {NULL, NULL, 0}
 };
 
-void R_init_RcppSMC(DllInfo *dll) {
+void R_init_RcppSMC(DllInfo *dll)
+{
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

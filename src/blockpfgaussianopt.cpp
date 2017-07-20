@@ -3,7 +3,7 @@
 // blockpfgaussianopt.cpp: Rcpp integration of SMC library -- Block PF Gaussian
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2012 - 2017  Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -37,7 +37,7 @@ Rcpp::NumericVector y;
 
 long lLag = 1;
 
-extern "C" SEXP blockpfGaussianOpt(SEXP dataS, SEXP partS, SEXP lagS)
+extern "C" SEXP blockpfGaussianOpt_impl(SEXP dataS, SEXP partS, SEXP lagS)
 {
     long lIterates;
     long lNumber = Rcpp::as<long>(partS);
