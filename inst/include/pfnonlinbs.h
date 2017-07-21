@@ -29,9 +29,8 @@
 namespace nonlinbs {
     double logLikelihood(long lTime, const double & X);
 
-    smc::particle<double> fInitialise(smc::rng *pRng);
-    long fSelect(long lTime, const smc::particle<double> & p, smc::rng *pRng);
-    void fMove(long lTime, smc::particle<double> & pFrom, smc::rng *pRng);
+    void fInitialise(double & value, double & logweight, smc::rng *pRng);
+    void fMove(long lTime, double & value, double & logweight, smc::rng *pRng);
 
     double integrand_mean_x(const double&, void*);
     double integrand_var_x(const double&, void*);

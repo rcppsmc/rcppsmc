@@ -1,3 +1,47 @@
+2017-07-21  Leah South  <leah.south@hdr.qut.edu.au>
+        
+    * DESCRIPTION: Adding RcppArmadillo to LinkingTo and updating authors
+    
+    * src/Makevars: Updating for Armadillo use
+    
+    * inst/include/particle.h renamed to population.h and changing from
+    a particle level object to a population level object
+    
+    * inst/include/history.h: updated to reflect population level object,
+      some parts moved to sampler.h
+      
+    * inst/include/moveset.h: updated to reflect population level object
+      
+	* inst/include/sampler.h:
+      - Updated to reflect population level object
+      - Changing structures used internally for resampling to arma::vec
+      - Adding the missing resample and MCMC steps to the Initialise function
+      - Updating history usage and storing at the end of the iterations
+      
+    * inst/include/rngR.h (Multinomial): Input argument arma::vec for weights
+    
+    * inst/include/blockpfgaussianopt.h: Updated initialisation and move functions
+    to reflect above changes.
+    * inst/include/pflineart.h: Idem.
+    * inst/include/pfnonlinbs.h: Idem.
+    * src/blockpfgaussianopt.cpp: Idem.
+    * src/pflineart.cpp: Idem.
+    * src/pfnonlinbs.cpp: Idem.
+    
+    * TODO: Updated to include more detailed plans
+
+2017-07-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/blockpfgaussianopt.cpp (blockpfGaussianOpt_impl): For symbol
+	registration, make C++ function name distinct from R function name
+	* src/pflineart.cpp (pfLineartBS_impl): Idem
+	* src/pfnonlinbs.cpp (pfNonlinBS_impl): Idem
+	* src/init.c: Updated accordingly
+
+	* R/bspfGaussianOptimal.R (blockpfGaussianOpt): Updated .Call
+	* R/pfLineartBS.R (onlinePlot): Idem
+	* R/pfNonlinBS.R (pfNonlinBS): Idem
+
 2017-03-04  Dirk Eddelbuettel  <edd@debian.org>
 
 	* NAMESPACE: Use .registration=TRUE on useDynLib

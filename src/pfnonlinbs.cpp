@@ -8,7 +8,7 @@
 //    IEE PROCEEDINGS-F 140(2):107-113, 1993
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2012 - 2013  Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2012 - 2017  Dirk Eddelbuettel and Adam Johansen
 //
 // This file is part of RcppSMC.
 //
@@ -47,7 +47,7 @@ namespace nonlinbs {
 using namespace std;
 using namespace nonlinbs;
 
-extern "C" SEXP pfNonlinBS(SEXP dataS, SEXP partS) {
+extern "C" SEXP pfNonlinBS_impl(SEXP dataS, SEXP partS) {
     long lNumber = Rcpp::as<long>(partS);
 
     y = Rcpp::NumericVector(dataS);
@@ -65,14 +65,14 @@ extern "C" SEXP pfNonlinBS(SEXP dataS, SEXP partS) {
     Rcpp::NumericVector resSD   = Rcpp::NumericVector(lIterates);
     for(int n=0 ; n < lIterates ; ++n) {
         if(n > 0)
-            Sampler.Iterate();
+        Sampler.Iterate();
 
         resMean(n) = Sampler.Integrate(integrand_mean_x,NULL);      
         resSD(n)  = sqrt(Sampler.Integrate(integrand_var_x, (void*)&resSD(n)));      
     }
 
     return Rcpp::List::create(Rcpp::_["mean"] = resMean,
-                              Rcpp::_["sd"] = resSD);
+    Rcpp::_["sd"] = resSD);
 }
 
 namespace nonlinbs {
@@ -85,31 +85,26 @@ namespace nonlinbs {
     }
 
     ///A function to initialise particles
-    
-    /// \param pRng A pointer to the random number generator which is to be used
-    smc::particle<double> fInitialise(smc::rng *pRng) {
-        double x;
-  
-        x = pRng->Normal(0,std_x0);
 
-        return smc::particle<double>(x,logLikelihood(0,x));
+    /// \param value The value of the particle being moved
+    /// \param logweight The log weight of the particle being moved
+    /// \param pRng A pointer to the random number generator which is to be used
+    void fInitialise(double & value, double & logweight, smc::rng *pRng) {
+        value = pRng->Normal(0,std_x0);
+        logweight = logLikelihood(0,value);
     }
 
     ///The proposal function.
 
-    ///\param lTime The sampler iteration.
-    ///\param pFrom The particle to move.
-    ///\param pRng  A random number generator.
-    void fMove(long lTime, smc::particle<double> & pFrom, smc::rng *pRng) {
-        double *to = pFrom.GetValuePointer();
-
-        double x = 0.5 * (*to) + 25.0*(*to) / (1.0 + (*to) * (*to)) + 8.0 * cos(1.2  * ( lTime)) + pRng->Normal(0.0,std_x);
-        
-        *to = x;
-
-        pFrom.AddToLogWeight(logLikelihood(lTime, *to));
+    /// \param lTime The sampler iteration.
+    /// \param value The value of the particle being moved
+    /// \param logweight The log weight of the particle being moved
+    /// \param pRng  A random number generator.
+    void fMove(long lTime, double & value, double & logweight, smc::rng *pRng) {
+        value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + pRng->Normal(0.0,std_x);
+        logweight += logLikelihood(lTime, value);
     }
-    
+
 
     double integrand_mean_x(const double& x, void *) {
         return x;

@@ -30,7 +30,7 @@
 #ifndef __SMC_RNGR_H
 #define __SMC_RNGR_H 1.0
 
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 
 namespace smc {
     /// A GSL-RNG information handling class (not templated)
@@ -98,17 +98,16 @@ namespace smc {
         //gsl_rng* GetRaw(void);
 
         ///Generate a multinomial random vector with parameters (n,w[1:k]) and store it in X
-        void Multinomial(unsigned n, unsigned k, double* w, unsigned* X) {
+        void Multinomial(unsigned n, unsigned k, arma::vec w, unsigned* X) {
             Rcpp::IntegerVector v(k);
-            double sum = 0.0;
-            unsigned int i;
-            for (i=0; i<k; i++) sum += w[i]; 
-            for (i=0; i<k; i++) w[i] = w[i] / sum;
+            w = w/arma::sum(w);
+            
+            double * w_mem = w.memptr();
 
             // R sources:  rmultinom(int n, double* prob, int K, int* rN);
-            rmultinom(static_cast<int>(n), const_cast<double*>(w), static_cast<int>(k), &(v[0]));
+            rmultinom(static_cast<int>(n), const_cast<double*>(w_mem), static_cast<int>(k), &(v[0]));
 
-            for (i=0; i<k; i++) {
+            for (unsigned int i=0; i<k; i++) {
                 X[i] = static_cast<unsigned int>(v[i]);
             }
         }
@@ -198,6 +197,6 @@ namespace smc {
 
     };
 }
- 
- 
+
+
 #endif
