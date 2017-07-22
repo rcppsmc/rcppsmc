@@ -37,9 +37,8 @@ public:
 
 double logLikelihood(long lTime, const cv_state & X);
 
-smc::particle<cv_state> fInitialise(smc::rng *pRng);
-long fSelect(long lTime, const smc::particle<cv_state> & p, smc::rng *pRng);
-void fMove(long lTime, smc::particle<cv_state> & pFrom, smc::rng *pRng);
+void fInitialise(cv_state & value, double & logweight, smc::rng *pRng);
+void fMove(long lTime, cv_state & value, double & logweight, smc::rng *pRng);
 
 extern double nu_x;
 extern double nu_y;

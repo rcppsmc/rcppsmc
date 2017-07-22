@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 
 #include "smctc.h"
 #include "pflineart.h"
@@ -33,10 +33,7 @@
 using namespace std;
 
 ///The observations
-//cv_obs * y;
-//Rcpp::NumericMatrix y;
 std::vector<cv_obs> y;
-//long load_data(char const * szName, cv_obs** y);
 
 double integrand_mean_x(const cv_state&, void*);
 double integrand_mean_y(const cv_state&, void*);
@@ -50,14 +47,11 @@ extern "C" SEXP pfLineartBS_impl(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) 
     long lIterates;
 
     try {
-
-        //std::string filename = Rcpp::as<std::string>(fileS);
         unsigned long lNumber = Rcpp::as<unsigned long>(partS);
         bool useF = Rcpp::as<bool>(usefS);
         Rcpp::Function f(funS);
 
         // Load observations -- or rather copy them in from R
-        //lIterates = load_data(filename.c_str(), &y);
         Rcpp::NumericMatrix dat = Rcpp::NumericMatrix(dataS); // so we expect a matrix
         lIterates = dat.nrow();
         y.reserve(lIterates);
@@ -83,7 +77,7 @@ extern "C" SEXP pfLineartBS_impl(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) 
 
         for(int n=1; n < lIterates; ++n) {
             Sampler.Iterate();
-      
+            
             Xm(n) = Sampler.Integrate(integrand_mean_x, NULL);
             Xv(n) = Sampler.Integrate(integrand_var_x, (void*)&Xm(n));
             Ym(n) = Sampler.Integrate(integrand_mean_y, NULL);
@@ -93,69 +87,42 @@ extern "C" SEXP pfLineartBS_impl(SEXP dataS, SEXP partS, SEXP usefS, SEXP funS) 
         }
 
         return Rcpp::DataFrame::create(Rcpp::Named("Xm") = Xm,
-                                       Rcpp::Named("Xv") = Xv,
-                                       Rcpp::Named("Ym") = Ym,
-                                       Rcpp::Named("Yv") = Yv);
+        Rcpp::Named("Xv") = Xv,
+        Rcpp::Named("Ym") = Ym,
+        Rcpp::Named("Yv") = Yv);
     }
     catch(smc::exception  e) {
-        Rcpp::Rcout << e;       	// not cerr, as R doesn't like to mix with i/o 
-        //exit(e.lCode);		// we're just called from R so we should not exit
+        Rcpp::Rcout << e;
     }
     return R_NilValue;          	// to provide a return 
 }
 
-#if 0
-long load_data(char const * szName, cv_obs** yp)
-{
-  FILE * fObs = fopen(szName,"rt");
-  if (!fObs)
-    throw SMC_EXCEPTION(SMCX_FILE_NOT_FOUND, "Error: pf assumes that the current directory contains an appropriate data file called data.csv\nThe first line should contain a constant indicating the number of data lines it contains.\nThe remaining lines should contain comma-separated pairs of x,y observations.");
-  char szBuffer[1024];
-  char* rc = fgets(szBuffer, 1024, fObs);
-  if (rc==NULL)
-    throw SMC_EXCEPTION(SMCX_FILE_NOT_FOUND, "Error: no data found.");
-  long lIterates = strtol(szBuffer, NULL, 10);
-
-  *yp = new cv_obs[lIterates];
-  
-  for(long i = 0; i < lIterates; ++i)
-    {
-      rc = fgets(szBuffer, 1024, fObs);
-      (*yp)[i].x_pos = strtod(strtok(szBuffer, ",\r\n "), NULL);
-      (*yp)[i].y_pos = strtod(strtok(szBuffer, ",\r\n "), NULL);
-    }
-  fclose(fObs);
-
-  return lIterates;
-}
-#endif
 
 double integrand_mean_x(const cv_state& s, void *)
 {
-  return s.x_pos;
+    return s.x_pos;
 }
 
 double integrand_var_x(const cv_state& s, void* vmx)
 {
-  double* dmx = (double*)vmx;
-  double d = (s.x_pos - (*dmx));
-  return d*d;
+    double* dmx = (double*)vmx;
+    double d = (s.x_pos - (*dmx));
+    return d*d;
 }
 
 double integrand_mean_y(const cv_state& s, void *)
 {
-  return s.y_pos;
+    return s.y_pos;
 }
 
 double integrand_var_y(const cv_state& s, void* vmy)
 {
-  double* dmy = (double*)vmy;
-  double d = (s.y_pos - (*dmy));
-  return d*d;
+    double* dmy = (double*)vmy;
+    double d = (s.y_pos - (*dmy));
+    return d*d;
 }
 #include <iostream>
 #include <cmath>
-//#include <gsl/gsl_randist.h>
 
 
 using namespace std;
@@ -175,42 +142,36 @@ double Delta = 0.1;
 ///  \param X     The state to consider 
 double logLikelihood(long lTime, const cv_state & X)
 {
-    //return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y[lTime].x_pos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y[lTime].y_pos)/scale_y,2) / nu_y));
-
-    //double y_xpos = y(lTime,0); 
-    //double y_ypos = y(lTime,1); 
-    //return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y_xpos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y_ypos)/scale_y,2) / nu_y));
-    
     return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y[lTime].x_pos)/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y[lTime].y_pos)/scale_y,2) / nu_y));
 }
 
 ///A function to initialise particles
 
+/// \param value The value of the particle being moved
+/// \param logweight The log weight of the particle being moved
 /// \param pRng A pointer to the random number generator which is to be used
-smc::particle<cv_state> fInitialise(smc::rng *pRng)
+void fInitialise(cv_state & value, double & logweight, smc::rng *pRng)
 {
-  cv_state value;
-  
-  value.x_pos = pRng->Normal(0,sqrt(var_s0));
-  value.y_pos = pRng->Normal(0,sqrt(var_s0));
-  value.x_vel = pRng->Normal(0,sqrt(var_u0));
-  value.y_vel = pRng->Normal(0,sqrt(var_u0));
+    value.x_pos = pRng->Normal(0,sqrt(var_s0));
+    value.y_pos = pRng->Normal(0,sqrt(var_s0));
+    value.x_vel = pRng->Normal(0,sqrt(var_u0));
+    value.y_vel = pRng->Normal(0,sqrt(var_u0));
 
-  return smc::particle<cv_state>(value,logLikelihood(0,value));
+    logweight = logLikelihood(0,value);
 }
 
 ///The proposal function.
 
 ///\param lTime The sampler iteration.
-///\param pFrom The particle to move.
+///\param value The value of the particle being moved
+///\param logweight The log weight of the particle being moved
 ///\param pRng  A random number generator.
-void fMove(long lTime, smc::particle<cv_state > & pFrom, smc::rng *pRng)
+void fMove(long lTime, cv_state & value, double & logweight, smc::rng *pRng)
 {
-  cv_state * cv_to = pFrom.GetValuePointer();
+    value.x_pos += value.x_vel * Delta + pRng->Normal(0,sqrt(var_s));
+    value.x_vel += pRng->Normal(0,sqrt(var_u));
+    value.y_pos += value.y_vel * Delta + pRng->Normal(0,sqrt(var_s));
+    value.y_vel += pRng->Normal(0,sqrt(var_u));
 
-  cv_to->x_pos += cv_to->x_vel * Delta + pRng->Normal(0,sqrt(var_s));
-  cv_to->x_vel += pRng->Normal(0,sqrt(var_u));
-  cv_to->y_pos += cv_to->y_vel * Delta + pRng->Normal(0,sqrt(var_s));
-  cv_to->y_vel += pRng->Normal(0,sqrt(var_u));
-  pFrom.AddToLogWeight(logLikelihood(lTime, *cv_to));
+    logweight += logLikelihood(lTime, value);
 }
