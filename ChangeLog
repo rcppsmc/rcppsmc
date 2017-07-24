@@ -1,4 +1,8 @@
 2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
+
+    * inst/include/sampler.h: Correcting the description of GetParticleWeight().
+    
+2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
     
     * src/init.c: Removed due to use of Rcpp attributes.
     * src/RcppExports.cpp: Initial creation with Rcpp attributes.
