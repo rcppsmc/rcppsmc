@@ -1,3 +1,21 @@
+2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
+    
+    * inst/include/particle.h: Removed (no longer needed now with population.h)
+    
+    * inst/include/blockpfGaussianOpt.h: Updated copyright header.
+    * inst/include/history.h: Idem.
+    * inst/include/moveset.h: Idem.
+    * inst/include/pflineart.h: Idem.
+    * inst/include/pfnonlinbs.h: Idem.
+    * inst/include/population.h: Idem.
+    * inst/include/rngR.h: Idem.
+    * inst/include/sampler.h: Idem.
+    * inst/include/smc-exception.h: Idem.
+    * inst/include/smctc.h: Idem.
+    * src/blockpfgaussianopt.cpp: Idem.
+    * src/pflineart.cpp: Idem.
+    * src/pfnonlinbs.cpp: Idem.
+
 2017-07-21  Leah South  <leah.south@hdr.qut.edu.au>
         
     * DESCRIPTION: Adding RcppArmadillo to LinkingTo and updating authors

@@ -3,6 +3,7 @@
 // blockpfgaussianopt.h: Rcpp integration of SMC library -- Block PF Gaussian
 //
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
 //

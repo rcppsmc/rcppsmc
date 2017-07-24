@@ -8,6 +8,7 @@
 //    IEE PROCEEDINGS-F 140(2):107-113, 1993
 //
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
 //

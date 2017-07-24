@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
 //
