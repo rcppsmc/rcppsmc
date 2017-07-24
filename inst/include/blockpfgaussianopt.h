@@ -25,12 +25,7 @@
 
 using namespace std;
 
-void fInitialiseBSPFG(vector<double> & value, double & logweight, smc::rng *pRng);
-void fMoveBSPFG(long lTime, vector<double> & value, double & logweight, smc::rng *pRng);
-
 namespace BSPFG {
-    extern Rcpp::NumericVector y; 
+    void fInitialise(arma::vec & value, double & logweight, smc::rng *pRng);
+    void fMove(long lTime, arma::vec & value, double & logweight, smc::rng *pRng);
 }
-using BSPFG::y;
-
-extern long lLag;

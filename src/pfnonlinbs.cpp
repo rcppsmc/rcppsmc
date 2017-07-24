@@ -33,7 +33,7 @@
 #include <cmath>
 
 namespace nonlinbs {
-    const double std_x0 = 2;
+    const double std_x0 = 2.0;
     const double var_x0 = std_x0 * std_x0;
     const double std_x  = sqrt(10.0);
     const double var_x  = std_x * std_x;
@@ -42,17 +42,18 @@ namespace nonlinbs {
     const double scale_y = 1.0 / 20.0;
 
     ///The observations
-    Rcpp::NumericVector y;
+    arma::vec y;
 }
 
 using namespace std;
 using namespace nonlinbs;
 
-extern "C" SEXP pfNonlinBS_impl(SEXP dataS, SEXP partS) {
-    long lNumber = Rcpp::as<long>(partS);
+// [[Rcpp::export]]
+Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
+    long lNumber = part;
 
-    y = Rcpp::NumericVector(dataS);
-    long lIterates = y.size();
+    y = data;
+    long lIterates = y.n_rows;
 
     //Initialise and run the sampler
     smc::sampler<double> Sampler(lNumber, SMC_HISTORY_NONE);  
@@ -82,7 +83,7 @@ namespace nonlinbs {
     ///  \param lTime The current time (i.e. the index of the current distribution)
     ///  \param X     The state to consider 
     double logLikelihood(long lTime, const double & x) {
-        return -0.5 * pow(y[int(lTime)] - x*x*scale_y,2) / var_y;
+        return -0.5 * pow(y(lTime) - x*x*scale_y,2) / var_y;
     }
 
     ///A function to initialise particles

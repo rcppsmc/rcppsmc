@@ -23,26 +23,28 @@
 
 #include "smctc.h"
 
-class cv_state 
-{
-public:
-    double x_pos, y_pos;
-    double x_vel, y_vel;
-};
+namespace pflineart {
+    class cv_state 
+    {
+    public:
+        double x_pos, y_pos;
+        double x_vel, y_vel;
+    };
 
-class cv_obs
-{
-public:
-    double x_pos, y_pos;
-};
+    class cv_obs
+    {
+    public:
+        arma::vec x_pos, y_pos;
+    };
 
-double logLikelihood(long lTime, const cv_state & X);
+    double logLikelihood(long lTime, const cv_state & X);
 
-void fInitialise(cv_state & value, double & logweight, smc::rng *pRng);
-void fMove(long lTime, cv_state & value, double & logweight, smc::rng *pRng);
+    void fInitialise(cv_state & value, double & logweight, smc::rng *pRng);
+    void fMove(long lTime, cv_state & value, double & logweight, smc::rng *pRng);
 
-extern double nu_x;
-extern double nu_y;
-extern double Delta;
+    double integrand_mean_x(const cv_state&, void*);
+    double integrand_mean_y(const cv_state&, void*);
+    double integrand_var_x(const cv_state&, void*);
+    double integrand_var_y(const cv_state&, void*);
 
-extern std::vector<cv_obs> y;
+}
