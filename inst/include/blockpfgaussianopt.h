@@ -21,11 +21,8 @@
 // along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "smctc.h"
-#include <vector>
-
-using namespace std;
 
 namespace BSPFG {
-    void fInitialise(arma::vec & value, double & logweight, smc::rng *pRng);
-    void fMove(long lTime, arma::vec & value, double & logweight, smc::rng *pRng);
+    void fInitialise(arma::vec & value, double & logweight);
+    void fMove(long lTime, arma::vec & value, double & logweight);
 }

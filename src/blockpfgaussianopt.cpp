@@ -23,7 +23,6 @@
 
 #include "smctc.h"
 #include "blockpfgaussianopt.h"
-#include "rngR.h"
 
 #include <cstdlib>
 #include <cmath>
@@ -75,11 +74,10 @@ namespace BSPFG {
     ///
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    /// \param pRng A pointer to the random number generator which is to be used
-    void fInitialise(arma::vec & value, double & logweight, smc::rng *pRng)
+    void fInitialise(arma::vec & value, double & logweight)
     {
         value = arma::zeros<arma::vec>(lIterates);
-        value(0) = pRng->Normal(0.5 * y(0),1.0/sqrt(2.0));
+        value(0) = R::rnorm(0.5 * y(0),1.0/sqrt(2.0));
         logweight = 1.0;
     }
 
@@ -88,11 +86,10 @@ namespace BSPFG {
     ///\param lTime The sampler iteration.
     ///\param value The value of the particle being moved
     ///\param logweight The log weight of the particle being moved
-    ///\param pRng  A random number generator.
-    void fMove(long lTime, arma::vec & value, double & logweight, smc::rng *pRng)
+    void fMove(long lTime, arma::vec & value, double & logweight)
     {
         if(lTime == 1) {
-            value(lTime) = (value(lTime-1) + y(lTime))/2.0 + pRng->Normal(0.0,1.0/sqrt(2.0));
+            value(lTime) = (value(lTime-1) + y(lTime))/2.0 + R::rnorm(0.0,1.0/sqrt(2.0));
             logweight += -0.25*(y(lTime) - value(lTime-1))*(y(lTime)-value(lTime-1));
             return;
         }
@@ -117,11 +114,11 @@ namespace BSPFG {
         }
         // Backward smoothing
         mub(lag) = mu(lag);
-        value(lTime) = pRng->Normal(mub(lag),sqrt(sigma(lag)));
+        value(lTime) = R::rnorm(mub(lag),sqrt(sigma(lag)));
         for(int i = lag-1; i; --i)
         {
             mub(i) = (sigma(i)*value(lTime-lag+i+1) + mu(i)) / (sigma(i)+1);
-            value(lTime-lag+i) = pRng->Normal(mub(i),sqrt(sigma(lag)/(sigma(lag) + 1)));
+            value(lTime-lag+i) = R::rnorm(mub(i),sqrt(sigma(lag)/(sigma(lag) + 1)));
         }
 
         // Importance weighting
