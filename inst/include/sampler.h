@@ -115,7 +115,7 @@ namespace smc {
         double GetParticleLogWeightN(long n) const { return pPopulation.GetLogWeightN(n); }
         ///Return the unnormalized weight of particle n
         double GetParticleWeightN(long n) const { return pPopulation.GetWeightN(n); }
-        ///Return the unnormalized weight of particle n
+        ///Return the unnormalized particle weights
         arma::vec GetParticleWeight(void) const { return pPopulation.GetWeight(); }
         ///Returns the current evolution time of the system.
         long GetTime(void) const {return T;}
