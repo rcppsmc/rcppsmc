@@ -33,7 +33,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "rngR.h"
 #include "history.h"
 #include "moveset.h"
 #include "population.h"
@@ -59,9 +58,6 @@ namespace smc {
     class sampler
     {
     private:
-        ///A random number generator.
-        rng* pRng;
-
         ///Number of particles in the system.
         long N;
         ///The current evolution time of the system.
@@ -155,12 +151,15 @@ namespace smc {
         sampler(const sampler<Space> & sFrom);
         ///Duplication of smc::sampler is not currently permitted.
         sampler<Space> & operator=(const sampler<Space> & sFrom);
+        ///Generate a multinomial random vector with parameters (n,w[1:k]) and store it in X
+		void Multinomial(unsigned n, unsigned k, arma::vec w, unsigned int * X);		
+		
     };
 
 
     /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
     /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
-    /// store the particle set and to initialise a random number generator.
+    /// store the particle set.
     ///
     /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
     /// \param htHM The history mode to use: set this to SMC_HISTORY_RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
@@ -168,9 +167,8 @@ namespace smc {
     template <class Space>
     sampler<Space>::sampler(long lSize, HistoryType htHM)
     {
-        pRng = new rng();
         N = lSize;
-        uRSCount = arma::zeros<arma::Col<unsigned int> >((int)N);
+        uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
 
         //Some workable defaults.
         htHistoryMode = htHM;
@@ -181,7 +179,6 @@ namespace smc {
     template <class Space>
     sampler<Space>::~sampler()
     {
-        delete pRng;
     }
 
     template <class Space>
@@ -212,7 +209,7 @@ namespace smc {
         std::vector<Space> InitVal(N);
         arma::vec InitWeights(N);
         pPopulation = population<Space>(InitVal,InitWeights);
-        Moves.DoInit(pRng,pPopulation,N);
+        Moves.DoInit(pPopulation,N);
 
 
         //Normalise the weights to sensible values....
@@ -231,7 +228,7 @@ namespace smc {
             nResampled = 0;
 
         //A possible MCMC step should be included here.
-        nAccepted += Moves.DoMCMC(0,pPopulation, pRng, N);
+        nAccepted += Moves.DoMCMC(0,pPopulation, N);
 
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != SMC_HISTORY_NONE) {
@@ -262,7 +259,7 @@ namespace smc {
         }
 
         rValue /= wSum;
-        return (double)rValue;
+        return static_cast<double>(rValue);
     }
 
     /// This function is intended to be used to estimate integrals of the sort which must be evaluated to determine the
@@ -297,7 +294,7 @@ namespace smc {
         
         // History.pop_back();
         
-        return ((double)rValue);
+        return static_cast<double>(rValue);
     }
 
     /// The iterate function:
@@ -353,7 +350,7 @@ namespace smc {
         nResampled = 0;
     
         //A possible MCMC step should be included here.
-        nAccepted += Moves.DoMCMC(T+1,pPopulation, pRng, N);
+        nAccepted += Moves.DoMCMC(T+1,pPopulation, N);
         
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != SMC_HISTORY_NONE){
@@ -378,7 +375,7 @@ namespace smc {
     template <class Space>
     void sampler<Space>::MoveParticles(void)
     {
-        Moves.DoMove(T+1,pPopulation, pRng, N);
+        Moves.DoMove(T+1,pPopulation, N);
     }
 
     template <class Space>
@@ -386,24 +383,24 @@ namespace smc {
     {
         //Resampling is done in place.
         unsigned uMultinomialCount;
-        arma::Col<unsigned int> uRSCount2 = arma::zeros<arma::Col<unsigned int> >((int)N);
+        arma::Col<unsigned int> uRSCount2 = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
         
         //First obtain a count of the number of children each particle has.
         switch(lMode) {
         case SMC_RESAMPLE_MULTINOMIAL:
             //Sample from a suitable multinomial vector
             dRSWeights = pPopulation.GetWeight();
-            pRng->Multinomial(N,N,dRSWeights,uRSCount.memptr());
+            Multinomial(N,N,dRSWeights,uRSCount.memptr());
             break;
 
         case SMC_RESAMPLE_RESIDUAL:
-            dRSWeights = exp(log((double)N)*arma::ones(N) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
-            uRSIndices = arma::zeros<arma::Col<unsigned int> >((int)N);
+            dRSWeights = exp(log(static_cast<double>(N))*arma::ones(N) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+            uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
             for(int i = 0; i < N; ++i)
-            uRSIndices(i) = unsigned(floor(dRSWeights(i)));
+            uRSIndices(i) = static_cast<unsigned int>(floor(dRSWeights(i)));
             dRSWeights = dRSWeights - uRSIndices;
             uMultinomialCount = N - arma::sum(uRSIndices);
-            pRng->Multinomial(uMultinomialCount,N,dRSWeights,uRSCount.memptr());
+            Multinomial(uMultinomialCount,N,dRSWeights,uRSCount.memptr());
             uRSCount += uRSIndices;
             break;
 
@@ -412,16 +409,16 @@ namespace smc {
             {
                 // Procedure for stratified sampling
                 //Generate a random number between 0 and 1/N
-                double dRand = pRng->Uniform(0,1.0 / ((double)N));
+                double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())));
                 int j = 0, k = 0;
-                uRSCount = arma::zeros<arma::Col<unsigned int> >((int)N);
+                uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
                 //while(j < N) {
                 while(k < N) {
-                    while((dWeightCumulative(k) - dRand) > ((double)j)/((double)N) && j < N) {
+                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
                         uRSCount(k)++;
                         j++;
-                        dRand = pRng->Uniform(0,1.0 / ((double)N));
+                        dRand = R::runif(0,1.0 / static_cast<double>(N));
                     }
                     k++;
                 }
@@ -432,13 +429,13 @@ namespace smc {
             {
                 // Procedure for stratified sampling but with a common RV for each stratum
                 //Generate a random number between 0 and 1/N
-                double dRand = pRng->Uniform(0,1.0 / ((double)N));
+                double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 int j = 0, k = 0;
-                uRSCount = arma::zeros<arma::Col<unsigned int> >((int)N);
+                uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
                 arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N)));
                 //while(j < N) {
                 while(k < N) {
-                    while((dWeightCumulative(k) - dRand) > ((double)j)/((double)N) && j < N) {
+                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
                         uRSCount(k)++;
                         j++;
                     }
@@ -448,7 +445,7 @@ namespace smc {
             }
         }
 
-        uRSIndices = arma::zeros<arma::Col<unsigned int> >((int)N);
+        uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
         //Map count to indices to allow in-place resampling
         for (int i=0, j=0; i<N; ++i) {
             if (uRSCount(i)>0) {
@@ -464,7 +461,7 @@ namespace smc {
         //Perform the replication of the chosen.
         for(int i = 0; i < N ; ++i) {
             if(uRSIndices(i) != static_cast<unsigned int>(i)){
-                pPopulation.SetValueN( pPopulation.GetValueN((int)uRSIndices(i)) ,i);
+                pPopulation.SetValueN( pPopulation.GetValueN(static_cast<int>(uRSIndices(i))) ,i);
             }
         }
 
@@ -550,6 +547,21 @@ namespace smc {
             os << it->GetESS() << std::endl;
         }
     }
+    
+	template <class Space>
+	void sampler<Space>::Multinomial(unsigned n, unsigned k, arma::vec w, unsigned int * X) {		
+		Rcpp::IntegerVector v(k);
+		w = w/arma::sum(w);
+		
+		double * w_mem = w.memptr();
+		
+		// R sources:  rmultinom(int n, double* prob, int K, int* rN);
+		rmultinom(static_cast<int>(n), const_cast<double*>(w_mem), static_cast<int>(k), &(v[0]));
+		
+		for (unsigned int i=0; i<k; i++) {
+			X[i] = static_cast<unsigned int>(v[i]);
+		}	
+	}
     
     /// This function performs a stable calculation of the log sum of the weights, which is useful for
     /// normalising weights, calculating the effective sample size and estimating the normalising constant.

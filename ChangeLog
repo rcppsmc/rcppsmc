@@ -1,3 +1,21 @@
+2017-07-25  Leah South  <leah.south@hdr.qut.edu.au>
+    
+    * inst/include/rngR.h: Removed (no longer needed with Rcpp attributes)
+    
+    * inst/include/smctc.h: Removing use of rngR
+    * inst/include/blockpfgaussianopt.h: Idem.
+    * inst/include/pflineart.h: Idem.
+    * inst/include/pfnonlinbs.h: Idem.
+    * src/blockpfgaussianopt.cpp: Idem.
+    * src/pflineart.cpp: Idem.
+    * src/pfnonlinbs.cpp: Idem.
+    
+    * inst/include/moveset.h: Removing the use of rngR and correcting the move
+    selector function to work on the particle level.
+    * inst/include/sampler.h: Removing the use of rngR and replacing some C style
+    casts with static_cast.
+    * inst/include/history.h: Including RcppArmadillo header
+
 2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
     
     * inst/include/particle.h: Removed (no longer needed now with population.h).

@@ -83,16 +83,15 @@ namespace nonlinbs {
     ///  \param lTime The current time (i.e. the index of the current distribution)
     ///  \param X     The state to consider 
     double logLikelihood(long lTime, const double & x) {
-        return -0.5 * pow(y(lTime) - x*x*scale_y,2) / var_y;
+        return -0.5 * pow(y(lTime) - x*x*scale_y,2.0) / var_y;
     }
 
     ///A function to initialise particles
 
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    /// \param pRng A pointer to the random number generator which is to be used
-    void fInitialise(double & value, double & logweight, smc::rng *pRng) {
-        value = pRng->Normal(0,std_x0);
+    void fInitialise(double & value, double & logweight) {
+        value = R::rnorm(0.0,std_x0);
         logweight = logLikelihood(0,value);
     }
 
@@ -101,9 +100,8 @@ namespace nonlinbs {
     /// \param lTime The sampler iteration.
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    /// \param pRng  A random number generator.
-    void fMove(long lTime, double & value, double & logweight, smc::rng *pRng) {
-        value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + pRng->Normal(0.0,std_x);
+    void fMove(long lTime, double & value, double & logweight) {
+        value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + R::rnorm(0.0,std_x);
         logweight += logLikelihood(lTime, value);
     }
 

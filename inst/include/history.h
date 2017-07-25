@@ -30,6 +30,8 @@
 #ifndef __SMC_HISTORY_HH
 #define __SMC_HISTORY_HH 1.0
 
+#include <RcppArmadillo.h>
+
 namespace smc {
     /// The historyflags class holds a set of flags which describe various properties of the particle system at a given time.
     class historyflags

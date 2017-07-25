@@ -25,7 +25,6 @@
 
 #include "smctc.h"
 #include "pflineart.h"
-#include "rngR.h"
 
 #include <cstdio> 
 #include <cstdlib>
@@ -142,13 +141,12 @@ namespace pflineart {
 
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    /// \param pRng A pointer to the random number generator which is to be used
-    void fInitialise(cv_state & value, double & logweight, smc::rng *pRng)
+    void fInitialise(cv_state & value, double & logweight)
     {
-        value.x_pos = pRng->Normal(0,sqrt(var_s0));
-        value.y_pos = pRng->Normal(0,sqrt(var_s0));
-        value.x_vel = pRng->Normal(0,sqrt(var_u0));
-        value.y_vel = pRng->Normal(0,sqrt(var_u0));
+        value.x_pos = R::rnorm(0.0,sqrt(var_s0));
+        value.y_pos = R::rnorm(0.0,sqrt(var_s0));
+        value.x_vel = R::rnorm(0.0,sqrt(var_u0));
+        value.y_vel = R::rnorm(0.0,sqrt(var_u0));
 
         logweight = logLikelihood(0,value);
     }
@@ -158,13 +156,12 @@ namespace pflineart {
     ///\param lTime The sampler iteration.
     ///\param value The value of the particle being moved
     ///\param logweight The log weight of the particle being moved
-    ///\param pRng  A random number generator.
-    void fMove(long lTime, cv_state & value, double & logweight, smc::rng *pRng)
+    void fMove(long lTime, cv_state & value, double & logweight)
     {
-        value.x_pos += value.x_vel * Delta + pRng->Normal(0,sqrt(var_s));
-        value.x_vel += pRng->Normal(0,sqrt(var_u));
-        value.y_pos += value.y_vel * Delta + pRng->Normal(0,sqrt(var_s));
-        value.y_vel += pRng->Normal(0,sqrt(var_u));
+        value.x_pos += value.x_vel * Delta + R::rnorm(0.0,sqrt(var_s));
+        value.x_vel += R::rnorm(0.0,sqrt(var_u));
+        value.y_pos += value.y_vel * Delta + R::rnorm(0.0,sqrt(var_s));
+        value.y_vel += R::rnorm(0.0,sqrt(var_u));
 
         logweight += logLikelihood(lTime, value);
     }
