@@ -1,41 +1,36 @@
 2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
     
+    * inst/include/particle.h: Removed (no longer needed now with population.h).
+    
     * src/init.c: Removed due to use of Rcpp attributes.
     * src/RcppExports.cpp: Initial creation with Rcpp attributes.
     * R/RcppExports.R: Initial creation with Rcpp attributes.
     
-    * inst/include/sampler.h: Adding a function GetParticleWeight()
+    * inst/include/sampler.h: Adding a function GetParticleWeight() and
+    updating copyright header.
     
-    * inst/include/blockpfgaussianopt.h: Making full use of the example namespace.
-    * inst/include/pflineart.h: Creating a namespace for this example and
-    changing the data type to armadillo vectors.
+    * inst/include/blockpfgaussianopt.h: Making full use of the example
+    namespace and updating copyright header.
+    * inst/include/pflineart.h: Creating a namespace for this example,
+    changing the data type to armadillo vectors and updating copyright header.
+    * inst/include/pfnonlinbs.h: Updating copyright header.
     
     * src/blockpfgaussianopt.cpp: Using Rcpp attributes, making use of the
-    example namespace and using armadillo vectors.
+    example namespace, using armadillo vectors and updating copyright header.
     * src/pflineart.cpp: Idem.
     * src/pfnonlinbs.cpp: Idem.
     
     * src/bspfGaussianOptimal.R: Switching to Rcpp attributes.
     * src/pfLineartBS.R: Idem.
     * src/pfNonlinBS.R: Idem.
-
-2017-07-24  Leah South  <leah.south@hdr.qut.edu.au>
     
-    * inst/include/particle.h: Removed (no longer needed now with population.h)
-    
-    * inst/include/blockpfGaussianOpt.h: Updated copyright header.
-    * inst/include/history.h: Idem.
+    * inst/include/history.h: Updating copyright header.
     * inst/include/moveset.h: Idem.
-    * inst/include/pflineart.h: Idem.
-    * inst/include/pfnonlinbs.h: Idem.
     * inst/include/population.h: Idem.
     * inst/include/rngR.h: Idem.
     * inst/include/sampler.h: Idem.
     * inst/include/smc-exception.h: Idem.
     * inst/include/smctc.h: Idem.
-    * src/blockpfgaussianopt.cpp: Idem.
-    * src/pflineart.cpp: Idem.
-    * src/pfnonlinbs.cpp: Idem.
 
 2017-07-21  Leah South  <leah.south@hdr.qut.edu.au>
         
