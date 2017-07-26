@@ -1,3 +1,7 @@
+2017-07-26  Leah South  <leah.south@hdr.qut.edu.au>
+
+    * inst/include/sampler.h: Removing the helper function Multinomial.
+
 2017-07-25  Leah South  <leah.south@hdr.qut.edu.au>
     
     * inst/include/rngR.h: Removed (no longer needed with Rcpp attributes)
