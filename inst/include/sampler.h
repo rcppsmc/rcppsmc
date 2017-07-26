@@ -71,7 +71,7 @@ namespace smc {
         ///Structure used internally for resampling.
         arma::vec dRSWeights;
         ///Structure used internally for resampling.
-        arma::Col<unsigned int> uRSCount;
+        arma::Col<int> uRSCount;
         ///Structure used internally for resampling.
         arma::Col<unsigned int> uRSIndices;
 
@@ -151,8 +151,6 @@ namespace smc {
         sampler(const sampler<Space> & sFrom);
         ///Duplication of smc::sampler is not currently permitted.
         sampler<Space> & operator=(const sampler<Space> & sFrom);
-        ///Generate a multinomial random vector with parameters (n,w[1:k]) and store it in X
-		void Multinomial(unsigned n, unsigned k, arma::vec w, unsigned int * X);		
 		
     };
 
@@ -168,7 +166,7 @@ namespace smc {
     sampler<Space>::sampler(long lSize, HistoryType htHM)
     {
         N = lSize;
-        uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
+        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
 
         //Some workable defaults.
         htHistoryMode = htHM;
@@ -382,15 +380,14 @@ namespace smc {
     void sampler<Space>::Resample(ResampleType lMode)
     {
         //Resampling is done in place.
-        unsigned uMultinomialCount;
-        arma::Col<unsigned int> uRSCount2 = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
+        int uMultinomialCount;
         
         //First obtain a count of the number of children each particle has.
         switch(lMode) {
         case SMC_RESAMPLE_MULTINOMIAL:
             //Sample from a suitable multinomial vector
-            dRSWeights = pPopulation.GetWeight();
-            Multinomial(N,N,dRSWeights,uRSCount.memptr());
+            dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+            rmultinom(static_cast<int>(N), dRSWeights.memptr(), static_cast<int>(N), uRSCount.memptr());
             break;
 
         case SMC_RESAMPLE_RESIDUAL:
@@ -399,9 +396,10 @@ namespace smc {
             for(int i = 0; i < N; ++i)
             uRSIndices(i) = static_cast<unsigned int>(floor(dRSWeights(i)));
             dRSWeights = dRSWeights - uRSIndices;
+            dRSWeights = dRSWeights/sum(dRSWeights);
             uMultinomialCount = N - arma::sum(uRSIndices);
-            Multinomial(uMultinomialCount,N,dRSWeights,uRSCount.memptr());
-            uRSCount += uRSIndices;
+            rmultinom(uMultinomialCount, dRSWeights.memptr(), static_cast<int>(N), uRSCount.memptr());
+            uRSCount += arma::conv_to<arma::Col<int> >::from(uRSIndices);
             break;
 
         case SMC_RESAMPLE_STRATIFIED:
@@ -412,7 +410,7 @@ namespace smc {
                 double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())));
                 int j = 0, k = 0;
-                uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
+                uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
                 //while(j < N) {
                 while(k < N) {
                     while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
@@ -431,7 +429,7 @@ namespace smc {
                 //Generate a random number between 0 and 1/N
                 double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 int j = 0, k = 0;
-                uRSCount = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
+                uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
                 arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N)));
                 //while(j < N) {
                 while(k < N) {
@@ -547,21 +545,6 @@ namespace smc {
             os << it->GetESS() << std::endl;
         }
     }
-    
-	template <class Space>
-	void sampler<Space>::Multinomial(unsigned n, unsigned k, arma::vec w, unsigned int * X) {		
-		Rcpp::IntegerVector v(k);
-		w = w/arma::sum(w);
-		
-		double * w_mem = w.memptr();
-		
-		// R sources:  rmultinom(int n, double* prob, int K, int* rN);
-		rmultinom(static_cast<int>(n), const_cast<double*>(w_mem), static_cast<int>(k), &(v[0]));
-		
-		for (unsigned int i=0; i<k; i++) {
-			X[i] = static_cast<unsigned int>(v[i]);
-		}	
-	}
     
     /// This function performs a stable calculation of the log sum of the weights, which is useful for
     /// normalising weights, calculating the effective sample size and estimating the normalising constant.
