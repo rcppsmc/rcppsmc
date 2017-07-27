@@ -33,25 +33,37 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "population.h"
 #include "history.h"
 #include "moveset.h"
-#include "population.h"
 #include "smc-exception.h"
 
 ///Specifiers for various resampling algorithms:
-enum ResampleType { SMC_RESAMPLE_MULTINOMIAL = 0,
-    SMC_RESAMPLE_RESIDUAL,
-    SMC_RESAMPLE_STRATIFIED,
-    SMC_RESAMPLE_SYSTEMATIC };
+namespace ResampleType
+{
+    enum Enum { MULTINOMIAL = 0, 
+        RESIDUAL, 
+        STRATIFIED, 
+        SYSTEMATIC };
+}
 
-///Storage types for the history of the particle system.
-enum HistoryType { SMC_HISTORY_NONE = 0,
-    SMC_HISTORY_RAM };
+///Specifiers for various path sampling methods:
+namespace PathSamplingType
+{
+    enum Enum { TRAPEZOID2 = 0, 
+        TRAPEZOID1, 
+        RECTANGLE};
+}
+
+
+///Storage types for the history of the particle system. 
+namespace HistoryType
+{
+    enum Enum { NONE = 0, 
+        RAM};
+}
 
 namespace smc {
-
-    /// A stable calculation of the log sum of the weights, used in ESS calculations
-    double stableLogSumWeights(const arma::vec & logw);
 
     /// A template class for an interacting particle system suitable for SMC sampling
     template <class Space>
@@ -64,7 +76,7 @@ namespace smc {
         long T;
 
         ///The resampling mode which is to be employed.
-        ResampleType rtResampleMode;
+        ResampleType::Enum rtResampleMode;
         ///The effective sample size at which resampling should be used.
         double dResampleThreshold;
 
@@ -85,14 +97,19 @@ namespace smc {
         ///A flag which tracks whether the ensemble was resampled during this iteration
         int nResampled;
 
+        ///An estimate of the log normalising constant ratio over the entire path.
+        double dlogNCPath;
+        ///An estimate of the log normalising constant ratio over the last step.
+        double dlogNCIt;
+        
         ///A mode flag which indicates whether historical information is stored
-        HistoryType htHistoryMode;
+        HistoryType::Enum htHistoryMode;
         ///The historical process associated with the particle system.
-        std::vector<historyelement< population<Space> > > History;
+        std::vector<historyelement<Space> > History;
 
     public:
         ///Create an particle system containing lSize uninitialised particles with the specified mode.
-        sampler(long lSize, HistoryType htHistoryMode);
+        sampler(long lSize, HistoryType::Enum htHistoryMode);
         ///Dispose of a sampler.
         ~sampler();
         ///Calculates and Returns the Effective Sample Size.
@@ -100,7 +117,7 @@ namespace smc {
         /// Returns the Effective Sample Size of the specified particle generation.
         double GetESS(long lGeneration) const;
         ///Returns the History of the particle system
-        const std::vector<historyelement< population<Space> > > & GetHistory(void) const { return History; }
+        const std::vector<historyelement<Space> > & GetHistory(void) const { return History; }
         ///Returns the number of particles within the system.
         long GetNumber(void) const {return N;}
         ///Returns the number of evolution times stored in the history.
@@ -115,12 +132,22 @@ namespace smc {
         arma::vec GetParticleWeight(void) const { return pPopulation.GetWeight(); }
         ///Returns the current evolution time of the system.
         long GetTime(void) const {return T;}
+        ///Returns the current estimate of the log normalising constant ratio over the entire path
+        double GetLogNCPath(void) const { return dlogNCPath; }
+        ///Returns the current estimate of the log normalising constant ratio over the last step
+        double GetLogNCStep(void) const { return dlogNCIt; }
+        ///Returns the current estimate of the normalising constant ratio over the entire path
+        double GetNCPath(void) const { return exp(dlogNCPath); }
+        ///Returns the current estimate of the normalising constant ratio over the last step
+        double GetNCStep(void) const { return exp(dlogNCIt); }
         ///Initialise the sampler and its constituent particles.
         void Initialise(void);
         ///Integrate the supplied function with respect to the current particle set.
         double Integrate(double(*pIntegrand)(const Space &,void*), void* pAuxiliary);
-        ///Integrate the supplied function over the path using the supplied width function.
-        double IntegratePathSampling(double (*pIntegrand)(long,const population<Space>&,void*), double (*pWidth)(long,void*), void* pAuxiliary);
+        ///Integrate the supplied function over the path using the supplied width function and integration method.
+        double IntegratePathSampling(PathSamplingType::Enum, double (*pIntegrand)(long,const Space &, void*), double (*pWidth)(long,void*), void* pAuxiliary);
+        ///Integrate the supplied function over the path using the supplied width function and the default integration method (the corrected trapezoid rule).
+        double IntegratePathSampling(double (*pIntegrand)(long,const Space &,void*), double (*pWidth)(long,void*), void* pAuxiliary) {return IntegratePathSampling(PathSamplingType::TRAPEZOID2, pIntegrand, pWidth, pAuxiliary);}
         ///Perform one iteration of the simulation algorithm.
         void Iterate(void);
         ///Cancel one iteration of the simulation algorithm.
@@ -132,11 +159,11 @@ namespace smc {
         ///Move the particle set by proposing and applying an appropriate move to each particle.
         void MoveParticles(void);
         ///Resample the particle set using the specified resampling scheme.
-        void Resample(ResampleType lMode);
+        void Resample(ResampleType::Enum lMode);
         ///Sets the entire moveset to the one which is supplied
         void SetMoveSet(moveset<Space>& pNewMoveset) { Moves = pNewMoveset; }
         ///Set Resampling Parameters
-        void SetResampleParams(ResampleType rtMode, double dThreshold);
+        void SetResampleParams(ResampleType::Enum rtMode, double dThreshold);
         ///Dump a specified particle to the specified output stream in a human readable form
         std::ostream & StreamParticle(std::ostream & os, long n) const;
         ///Dump the entire particle set to the specified output stream in a human readable form
@@ -151,7 +178,10 @@ namespace smc {
         sampler(const sampler<Space> & sFrom);
         ///Duplication of smc::sampler is not currently permitted.
         sampler<Space> & operator=(const sampler<Space> & sFrom);
-		
+        
+    protected:
+        ///Returns the crude normalising constant ratio estimate implied by the weights.
+        double CalcLogNC(void) const {return stableLogSumWeights(pPopulation.GetLogWeight());}
     };
 
 
@@ -160,17 +190,17 @@ namespace smc {
     /// store the particle set.
     ///
     /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
-    /// \param htHM The history mode to use: set this to SMC_HISTORY_RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
     /// \tparam Space The class used to represent a point in the sample space.
     template <class Space>
-    sampler<Space>::sampler(long lSize, HistoryType htHM)
+    sampler<Space>::sampler(long lSize, HistoryType::Enum htHM)
     {
         N = lSize;
         uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
 
         //Some workable defaults.
         htHistoryMode = htHM;
-        rtResampleMode = SMC_RESAMPLE_STRATIFIED;
+        rtResampleMode = ResampleType::STRATIFIED;;
         dResampleThreshold = 0.5 * N;
     }
 
@@ -189,7 +219,7 @@ namespace smc {
     template <class Space>
     double  sampler<Space>::GetESS(long lGeneration) const
     {
-        typename std::vector<historyelement<population<Space> > >::const_iterator it = History.begin();
+        typename std::vector<historyelement<Space> >::const_iterator it = History.begin();
         std::advance(it,lGeneration);
         return it->GetESS(); 
     }
@@ -209,12 +239,16 @@ namespace smc {
         pPopulation = population<Space>(InitVal,InitWeights);
         Moves.DoInit(pPopulation,N);
 
+        //Scaling weights by 1/N (for evidence computation)
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
 
-        //Normalise the weights to sensible values....
-        double dMaxWeight = arma::max(pPopulation.GetLogWeight());
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - (dMaxWeight)*arma::ones(N));
+        //Estimate the normalising constant
+        dlogNCIt = CalcLogNC();
+        dlogNCPath += dlogNCIt;
 
-
+        //Normalise the weights
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt);
+        
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
         double ESS = GetESS();
@@ -223,17 +257,20 @@ namespace smc {
             Resample(rtResampleMode);
         }
         else
-            nResampled = 0;
+        nResampled = 0;
 
         //A possible MCMC step should be included here.
         nAccepted += Moves.DoMCMC(0,pPopulation, N);
 
+        //Normalise the weights
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
+        
         //Finally, the current particle set should be appended to the historical process.
-        if(htHistoryMode != SMC_HISTORY_NONE) {
+        if(htHistoryMode != HistoryType::NONE) {
             History.clear();
-            historyelement<population<Space> > histel;
+            historyelement<Space> histel;
             histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
-            History.push_back(histel);			
+            History.push_back(histel);          
         }  
 
         return;
@@ -260,35 +297,97 @@ namespace smc {
         return static_cast<double>(rValue);
     }
 
+    
     /// This function is intended to be used to estimate integrals of the sort which must be evaluated to determine the
-    /// normalising constant of a distribution obtain using a sequence of potential functions proportional to densities with respect
+    /// normalising constant of a distribution obtained using a sequence of potential functions proportional to densities with respect
     /// to the initial distribution to define a sequence of distributions leading up to the terminal, interesting distribution.
     ///
-    /// In this context, the particle set at each time is used to make an estimate of the path sampling integrand, and a
-    /// trapezoidal integration is then performed to obtain an estimate of the path sampling integral which is the natural logarithm
+    /// In this context, the particle set at each time is used to make an estimate of the path sampling integrand, and
+    /// numerical integration is then performed to obtain an estimate of the path sampling integral which is the natural logarithm
     /// of the ratio of normalising densities.
     ///
-    /// \param pIntegrand  The quantity which we wish to integrate at each time
-    /// \param pWidth      A pointer to a function which specifies the width of each
-    /// \param pAuxiliary A pointer to any auxiliary data which should be passed to the function
+    /// The integrand is integrated at every time point in the population history. The results of this integration are
+    /// taken to be point-evaluations of the path sampling integrand which are spaced on a grid of intervals given by the
+    /// width function. The path sampling integral is then calculated by performing a suitable numerical integration and
+    /// the results of this integration is returned.
+    ///
+    /// pAuxiliary is passed to both of the user specified functions to allow the user to pass additional data to either or
+    /// both of these functions in a convenient manner. It is safe to use NULL if no such data is used by either function.
+    ///
+    /// \param PStype  The numerical integration method to use
+    /// \param pIntegrand  The function to integrated. The first argument is evolution time, the second the particle value at which the function is to be evaluated and the final argument is always pAuxiliary.
+    /// \param pWidth      The function which returns the width of the path sampling grid at the specified evolution time. The final argument is always pAuxiliary
+    /// \param pAuxiliary  A pointer to auxiliary data to pass to both of the above functions
+    /// \tparam Space The class used to represent a point in the sample space.
+    ///
+    /// The PStype parameter should be set to one of the following:
+    /// -# PathSamplingType::RECTANGLE to use the rectangle rule for integration.  
+    /// -# PathSamplingType::TRAPEZOID1 to use the trapezoidal rule for integration.
+    /// -# PathSamplingType::TRAPEZOID2 to use the trapezoidal rule for integration with a second order correction.
 
     template <class Space>
-    double sampler<Space>::IntegratePathSampling(double (*pIntegrand)(long,const population<Space> &,void*), double (*pWidth)(long,void*), void* pAuxiliary)
+    double sampler<Space>::IntegratePathSampling(PathSamplingType::Enum PStype, double (*pIntegrand)(long,const Space &, void*), double (*pWidth)(long,void*), void* pAuxiliary)
     {
-        if(htHistoryMode == SMC_HISTORY_NONE)
+        if(htHistoryMode == HistoryType::NONE)
         throw SMC_EXCEPTION(SMCX_MISSING_HISTORY, "The path sampling integral cannot be computed as the history of the system was not stored.");
 
-        // historyelement<population<Space> > histel;
+        // historyelement<Space> histel;
         // histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
         // History.push_back(histel);
         
-        long lTime = 1;
-        long double rValue = 0.0;
-        typename std::vector<historyelement<population<Space> > >::const_iterator it;
-        for(it = ++History.begin(); it!=History.end(); it++){
-            rValue += it->Integrate(lTime, pIntegrand, pAuxiliary) * (long double)pWidth(lTime,pAuxiliary);
-            lTime++;
-        }
+        
+		long lTime = 1;
+		long double rValue = 0.0;
+		typename std::vector<historyelement<Space> >::const_iterator it;	
+		
+		switch(PStype) {
+		case PathSamplingType::RECTANGLE:
+			{
+				for(it = ++History.begin(); it!=History.end(); it++){
+					rValue += it->Integrate(lTime, pIntegrand, pAuxiliary) * static_cast<long double>(pWidth(lTime,pAuxiliary));
+					lTime++;
+				}
+				break;
+			}
+			
+			
+		case PathSamplingType::TRAPEZOID1:
+			{	
+
+				long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
+				long double current_expt;
+				for(it = ++History.begin(); it!=History.end(); it++){
+					current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
+					rValue += static_cast<long double>(pWidth(lTime,pAuxiliary))/2.0 * (previous_expt + current_expt) ;
+					lTime++;
+					previous_expt = current_expt;
+				}
+				
+				break;
+			}
+
+		case PathSamplingType::TRAPEZOID2:
+		default:
+			{
+				long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
+				long double previous_var = History.begin()->Integrate_Var(0,pIntegrand,previous_expt,pAuxiliary);
+				long double current_expt;
+				long double current_var;
+				long double width = 0.0;
+				for(it = ++History.begin(); it!=History.end(); it++){
+					current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
+					current_var = it->Integrate_Var(lTime, pIntegrand, current_expt, pAuxiliary);
+					width = static_cast<long double>(pWidth(lTime,pAuxiliary));
+					rValue += width/2.0 * (previous_expt + current_expt) - pow(width,2.0)/12.0*(current_var - previous_var);
+					lTime++;
+					previous_expt = current_expt;
+					previous_var = current_var;
+				}	
+				
+				break;
+			}
+
+		}
         
         // History.pop_back();
         
@@ -311,11 +410,11 @@ namespace smc {
     template <class Space>
     void sampler<Space>::IterateBack(void)
     {
-        if(htHistoryMode == SMC_HISTORY_NONE)
+        if(htHistoryMode == HistoryType::NONE)
         throw SMC_EXCEPTION(SMCX_MISSING_HISTORY, "An attempt to undo an iteration was made; unforunately, the system history has not been stored.");
 
         History.pop_back();
-        historyelement<population<Space> > recent = History.back();
+        historyelement<Space> recent = History.back();
         pPopulation = recent.GetRefs();
         N =recent.GetNumber();
         nAccepted = recent.AcceptCount();
@@ -332,10 +431,12 @@ namespace smc {
         //Move the particle set.
         MoveParticles();
 
-        //Normalise the weights to sensible values....
-        double dMaxWeight = arma::max(pPopulation.GetLogWeight());
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - (dMaxWeight)*arma::ones(N));
+        //Estimate the normalising constant
+        dlogNCIt = CalcLogNC();
+        dlogNCPath += dlogNCIt;
 
+        //Normalise the weights
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight()  - dlogNCIt);
 
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
@@ -346,13 +447,16 @@ namespace smc {
         }
         else
         nResampled = 0;
-    
+        
         //A possible MCMC step should be included here.
         nAccepted += Moves.DoMCMC(T+1,pPopulation, N);
         
+        //Normalise the weights
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
+        
         //Finally, the current particle set should be appended to the historical process.
-        if(htHistoryMode != SMC_HISTORY_NONE){
-            historyelement<population<Space> > histel;
+        if(htHistoryMode != HistoryType::NONE){
+            historyelement<Space> histel;
             histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
             History.push_back(histel);
         }
@@ -377,21 +481,21 @@ namespace smc {
     }
 
     template <class Space>
-    void sampler<Space>::Resample(ResampleType lMode)
+    void sampler<Space>::Resample(ResampleType::Enum lMode)
     {
         //Resampling is done in place.
         int uMultinomialCount;
         
         //First obtain a count of the number of children each particle has.
         switch(lMode) {
-        case SMC_RESAMPLE_MULTINOMIAL:
+        case ResampleType::MULTINOMIAL:
             //Sample from a suitable multinomial vector
-            dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+            dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
             rmultinom(static_cast<int>(N), dRSWeights.memptr(), static_cast<int>(N), uRSCount.memptr());
             break;
 
-        case SMC_RESAMPLE_RESIDUAL:
-            dRSWeights = exp(log(static_cast<double>(N))*arma::ones(N) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+        case ResampleType::RESIDUAL:
+            dRSWeights = exp(log(static_cast<double>(N)) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
             uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
             for(int i = 0; i < N; ++i)
             uRSIndices(i) = static_cast<unsigned int>(floor(dRSWeights(i)));
@@ -402,7 +506,7 @@ namespace smc {
             uRSCount += arma::conv_to<arma::Col<int> >::from(uRSIndices);
             break;
 
-        case SMC_RESAMPLE_STRATIFIED:
+        case ResampleType::STRATIFIED:
         default:
             {
                 // Procedure for stratified sampling
@@ -423,14 +527,14 @@ namespace smc {
                 break;
             }
 
-        case SMC_RESAMPLE_SYSTEMATIC:
+        case ResampleType::SYSTEMATIC:
             {
                 // Procedure for stratified sampling but with a common RV for each stratum
                 //Generate a random number between 0 and 1/N
                 double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 int j = 0, k = 0;
                 uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
-                arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N)));
+                arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())));
                 //while(j < N) {
                 while(k < N) {
                     while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
@@ -474,16 +578,16 @@ namespace smc {
     /// \param dThreshold The threshold at which resampling is deemed necesary.
     ///
     /// The rtMode parameter should be set to one of the following:
-    /// -# SMC_RESAMPLE_MULTINOMIAL to use multinomial resampling
-    /// -# SMC_RESAMPLE_RESIDUAL to use residual resampling
-    /// -# SMC_RESAMPLE_STRATIFIED to use stratified resampling
-    /// -# SMC_RESAMPLE_SYSTEMATIC to use systematic resampling
+    /// -# ResampleType::MULTINOMIAL to use multinomial resampling
+    /// -# ResampleType::RESIDUAL to use residual resampling
+    /// -# ResampleType::STRATIFIED to use stratified resampling
+    /// -# ResampleType::SYSTEMATIC to use systematic resampling
     ///
     /// The dThreshold parameter can be set to a value in the range [0,1) corresponding to a fraction of the size of
     /// the particle set or it may be set to an integer corresponding to an actual effective sample size.
 
     template <class Space>
-    void sampler<Space>::SetResampleParams(ResampleType rtMode, double dThreshold)
+    void sampler<Space>::SetResampleParams(ResampleType::Enum rtMode, double dThreshold)
     {
         rtResampleMode = rtMode;
         if(dThreshold < 1)
@@ -522,7 +626,7 @@ namespace smc {
     {
         os << "Accepted MCMC proposals history:" << std::endl;
         os << "======================" << std::endl;
-        for(typename std::vector<historyelement<population<Space> > >::const_iterator it = History.begin(); it!=History.end(); it++){
+        for(typename std::vector<historyelement<Space> >::const_iterator it = History.begin(); it!=History.end(); it++){
             os << it->AcceptCount() << std::endl;
         }
     }
@@ -536,7 +640,7 @@ namespace smc {
         os << "Resampling history:" << std::endl;
         os << "======================" << std::endl;
         os << "Flag\t" << "ESS\t" << std::endl;
-        for(typename std::vector<historyelement<population<Space> > >::const_iterator it = History.begin(); it!=History.end(); it++){ 
+        for(typename std::vector<historyelement<Space> >::const_iterator it = History.begin(); it!=History.end(); it++){ 
             if(it->WasResampled())
             os << "1\t";
             else
@@ -544,17 +648,6 @@ namespace smc {
 
             os << it->GetESS() << std::endl;
         }
-    }
-    
-    /// This function performs a stable calculation of the log sum of the weights, which is useful for
-    /// normalising weights, calculating the effective sample size and estimating the normalising constant.
-    ///
-    /// \param logw The log weights of interest.
-    inline double stableLogSumWeights(const arma::vec & logw){
-        long N = logw.n_rows;
-        double dMaxWeight = arma::max(logw);
-        double sum = arma::sum(exp(logw - dMaxWeight*arma::ones(N)));
-        return (dMaxWeight + log(sum));
     }
 
 }

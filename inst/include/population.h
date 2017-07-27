@@ -37,6 +37,10 @@
 #include <cmath>
 
 namespace smc {
+
+    /// A stable calculation of the log sum of the weights, used in ESS calculations
+    double stableLogSumWeights(const arma::vec & logw);
+    
     /// A template class for the particles of an SMC algorithm
     template <class Space> class population
     {

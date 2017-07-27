@@ -62,10 +62,10 @@ Rcpp::DataFrame pfLineartBS_impl(arma::mat data, unsigned long part, bool usef, 
         y.y_pos = data.col(1);
 
         //Initialise and run the sampler
-        smc::sampler<cv_state> Sampler(lNumber, SMC_HISTORY_NONE);  
+        smc::sampler<cv_state> Sampler(lNumber, HistoryType::NONE);  
         smc::moveset<cv_state> Moveset(fInitialise, fMove, NULL);
 
-        Sampler.SetResampleParams(SMC_RESAMPLE_RESIDUAL, 0.5);
+        Sampler.SetResampleParams(ResampleType::RESIDUAL, 0.5);
         Sampler.SetMoveSet(Moveset);
         Sampler.Initialise();
 
