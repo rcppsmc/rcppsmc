@@ -140,17 +140,6 @@ namespace smc {
 
         return *this;
     }
-    
-    /// This function performs a stable calculation of the log sum of the weights, which is useful for
-    /// normalising weights, calculating the effective sample size and estimating the normalising constant.
-    ///
-    /// \param logw The log weights of interest.
-    inline double stableLogSumWeights(const arma::vec & logw){
-        long N = logw.n_rows;
-        double dMaxWeight = arma::max(logw);
-        double sum = arma::sum(exp(logw - dMaxWeight*arma::ones(N)));
-        return (dMaxWeight + log(sum));
-    }
 }
 
 namespace std {

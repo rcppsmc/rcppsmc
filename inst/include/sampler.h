@@ -240,14 +240,14 @@ namespace smc {
         Moves.DoInit(pPopulation,N);
 
         //Scaling weights by 1/N (for evidence computation)
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N))*arma::ones(N));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
 
         //Estimate the normalising constant
         dlogNCIt = CalcLogNC();
         dlogNCPath += dlogNCIt;
 
         //Normalise the weights
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt*arma::ones(N));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt);
         
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
@@ -263,7 +263,7 @@ namespace smc {
         nAccepted += Moves.DoMCMC(0,pPopulation, N);
 
         //Normalise the weights
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC()*arma::ones(N));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
         
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE) {
@@ -436,7 +436,7 @@ namespace smc {
         dlogNCPath += dlogNCIt;
 
         //Normalise the weights
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight()  - dlogNCIt*arma::ones(N));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight()  - dlogNCIt);
 
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
@@ -452,7 +452,7 @@ namespace smc {
         nAccepted += Moves.DoMCMC(T+1,pPopulation, N);
         
         //Normalise the weights
-        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC()*arma::ones(N));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
         
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
@@ -490,12 +490,12 @@ namespace smc {
         switch(lMode) {
         case ResampleType::MULTINOMIAL:
             //Sample from a suitable multinomial vector
-            dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+            dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
             rmultinom(static_cast<int>(N), dRSWeights.memptr(), static_cast<int>(N), uRSCount.memptr());
             break;
 
         case ResampleType::RESIDUAL:
-            dRSWeights = exp(log(static_cast<double>(N))*arma::ones(N) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N));
+            dRSWeights = exp(log(static_cast<double>(N)) + pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
             uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
             for(int i = 0; i < N; ++i)
             uRSIndices(i) = static_cast<unsigned int>(floor(dRSWeights(i)));
@@ -534,7 +534,7 @@ namespace smc {
                 double dRand = R::runif(0,1.0 / static_cast<double>(N));
                 int j = 0, k = 0;
                 uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
-                arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())*arma::ones(N)));
+                arma::vec dWeightCumulative = arma::cumsum(exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight())));
                 //while(j < N) {
                 while(k < N) {
                     while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {

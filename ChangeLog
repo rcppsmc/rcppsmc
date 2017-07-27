@@ -3,12 +3,14 @@
     * inst/include/sampler.h: Adding log normalising constant estimation
     capabilities (standard SMC estimator and additional path sampling estimators).
     Moving ResampleType and HistoryType into namespaces. Taking stableLogSumWeights
-    out and moving it into population.h.
-    * inst/include/population.h: Moving stableLogSumWeights into this header file.
+    out.
+    * inst/include/population.h: Moving stableLogSumWeights declaration here.
     * inst/include/history.h: Changing template parameter from Population to Space
     to make it easier for users to write path sampling integrands. Adding a function
     which will be used in the second order trapezoidal integration correction. Using
     more stable calculations of the log sum of weights.
+    
+    * src/helper.cpp: Adding a source file for untemplated functions of general interest.
     
     * src/pflineart.cpp: Updating use of ResampleType and HistoryType
     * src/pfnonlinbs.cpp: Updating use of ResampleType and HistoryType
