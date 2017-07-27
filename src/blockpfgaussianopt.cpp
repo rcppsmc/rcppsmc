@@ -47,10 +47,10 @@ Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag)
     lIterates = y.size();
 
     //Initialise and run the sampler
-    smc::sampler<arma::vec> Sampler(lNumber, SMC_HISTORY_NONE);  
+    smc::sampler<arma::vec> Sampler(lNumber, HistoryType::NONE);  
     smc::moveset<arma::vec> Moveset(fInitialise, fMove, NULL);
 
-    Sampler.SetResampleParams(SMC_RESAMPLE_SYSTEMATIC, 0.5);
+    Sampler.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
     Sampler.SetMoveSet(Moveset);
 
     Sampler.Initialise();
@@ -63,8 +63,10 @@ Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag)
     {
         resValues.row(i) = Sampler.GetParticleValueN(i).t();
     }
+    
+    double logNC = Sampler.GetLogNCPath();
 
-    return Rcpp::List::create(Rcpp::_["weight"] = resWeights, Rcpp::_["values"] = resValues);
+    return Rcpp::List::create(Rcpp::_["weight"] = resWeights, Rcpp::_["values"] = resValues, Rcpp::_["logNC"] = logNC);
 }
 
 

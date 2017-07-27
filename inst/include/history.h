@@ -25,12 +25,12 @@
 //! \brief Classes and function related to the history of the sampler.
 //!
 //! This file contains template definitions for the classes used to store the history of an SMCTC sampler.
-//! It defines smc::history, smc::historyelement and smc::history.
+//! It defines smc::historyflags and smc::historyelement.
 
 #ifndef __SMC_HISTORY_HH
 #define __SMC_HISTORY_HH 1.0
 
-#include <RcppArmadillo.h>
+#include "population.h"
 
 namespace smc {
     /// The historyflags class holds a set of flags which describe various properties of the particle system at a given time.
@@ -48,19 +48,19 @@ namespace smc {
     };
 
     /// A template class for the elements of a linked list to be used for the history of the sampler.
-    template <class Population>class historyelement
+    template <class Space>class historyelement
     {
     private:
         long number; //!< The number of particles (presently redundant as this is not a function of iteration)
         int nAccepted; //!< Number of MCMC moves accepted during this iteration.
-        Population value; //!< The particles themselves (values and weights)
+        population<Space> pop; //!< The particles themselves (values and weights)
         historyflags flags; //!< Flags associated with this iteration.
         
     public:
         /// The null constructor creates an empty history element.
         historyelement();
         /// A constructor with four arguments initialises the particle set.
-        historyelement(long lNumber, Population pNew, int nAccepts, historyflags hf);
+        historyelement(long lNumber, population<Space> pNew, int nAccepts, historyflags hf);
 
         /// The destructor tidies up.
         ~historyelement();
@@ -72,29 +72,32 @@ namespace smc {
         /// Returns the number of particles present.
         long GetNumber(void) const {return number;} 
         /// Returns the current particle set.
-        Population GetValues(void) const { return value; }
-		/// Returns a reference to the current particle set.
-		Population & GetRefs(void) { return value; }
-        /// Integrate the supplied function according to the empirical measure of the particle ensemble.
-        long double Integrate(long lTime, double (*pIntegrand)(long,const Population&,long,void*), void* pAuxiliary) const;
-		/// Sets the particle set to the specified values.  
-		void Set(long lNumber, const Population &New, int inAccepted, const historyflags &histflags){number = lNumber; value = New; nAccepted = inAccepted; flags = histflags;};
+        population<Space> GetValues(void) const { return pop; }
+        /// Returns a reference to the current particle set.
+        population<Space> & GetRefs(void) { return pop; }
+        /// Monte Carlo estimate of the expectation of the supplied function with respect to the empirical measure of the particle ensemble.
+        long double Integrate(long lTime, double (*pIntegrand)(long,const Space&,void*), void* pAuxiliary) const;
+        /// Monte Carlo estimate of the variance of the supplied function with respect to the empirical measure of the particle ensemble (to be used in second order trapezoidal correction).
+        long double Integrate_Var(long lTime, double (*pIntegrand)(long,const Space&,void*), double Expectation, void* pAuxiliary) const;
+        /// Sets the particle set to the specified values.
+        void Set(long lNumber, const population<Space> &New, int inAccepted, const historyflags &histflags){number = lNumber; pop = New; nAccepted = inAccepted; flags = histflags;};
 
         /// Returns the number of MCMC moves accepted during this iteration.
         int AcceptCount(void) {return nAccepted; }
         /// Returns true if the particle set 
         int WasResampled(void) {return flags.WasResampled(); }
+
         
         
 
     };
 
-	template <class Population>
-	historyelement<Population>::historyelement(): flags(0)
-	{
-		number = 0;
-		nAccepted = 0;
-	}
+    template <class Space>
+    historyelement<Space>::historyelement(): flags(0)
+    {
+        number = 0;
+        nAccepted = 0;
+    }
 
 
     /// \param lNumber The number of particles present in the particle generation
@@ -102,44 +105,59 @@ namespace smc {
     /// \param nAccepts The number of MCMC moves that were accepted during this particle generation
     /// \param hf      The historyflags associated with the particle generation
 
-    template <class Population>
-	historyelement<Population>::historyelement(long lNumber, Population New, int nAccepts, historyflags hf) :
-	number(lNumber), nAccepted(nAccepts), value(New), flags(hf)
-	{
-	}
-
-    template <class Population>
-    historyelement<Population>::~historyelement(void)
+    template <class Space>
+    historyelement<Space>::historyelement(long lNumber, population<Space> New, int nAccepts, historyflags hf) :
+    number(lNumber), nAccepted(nAccepts), pop(New), flags(hf)
     {
     }
 
-    template <class Population>
-    double historyelement<Population>::GetESS(void) const
+    template <class Space>
+    historyelement<Space>::~historyelement(void)
     {
-        double sum = arma::sum(exp(value.GetLogWeight()));
-		double sumsq = arma::sum(exp(2.0*value.GetLogWeight()));
-		return expl(-log(sumsq) + 2*log(sum));
+    }
+
+    template <class Space>
+    double historyelement<Space>::GetESS(void) const
+    {
+        return expl(2*stableLogSumWeights(pop.GetLogWeight())-stableLogSumWeights(2.0*pop.GetLogWeight()));
     }
 
     /// \param lTime The timestep at which the integration is to be carried out
     /// \param pIntegrand The function which is to be integrated
     /// \param pAuxiliary A pointer to additional information which is passed to the integrand function
 
-    template <class Population>
-	long double historyelement<Population>::Integrate(long lTime, double (*pIntegrand)(long,const Population&,long,void*), void* pAuxiliary) const
-	{
-		long double rValue = 0;
-		long double wSum = 0;
-		for(long i =0; i < number; i++)
-		{
-			rValue += expl(value.GetLogWeightN(i)) * (long double)pIntegrand(lTime, value,i, pAuxiliary); //may want to change input type for this pIntegrand
-			wSum  += expl(value.GetLogWeightN(i));
-		}
+    template <class Space>
+    long double historyelement<Space>::Integrate(long lTime, double (*pIntegrand)(long,const Space&,void*), void* pAuxiliary) const
+    {
+        long double rValue = 0;
+        long double wSum = expl(stableLogSumWeights(pop.GetLogWeight()));
+        for(long i =0; i < number; i++)
+        {
+            rValue += expl(pop.GetLogWeightN(i)) * static_cast<long double>(pIntegrand(lTime, pop.GetValueN(i), pAuxiliary));
+        }
 
-		rValue /= wSum;
-		return rValue;
-	}
+        rValue /= wSum;
+        return rValue;
+    }
 
+    /// \param lTime The timestep at which the integration is to be carried out
+    /// \param pIntegrand The function which is to be integrated
+    /// \param pAuxiliary A pointer to additional information which is passed to the integrand function
+
+    template <class Space>
+    long double historyelement<Space>::Integrate_Var(long lTime, double (*pIntegrand)(long,const Space &,void*), double Expectation, void* pAuxiliary) const
+    {
+        long double rValue = 0;
+        long double wSum = expl(stableLogSumWeights(pop.GetLogWeight()));
+        for(long i =0; i < number; i++)
+        {
+            rValue += expl(pop.GetLogWeightN(i)) * pow(static_cast<long double>(pIntegrand(lTime, pop.GetValueN(i), pAuxiliary) - Expectation),2.0);
+        }
+
+        rValue /= wSum;
+        return rValue;
+    }
+    
 }
 
 #endif
