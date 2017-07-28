@@ -13,7 +13,9 @@
  
  * Make it easier to add additional parameters (for example the covariance
    matrix used in a random walk proposal in MCMC) and to adapt these parameters
-   using the population of particles
+   using the population of particles. Store adapted parameters, making it
+   easier to do a follow-up run to get unbiased log normalising constant
+   estimates.
    
  * For blockpfGaussianOpt et al, we could be fancy and return an S3 object
    with a plot method.  Maybe later.

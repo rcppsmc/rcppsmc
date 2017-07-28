@@ -1,3 +1,16 @@
+#' Simulates from the associated model.
+#' 
+#' The \code{simLineart} function simulates data from the model. 
+#' 
+#' @param len Length of sequence to simulate.
+#' 
+#' @return The \code{simLineart} function returns a list containing the vector of
+#' states and the associated vector of observations.
+#' 
+#' @details \code{simLineart} simulates from the model. 
+#' 
+#' @rdname pfLineartBS
+#' @export
 simLineart <- function(len = 250)
 {
   sim <- list()

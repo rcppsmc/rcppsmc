@@ -1,3 +1,29 @@
+2017-07-28  Leah South  <leah.south@hdr.qut.edu.au>
+
+    * DESCRIPTION: Setting LazyData to true.
+    * inst/rawdata/pf-data.csv: New location (moved from inst/sampleData/)
+    * data/pfdata.rda: An R data file version of pf-data.csv.
+    * rcppsmc.Rproj: Enabling automatic documentation to be generated.    
+    
+    * R/RcppSMC.R: Created to document package.
+    * R/dataDoc.R: Created to document data.
+    * R/bspfGaussianOptimal.R: Documenting with Roxygen comments and generating data
+    from the model if none is provided.
+    * R/pfLineartBS.R: Documenting with Roxygen comments.
+    * R/pfNonlinBS.R: Idem.
+    * R/simGaussian.R: Idem.
+    * R/simLineart.R: Idem.
+    * R/simNonlin.R: Idem.
+    
+    * man/RcppSMC-package.Rd: Automatically generated documentation from Roxygen comments.
+    * man/pfdata.Rd: Idem.
+    * man/blockpfGaussianOpt.Rd: Idem.
+    * man/pfLineartBS.Rd: Idem.
+    * man/pfNonlinBS.Rd: Idem.
+    
+    * TODO: Want to easily store and reuse the parameters from an adaptive run for use
+    in a follow-up run (which will give an unbiased estimate of the normalising constant ratio).
+
 2017-07-27  Leah South  <leah.south@hdr.qut.edu.au>
 
     * inst/include/sampler.h: Adding log normalising constant estimation
