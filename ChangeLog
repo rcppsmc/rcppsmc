@@ -1,8 +1,8 @@
 2017-07-28  Leah South  <leah.south@hdr.qut.edu.au>
 
     * DESCRIPTION: Setting LazyData to true.
-    * inst/sampleData/pf-data.csv: Removed.
-    * data/pfdata.rda: Replaces pf-data.csv.
+    * inst/rawdata/pf-data.csv: New location (moved from inst/sampleData/)
+    * data/pfdata.rda: An R data file version of pf-data.csv.
     * rcppsmc.Rproj: Enabling automatic documentation to be generated.    
     
     * R/RcppSMC.R: Created to document package.
