@@ -1,3 +1,15 @@
+#' Simulates from the associated model.
+#' 
+#' The \code{simNonlin} function simulates data from the associated model. 
+#' 
+#' @param len The length of data sequence to simulate.
+#' 
+#' @return The \code{simNonlin} function returns a list containing the state and data sequences. 
+#' 
+#' @details The \code{simNonlin} function simulates from the same model.
+#' 
+#' @rdname pfNonlinBS
+#' @export
 simNonlin <- function(len = 50)
 {
    sim <- list()

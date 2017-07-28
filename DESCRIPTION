@@ -14,3 +14,5 @@ License: GPL (>= 2)
 LazyLoad: yes
 Imports: Rcpp (>= 0.11.0), methods
 LinkingTo: Rcpp, RcppArmadillo
+LazyData: true
+RoxygenNote: 6.0.1
