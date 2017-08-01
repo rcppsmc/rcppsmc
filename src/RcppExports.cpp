@@ -19,6 +19,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LinReg_impl
+Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber);
+RcppExport SEXP RcppSMC_LinReg_impl(SEXP DataSEXP, SEXP lNumberSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
+    rcpp_result_gen = Rcpp::wrap(LinReg_impl(Data, lNumber));
+    return rcpp_result_gen;
+END_RCPP
+}
+// LinRegLA_impl
+Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumber);
+RcppExport SEXP RcppSMC_LinRegLA_impl(SEXP DataSEXP, SEXP intempsSEXP, SEXP lNumberSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type intemps(intempsSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
+    rcpp_result_gen = Rcpp::wrap(LinRegLA_impl(Data, intemps, lNumber));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pfLineartBS_impl
 Rcpp::DataFrame pfLineartBS_impl(arma::mat data, unsigned long part, bool usef, Rcpp::Function fun);
 RcppExport SEXP RcppSMC_pfLineartBS_impl(SEXP dataSEXP, SEXP partSEXP, SEXP usefSEXP, SEXP funSEXP) {
