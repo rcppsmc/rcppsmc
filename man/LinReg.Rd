@@ -46,8 +46,11 @@ pine. Both models are of the form
 \eqn{y_i = \alpha + \beta (x_i - \bar{x}) + \epsilon_i},
 
 where \eqn{\epsilon_i ~ N(0,\sigma^2)} and \eqn{i=1,\ldots,42}.
-Here \eqn{y} is the maximum compression strength and \eqn{x} is either the density
-(model 1) or the adjusted density (model 2).
+Here \eqn{y} is the maximum compression strength in pounds per square
+inch. The density (in pounds per cubic foot) of the radiata pine
+is considered a useful predictor, so model 1 uses density for \eqn{x}.
+Model 2 instead considers the density adjusted for resin content, which
+is associated with high density but not with strength.
 
 This example is frequently used as a test problem in model choice
 (see for example Carlin and Chib (1995) and Friel and Pettitt (2008)).
