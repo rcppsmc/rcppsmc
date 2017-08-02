@@ -1,3 +1,7 @@
+2017-08-03  Leah South  <leah.south@hdr.qut.edu.au>
+
+	* inst/include/sampler.h: Initialising dlogNCPath to 0.
+
 2017-08-02  Dirk Eddelbuettel  <edd@debian.org>
 
 	* R/LinReg.R: Silence R CMD check --as-cran about data(radiate)

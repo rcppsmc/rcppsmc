@@ -232,6 +232,7 @@ namespace smc {
     void sampler<Space>::Initialise(void)
     {
         T = 0;
+        dlogNCPath = 0.0;
 
         //Set the initial values and log weights of the particles
         std::vector<Space> InitVal(N);
