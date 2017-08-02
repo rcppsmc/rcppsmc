@@ -9,7 +9,7 @@ LinReg<- function(model, particles=1000, plot=FALSE) {
         stop("Please choose a valid model (1 or 2).")
     }
 
-	res <- LinReg_impl(as.matrix(Data),particles)	
+    res <- LinReg_impl(as.matrix(Data),particles)
 
     if (plot) {
         par(mfrow=c(1,3),oma=c(0,0,2,0))
@@ -24,7 +24,10 @@ LinReg<- function(model, particles=1000, plot=FALSE) {
                        main = NA, col='darkblue'))
         title("Posterior Estimates",outer=TRUE)
         par(mfrow=c(1,1))
-    }    
-	
+    }
+
     invisible(res)
 }
+
+## silence a NOTE from 'R CMD check --as-cran'
+utils::globalVariables(c("radiata"))
