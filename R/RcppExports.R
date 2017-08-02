@@ -5,6 +5,14 @@ blockpfGaussianOpt_impl <- function(data, part, lag) {
     .Call('RcppSMC_blockpfGaussianOpt_impl', PACKAGE = 'RcppSMC', data, part, lag)
 }
 
+LinReg_impl <- function(Data, lNumber) {
+    .Call('RcppSMC_LinReg_impl', PACKAGE = 'RcppSMC', Data, lNumber)
+}
+
+LinRegLA_impl <- function(Data, intemps, lNumber) {
+    .Call('RcppSMC_LinRegLA_impl', PACKAGE = 'RcppSMC', Data, intemps, lNumber)
+}
+
 pfLineartBS_impl <- function(data, part, usef, fun) {
     .Call('RcppSMC_pfLineartBS_impl', PACKAGE = 'RcppSMC', data, part, usef, fun)
 }

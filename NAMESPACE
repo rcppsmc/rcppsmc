@@ -12,6 +12,8 @@ export("blockpfGaussianOpt",
        "pfLineartBS",
        "pfLineartBSOnlinePlot",
        "pfNonlinBS",
+       "LinReg",
+       "LinRegLA",
        "simGaussian",
        "simLineart",
        "simNonlin")

@@ -1,3 +1,23 @@
+2017-08-01  Leah South  <leah.south@hdr.qut.edu.au>
+
+    * inst/include/LinReg.h: Data annealing SMC approach to a linear regression problem.
+    * src/LinReg.cpp: Idem.
+    * R/LinReg.R: Idem.
+    
+    * inst/include/LinReg_LA.h: Likelihood annealing SMC approach to a linear regression problem.
+    * src/LinReg_LA.cpp: Idem.
+    * R/LinRegLA.R: Idem.
+    
+    * man/LinReg.Rd: Documentation for the linear regression examples.
+
+    * NAMESPACE: Adding LinReg and LinRegLA to the exports.
+    
+    * DESCRIPTION: Setting LazyData to true.
+    * data/radiata.rda: Adding the linear regression example data.
+    * inst/rawdata/radiata-data.csv: Adding a raw version of the linear regression
+    example data.
+    * man/radiata.Rd: Documentation for the dataset
+    
 2017-07-27  Leah South  <leah.south@hdr.qut.edu.au>
 
     * inst/include/sampler.h: Adding log normalising constant estimation
