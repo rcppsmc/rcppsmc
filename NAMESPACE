@@ -4,7 +4,7 @@ useDynLib("RcppSMC", .registration=TRUE)
 import("methods")
 importFrom("Rcpp", "evalCpp")               # with Rcpp 0.11.0
 importFrom("grDevices", "dev.new")
-importFrom("graphics", "lines", "par", "plot", "points", "polygon", "title")
+importFrom("graphics", "lines", "par", "plot", "points", "polygon", "title", "abline")
 importFrom("stats", "rnorm", "rt")
 importFrom("utils", "read.table", "data")
 
