@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // blockpfGaussianOpt_impl
 Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag);
-RcppExport SEXP RcppSMC_blockpfGaussianOpt_impl(SEXP dataSEXP, SEXP partSEXP, SEXP lagSEXP) {
+RcppExport SEXP _RcppSMC_blockpfGaussianOpt_impl(SEXP dataSEXP, SEXP partSEXP, SEXP lagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -19,21 +19,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// LinReg_impl
-Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber);
-RcppExport SEXP RcppSMC_LinReg_impl(SEXP DataSEXP, SEXP lNumberSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
-    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
-    rcpp_result_gen = Rcpp::wrap(LinReg_impl(Data, lNumber));
-    return rcpp_result_gen;
-END_RCPP
-}
 // LinRegLA_impl
 Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumber);
-RcppExport SEXP RcppSMC_LinRegLA_impl(SEXP DataSEXP, SEXP intempsSEXP, SEXP lNumberSEXP) {
+RcppExport SEXP _RcppSMC_LinRegLA_impl(SEXP DataSEXP, SEXP intempsSEXP, SEXP lNumberSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -44,9 +32,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LinReg_impl
+Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber);
+RcppExport SEXP _RcppSMC_LinReg_impl(SEXP DataSEXP, SEXP lNumberSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
+    rcpp_result_gen = Rcpp::wrap(LinReg_impl(Data, lNumber));
+    return rcpp_result_gen;
+END_RCPP
+}
 // nonLinPMMH_impl
 Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits);
-RcppExport SEXP RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP) {
+RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,7 +59,7 @@ END_RCPP
 }
 // pfLineartBS_impl
 Rcpp::DataFrame pfLineartBS_impl(arma::mat data, unsigned long part, bool usef, Rcpp::Function fun);
-RcppExport SEXP RcppSMC_pfLineartBS_impl(SEXP dataSEXP, SEXP partSEXP, SEXP usefSEXP, SEXP funSEXP) {
+RcppExport SEXP _RcppSMC_pfLineartBS_impl(SEXP dataSEXP, SEXP partSEXP, SEXP usefSEXP, SEXP funSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +73,7 @@ END_RCPP
 }
 // pfNonlinBS_impl
 Rcpp::List pfNonlinBS_impl(arma::vec data, long part);
-RcppExport SEXP RcppSMC_pfNonlinBS_impl(SEXP dataSEXP, SEXP partSEXP) {
+RcppExport SEXP _RcppSMC_pfNonlinBS_impl(SEXP dataSEXP, SEXP partSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,4 +82,19 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(pfNonlinBS_impl(data, part));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_RcppSMC_blockpfGaussianOpt_impl", (DL_FUNC) &_RcppSMC_blockpfGaussianOpt_impl, 3},
+    {"_RcppSMC_LinRegLA_impl", (DL_FUNC) &_RcppSMC_LinRegLA_impl, 3},
+    {"_RcppSMC_LinReg_impl", (DL_FUNC) &_RcppSMC_LinReg_impl, 2},
+    {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 3},
+    {"_RcppSMC_pfLineartBS_impl", (DL_FUNC) &_RcppSMC_pfLineartBS_impl, 4},
+    {"_RcppSMC_pfNonlinBS_impl", (DL_FUNC) &_RcppSMC_pfNonlinBS_impl, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_RcppSMC(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
 
-\section{Changes in RcppSMC version 0.1.6 (2017-xx-yy)}{
+\section{Changes in RcppSMC version 0.1.6 [unreleased] (2017-xx-yy)}{
   \itemize{
     \item Also use \code{.registration=TRUE} in \code{useDynLib} in
     \code{NAMESPACE} 

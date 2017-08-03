@@ -1,3 +1,10 @@
+2017-08-03  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* src/RcppExports.cpp: Regenerated
+	* R/RcppExports.R: Ditto
+
 2017-08-03  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* inst/include/sampler.h: Initialising dlogNCPath to 0.
