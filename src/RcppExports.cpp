@@ -44,6 +44,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// nonLinPMMH_impl
+Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits);
+RcppExport SEXP RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lMCMCits(lMCMCitsSEXP);
+    rcpp_result_gen = Rcpp::wrap(nonLinPMMH_impl(data, lNumber, lMCMCits));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pfLineartBS_impl
 Rcpp::DataFrame pfLineartBS_impl(arma::mat data, unsigned long part, bool usef, Rcpp::Function fun);
 RcppExport SEXP RcppSMC_pfLineartBS_impl(SEXP dataSEXP, SEXP partSEXP, SEXP usefSEXP, SEXP funSEXP) {

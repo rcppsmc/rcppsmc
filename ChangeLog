@@ -1,6 +1,18 @@
 2017-08-03  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* inst/include/sampler.h: Initialising dlogNCPath to 0.
+	* src/nonLinPMMH.cpp: A new example based on using PMMH for a
+	non-linear state space model
+	* inst/include/nonLinPMMH.h: Idem.
+	* R/nonLinPMMH.R: Idem.
+	* man/nonLinPMMH.Rd: Documenting the new example.
+	* NAMESPACE: Adding the new function nonLinPMMH.
+
+	* R/simNonlin.R: Generalising the function so that it can be
+	used for both nonLinPMMH and pfNonlinBS.
+	* man/simNonlin.Rd: Documenting the function separately because
+	it is used in multiple examples.
+	* man/pfNonlinBS.Rd: Documenting simNonlin separately.
 
 2017-08-02  Dirk Eddelbuettel  <edd@debian.org>
 
