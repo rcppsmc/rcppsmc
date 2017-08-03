@@ -25,17 +25,17 @@
 
 namespace nonLinPMMH {
 
-	class parameters 
-	{
-	public:
-		double sigv, sigw;
-	};
-	arma::vec y; //data
-	
-	double logPrior(const parameters & proposal);
-	void fInitialise(double & value, double & logweight);
-	void fMove(long lTime, double & value, double & logweight);
-	
-	parameters theta_prop;
+    class parameters 
+    {
+    public:
+        double sigv, sigw;
+    };
+    arma::vec y; //data
+    
+    double logPrior(const parameters & proposal);
+    void fInitialise(double & value, double & logweight);
+    void fMove(long lTime, double & value, double & logweight);
+    
+    parameters theta_prop;
 }
 

@@ -46,5 +46,5 @@
 \code{\link{nonLinPMMH}} for an example of particle
 marginal Metropolis Hastings applied to a non-linear state space model.
 }
-\author{Adam M. Johansen and Dirk Eddelbuettel}
+\author{Adam M. Johansen, Dirk Eddelbuettel and Leah F. South}
 \keyword{programming}
