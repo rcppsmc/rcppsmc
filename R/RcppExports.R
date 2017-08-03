@@ -13,6 +13,10 @@ LinRegLA_impl <- function(Data, intemps, lNumber) {
     .Call('RcppSMC_LinRegLA_impl', PACKAGE = 'RcppSMC', Data, intemps, lNumber)
 }
 
+nonLinPMMH_impl <- function(data, lNumber, lMCMCits) {
+    .Call('RcppSMC_nonLinPMMH_impl', PACKAGE = 'RcppSMC', data, lNumber, lMCMCits)
+}
+
 pfLineartBS_impl <- function(data, part, usef, fun) {
     .Call('RcppSMC_pfLineartBS_impl', PACKAGE = 'RcppSMC', data, part, usef, fun)
 }
