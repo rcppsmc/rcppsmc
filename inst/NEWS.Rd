@@ -1,10 +1,30 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
+\newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
+\newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
 
 \section{Changes in RcppSMC version 0.1.6 [unreleased] (2017-xx-yy)}{
   \itemize{
     \item Also use \code{.registration=TRUE} in \code{useDynLib} in
-    \code{NAMESPACE} 
+    \code{NAMESPACE}
+    \item The particles are now represented internally as a population 
+    level object rather than particle level objects. As a result, 
+    the user defined initialisation, move and MCMC functions 
+    take a different format (Leah South in \ghpr{2} and \ghpr{3}). 
+    \item Rcpp attributes are now used (Leah South in \ghpr{2}). 
+    \item The automatic RNGscope from Rcpp attributes is used 
+    (Leah South in \ghpr{4} and \ghpr{5}). 
+    \item Estimation of the log ratio of normalising constants 
+    can now be performed via the standard SMC estimator and 
+    multiple path sampling methods (Leah South in \ghpr{7}) 
+    \item A linear regression example has been added to  
+    demonstrate how the package can be used to perform  
+    inference for static Bayesian models and 
+    Bayesian model choice (Leah South in \ghit{9} 
+    and \ghpr{10}). 
+    \item An example of particle marginal Metropolis
+    Hastings has been added (Leah South in \ghit{11} 
+    and \ghpr{13}). 
   }
 }
   
