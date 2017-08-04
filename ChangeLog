@@ -1,3 +1,9 @@
+2017-08-04  Leah South  <leah.south@hdr.qut.edu.au>
+
+	* R/LinReg.R: Silencing R CMD check --as-cran by not loading
+    data(radiata) into the global workspace.
+	* R/LinRegLA.R: Idem.
+
 2017-08-03  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Roll minor version

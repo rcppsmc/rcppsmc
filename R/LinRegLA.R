@@ -1,6 +1,6 @@
 LinRegLA<- function(model, particles=1000,temperatures = seq(0,1,0.05)^5) {
 
-    data(radiata)
+    data(radiata, envir = environment())
     if (model ==1){
         Data <- cbind(radiata$y,radiata$x1)
     } else if (model == 2){
