@@ -1,6 +1,5 @@
 LinReg<- function(model, particles=1000, plot=FALSE) {
 
-    data(radiata)
     if (model ==1){
         Data <- cbind(radiata$y,radiata$x1)
     } else if (model == 2){
