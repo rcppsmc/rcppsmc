@@ -1,3 +1,8 @@
+2017-08-04    <adam.johansen@gmail.com>
+
+	* R/LinRegLA.R: Suppressing redundant call to data().
+	* R/LinReg.R: Idem.
+
 2017-08-04  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* R/LinReg.R: Silencing R CMD check --as-cran by not loading
