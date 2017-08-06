@@ -1,4 +1,24 @@
-2017-08-04    <adam.johansen@gmail.com>
+2017-08-06  Leah South  <leah.south@hdr.qut.edu.au>
+
+	* inst/include/algParam.h: A base class to contain
+	additional algorithm parameters and virtual functions to
+	adapt them.
+	* inst/include/moveset.h: Changing the MCMC step to perform
+	multiple iterations within the library rather than on user end.
+	* inst/include/sampler.h: Adding an additional template
+	parameter for additional parameters and allowing for
+	optional adaptation at multiple points.
+
+	* src/LinReg.cpp: Boolean return for MCMC function and
+	setting MCMC repeats separately.
+	* src/LinReg.cpp: Idem.
+	* inst/include/LinReg.h: Idem.
+	* inst/include/LinReg_LA.h: Idem.
+
+	* src/RcppExports.cpp: Regenerated.
+	* R/RcppExports.R: Idem.
+
+2017-08-04  Adam M. Johansen  <adam.johansen@gmail.com>
 
 	* R/LinRegLA.R: Suppressing redundant call to data().
 	* R/LinReg.R: Idem.

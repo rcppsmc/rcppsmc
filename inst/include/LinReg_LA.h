@@ -48,7 +48,7 @@ namespace LinReg_LA {
     
     void fInitialise(rad_state & value, double & logweight);
     void fMove(long lTime, rad_state & value, double & logweight);
-    int fMCMC(long lTime, rad_state & value, double & logweight);
+    bool fMCMC(long lTime, rad_state & value, double & logweight);
     
     double integrand_ps(long,const rad_state &, void *);
     double width_ps(long, void *);

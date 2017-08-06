@@ -46,8 +46,8 @@ namespace smc {
         long (*pfMoveSelect)(long , const Space &, const double &);
         ///The functions which perform actual moves on a single particle.
         void (**pfMoves)(long, Space &, double &);
-        ///A Markov Chain Monte Carlo move for a single particle.
-        int (*pfMCMC)(long, Space &,double &);
+        ///One iteration of a Markov Chain Monte Carlo move for a single particle.
+        bool (*pfMCMC)(long, Space &,double &);
 
     public:
         ///Create a completely unspecified moveset
@@ -55,16 +55,16 @@ namespace smc {
         ///Create a reduced moveset with a single move
         moveset(void (*pfInit)(Space &, double &),
         void (*pfNewMoves)(long, Space &,double &),
-        int (*pfNewMCMC)(long,Space &,double &));
+        bool (*pfNewMCMC)(long,Space &,double &));
         ///Create a fully specified moveset
         moveset(void (*pfInit)(Space &, double &),long (*pfMoveSelector)(long , const Space &, const double &), 
         long nMoves, void (**pfNewMoves)(long, Space &,double &),
-        int (*pfNewMCMC)(long,Space &, double &));
+        bool (*pfNewMCMC)(long,Space &, double &));
         
         ///Initialise the population of particles
         void DoInit(population<Space> & pFrom, long N);
         ///Perform an MCMC move on the particles
-        int DoMCMC(long lTime, population<Space> & pFrom, long N);
+        bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted);
         ///Select an appropriate move at time lTime and apply it to pFrom
         void DoMove(long lTime, population<Space> & pFrom,long N);
         
@@ -78,7 +78,7 @@ namespace smc {
 
         /// \brief Set the MCMC function
         /// \param pfNewMCMC  The function which performs an MCMC move
-        void SetMCMCFunction(int (*pfNewMCMC)(long,Space &,double &)) {pfMCMC = pfNewMCMC;}
+        void SetMCMCFunction(bool (*pfNewMCMC)(long,Space &,double &)) {pfMCMC = pfNewMCMC;}
 
         /// \brief Set the move selection function
         /// \param pfMoveSelectNew returns the index of move to perform at the specified time given the specified particle
@@ -114,7 +114,7 @@ namespace smc {
     template <class Space>
     moveset<Space>::moveset(void (*pfInit)(Space &, double &),
     void (*pfNewMoves)(long, Space &,double &),
-    int (*pfNewMCMC)(long,Space &,double &))
+    bool (*pfNewMCMC)(long,Space &,double &))
     {
         SetInitialisor(pfInit);
         SetMoveSelectionFunction(NULL);
@@ -133,7 +133,7 @@ namespace smc {
     template <class Space>
     moveset<Space>::moveset(void (*pfInit)(Space &, double &),long (*pfMoveSelector)(long ,const Space &, const double &), 
     long nMoves, void (**pfNewMoves)(long, Space &,double &),
-    int (*pfNewMCMC)(long,Space &,double &))
+    bool (*pfNewMCMC)(long,Space &,double &))
     {
         SetInitialisor(pfInit);
         SetMoveSelectionFunction(pfMoveSelector);
@@ -157,16 +157,20 @@ namespace smc {
     }
 
     template <class Space>
-    int moveset<Space>::DoMCMC(long lTime, population<Space> & pFrom, long N)
-    {    if(pfMCMC) {
-            int count = 0;
-            for (long i=0; i<N; i++){
-                count += pfMCMC(lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i));
+    bool moveset<Space>::DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted)
+    {
+        if(pfMCMC && nRepeats>0) {
+            nAccepted = 0;
+            for (int j=0; j<nRepeats; j++){
+                for (long i=0; i<N; i++){
+                    nAccepted += pfMCMC(lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i));
+                }
             }
-            return count;
+            return TRUE;
         }
         else {
-            return 0;
+            nAccepted = 0;
+            return FALSE; // an MCMC step was not performed because there was no user defined MCMC step or because the number of MCMC repeats was zero.
         }
     }
 

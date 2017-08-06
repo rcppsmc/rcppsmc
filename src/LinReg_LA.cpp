@@ -62,6 +62,7 @@ Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumbe
         
         Sampler.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
         Sampler.SetMoveSet(Moveset);
+        Sampler.SetMcmcRepeats(10);
         Sampler.Initialise();
         
         arma::cube theta(lNumber,3,lTemps);
@@ -166,26 +167,19 @@ namespace LinReg_LA {
     ///\param lTime         The sampler iteration.
     ///\param value         Reference to the value of the particle being moved
     ///\param logweight     Reference to the log weight of the particle being moved
-    int fMCMC(long lTime, rad_state & value, double & logweight)
+    bool fMCMC(long lTime, rad_state & value, double & logweight)
     {
-        double MH_ratio;
-        double dRand;
-        int count = 0;
         rad_state value_prop;
+        value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
+        value_prop.loglike = logLikelihood(value_prop);
+        value_prop.logprior = logPrior(value_prop);
         
-        for (unsigned int j=0; j<10; j++){
-            value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
-            value_prop.loglike = logLikelihood(value_prop);
-            value_prop.logprior = logPrior(value_prop);
-            
-            MH_ratio = exp(temps(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
-            dRand = R::runif(0,1);
-            
-            if (MH_ratio>dRand){
-                value = value_prop;
-                count++;
-            }
+        double MH_ratio = exp(temps(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
+        
+        if (MH_ratio>R::runif(0,1)){
+            value = value_prop;
+            return TRUE;
         }
-        return count;
+        return FALSE;
     }
 }
