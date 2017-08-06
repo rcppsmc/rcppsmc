@@ -61,6 +61,7 @@ Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber) {
         
         Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
         Sampler.SetMoveSet(Moveset);
+        Sampler.SetMcmcRepeats(10);
         Sampler.Initialise();
         Sampler.IterateUntil(lIterates-1);
         
@@ -149,30 +150,22 @@ namespace LinReg {
     /// \param lTime        The sampler iteration.
     /// \param value        Reference to the current particle value
     /// \param logweight    Reference to the log weight of the particle being moved
-    int fMCMC(long lTime, rad_state & value, double & logweight)
+    bool fMCMC(long lTime, rad_state & value, double & logweight)
     {
-        double MH_ratio;
-        double dRand;
-        int count = 0;
-
-        rad_state value_prop;
         double logposterior_curr = logPosterior(lTime, value);
-        double logposterior_prop;
-
-        for (unsigned int j=0; j<10; j++){
-            value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));
-            
-            logposterior_prop = logPosterior(lTime, value_prop);
-            
-            MH_ratio = exp(logposterior_prop - logposterior_curr);
-            dRand = R::runif(0,1);
-            
-            if (MH_ratio>dRand){
-                value = value_prop;
-                logposterior_curr = logposterior_prop;
-                count++;
-            }
+        
+        rad_state value_prop;
+        value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));
+        
+        double logposterior_prop = logPosterior(lTime, value_prop);
+        
+        double MH_ratio = exp(logposterior_prop - logposterior_curr);
+        
+        if (MH_ratio>R::runif(0,1)){
+            value = value_prop;
+            logposterior_curr = logposterior_prop;
+            return TRUE;
         }
-        return count;
+        return FALSE;
     }
 }

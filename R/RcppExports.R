@@ -2,26 +2,26 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 blockpfGaussianOpt_impl <- function(data, part, lag) {
-    .Call(`_RcppSMC_blockpfGaussianOpt_impl`, data, part, lag)
-}
-
-LinRegLA_impl <- function(Data, intemps, lNumber) {
-    .Call(`_RcppSMC_LinRegLA_impl`, Data, intemps, lNumber)
+    .Call('RcppSMC_blockpfGaussianOpt_impl', PACKAGE = 'RcppSMC', data, part, lag)
 }
 
 LinReg_impl <- function(Data, lNumber) {
-    .Call(`_RcppSMC_LinReg_impl`, Data, lNumber)
+    .Call('RcppSMC_LinReg_impl', PACKAGE = 'RcppSMC', Data, lNumber)
+}
+
+LinRegLA_impl <- function(Data, intemps, lNumber) {
+    .Call('RcppSMC_LinRegLA_impl', PACKAGE = 'RcppSMC', Data, intemps, lNumber)
 }
 
 nonLinPMMH_impl <- function(data, lNumber, lMCMCits) {
-    .Call(`_RcppSMC_nonLinPMMH_impl`, data, lNumber, lMCMCits)
+    .Call('RcppSMC_nonLinPMMH_impl', PACKAGE = 'RcppSMC', data, lNumber, lMCMCits)
 }
 
 pfLineartBS_impl <- function(data, part, usef, fun) {
-    .Call(`_RcppSMC_pfLineartBS_impl`, data, part, usef, fun)
+    .Call('RcppSMC_pfLineartBS_impl', PACKAGE = 'RcppSMC', data, part, usef, fun)
 }
 
 pfNonlinBS_impl <- function(data, part) {
-    .Call(`_RcppSMC_pfNonlinBS_impl`, data, part)
+    .Call('RcppSMC_pfNonlinBS_impl', PACKAGE = 'RcppSMC', data, part)
 }
 

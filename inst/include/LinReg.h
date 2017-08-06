@@ -43,5 +43,5 @@ namespace LinReg {
     double logPosterior(long lTime, const rad_state & value);
     void fInitialise(rad_state & value, double & logweight);
     void fMove(long lTime, rad_state & value, double & logweight);
-    int fMCMC(long lTime, rad_state & value, double & logweight);
+    bool fMCMC(long lTime, rad_state & value, double & logweight);
 }
