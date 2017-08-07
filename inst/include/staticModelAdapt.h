@@ -47,7 +47,7 @@ namespace smc {
         /// Computes the difference between the conditional ESS given the specified temperature difference and the desired conditional ESS.
         double CESSdiff(const arma::vec & logweight, const arma::vec & loglike, double tempDiff, double desiredCESS);
         ///Performs the bisection method to find the temperature within (temp_curr,1) which gives the desired conditional ESS.
-        double bisection(double curr, const arma::vec & logweight, const arma::vec & loglike, const double & desiredCESS);
+        double bisection(double curr, const arma::vec & logweight, const arma::vec & loglike, double desiredCESS, double epsilon);
 
     public:
         ~staticModelAdapt() {}
@@ -55,7 +55,7 @@ namespace smc {
         staticModelAdapt() {temp.push_back(0.0);}
 
         /// Chooses the next temperature such that a desired conditional ESS is maintained.
-        void ChooseTemp(const arma::vec & logweight, const arma::vec & loglike, double desiredCESS);
+        void ChooseTemp(const arma::vec & logweight, const arma::vec & loglike, double desiredCESS, double epsilon = 0.01);
         /// Calculates the empirical covariance matrix based on the current weighted particle set.
         void calcEmpCov(const arma::mat & theta, const arma::vec & logweight);
         /// Calculates the Cholesky decomposition of the empirical covariance matrix based on the current weighted particle set.

@@ -43,9 +43,9 @@ namespace smc {
     }
     
     ///Performs the bisection method to find the temperature within (temp_curr,1) which gives the desired conditional ESS.
-    double staticModelAdapt::bisection(double curr, const arma::vec & logweight, const arma::vec & loglike, const double & desiredCESS){
+    double staticModelAdapt::bisection(double curr, const arma::vec & logweight, const arma::vec & loglike, double desiredCESS, double epsilon){
         double a = curr;
-        double b = 1;
+        double b = 1.0;
         double f_a = CESSdiff(logweight,loglike,a-curr,desiredCESS);
         double f_b = CESSdiff(logweight,loglike,b-curr,desiredCESS);
         if (f_a*f_b>0){
@@ -54,9 +54,9 @@ namespace smc {
             double m, f_m, err;
             m = (a+b)/2.0;
             f_m = CESSdiff(logweight,loglike,m-curr,desiredCESS);
-            err = 10;
-            while (err > 0.01){
-                if (f_m<0){
+            err = 10.0;
+            while (err > epsilon){
+                if (f_m<0.0){
                     b = m;
                     f_b = f_m;
                 } else{
@@ -76,12 +76,13 @@ namespace smc {
     /// \param logweight An armadillo vector containing the logarithm of the current particle weights.
     /// \param loglike An armadillo vector containing the log likelihood of the current particle values.
     /// \param desiredCESS The target conditional ESS for the next temperature (generally fixed).
-    void staticModelAdapt::ChooseTemp(const arma::vec & logweight, const arma::vec & loglike, double desiredCESS) {
+    /// \param epsilon The tolerance for the bisection method (maximum difference between desired and actual conditional ESS).
+    void staticModelAdapt::ChooseTemp(const arma::vec & logweight, const arma::vec & loglike, double desiredCESS, double epsilon) {
         double temp_curr = temp.back();
-        if (CESSdiff(logweight,loglike,1-temp_curr,desiredCESS)>=0){
+        if (CESSdiff(logweight,loglike,1.0-temp_curr,desiredCESS)>=-epsilon){
             temp.push_back(1.0);
         } else {
-            temp.push_back(bisection(temp_curr, logweight, loglike, desiredCESS));
+            temp.push_back(bisection(temp_curr, logweight, loglike, desiredCESS, epsilon));
         }
     }
 
@@ -115,14 +116,14 @@ namespace smc {
     /// \param initialN The initial number of MCMC repeats.
     /// \param maxReps The maximum number of MCMC repeats.
     int staticModelAdapt::calcMcmcRepeats(double acceptProb, double desiredAcceptProb, int initialN, int maxReps){
-        if (acceptProb == -1){
+        if (acceptProb + 1.0 <= 1e-9){
             return initialN;
-        } else if (acceptProb == 1){
+        } else if (acceptProb - 1.0 <= 1e-9){
             return 1;
-        } else if (acceptProb == 0){
+        } else if (acceptProb <= 1e-9){
             return maxReps;
         } else {
-            return std::min(maxReps,static_cast<int>(std::ceil(log(1-desiredAcceptProb)/log(1-acceptProb))));
+            return std::min(maxReps,static_cast<int>(std::ceil(log(1.0-desiredAcceptProb)/log(1.0-acceptProb))));
         }
     }
 }
