@@ -1,3 +1,12 @@
+2017-08-07  Leah South  <leah.south@hdr.qut.edu.au>
+
+	* inst/include/staticModelAdapt.h: A class for commonly used
+	parameters and methods to adapt them in SMC for static
+	Bayesian models.
+	* src/staticModelAdapt.cpp: The function definitions.
+	* inst/include/sampler.h: Adding an include statement for
+	staticModelAdapt.
+
 2017-08-06  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* inst/include/algParam.h: A base class to contain

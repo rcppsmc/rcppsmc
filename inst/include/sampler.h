@@ -38,6 +38,7 @@
 #include "moveset.h"
 #include "algParam.h"
 #include "smc-exception.h"
+#include "staticModelAdapt.h"
 
 ///Specifiers for various resampling algorithms:
 namespace ResampleType
