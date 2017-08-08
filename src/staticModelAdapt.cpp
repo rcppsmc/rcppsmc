@@ -65,7 +65,7 @@ namespace smc {
                 }
                 m = (a+b)/2.0;
                 f_m = CESSdiff(logweight,loglike,m-curr,desiredCESS);
-                err = abs(f_m);
+                err = std::abs(f_m);
             }
             return m;
         }
@@ -118,7 +118,7 @@ namespace smc {
     int staticModelAdapt::calcMcmcRepeats(double acceptProb, double desiredAcceptProb, int initialN, int maxReps){
         if (acceptProb + 1.0 <= 1e-9){
             return initialN;
-        } else if (fabs(acceptProb - 1.0) <= 1e-9){
+        } else if (acceptProb - 1.0 >= -1e-9){
             return 1;
         } else if (acceptProb <= 1e-9){
             return maxReps;
