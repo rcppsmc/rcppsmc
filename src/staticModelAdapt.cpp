@@ -118,7 +118,7 @@ namespace smc {
     int staticModelAdapt::calcMcmcRepeats(double acceptProb, double desiredAcceptProb, int initialN, int maxReps){
         if (acceptProb + 1.0 <= 1e-9){
             return initialN;
-        } else if (acceptProb - 1.0 <= 1e-9){
+        } else if (fabs(acceptProb - 1.0) <= 1e-9){
             return 1;
         } else if (acceptProb <= 1e-9){
             return maxReps;
