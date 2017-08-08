@@ -1,3 +1,10 @@
+2017-08-09  Leah South  <leah.south@hdr.qut.edu.au>
+
+	* R/LinReg.R: Accessing radiata data through RcppSMC:: namespace rather
+	than declaring it global.
+	* R/LinRegLA.R: Idem.
+	* R/LinRegLA_adapt.R: Idem.
+
 2017-08-08  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* src/staticModelAdapt.cpp: Adding missing absolute value
