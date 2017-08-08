@@ -1,12 +1,22 @@
 2017-08-08  Leah South  <leah.south@hdr.qut.edu.au>
 
-	* src/staticModelAdapt.cpp: Adding missing absolute value 
-	to calculations of MCMC repeats. 
+	* src/staticModelAdapt.cpp: Adding missing absolute value
+	to calculations of MCMC repeats.
 
 	* inst/include/history.h: Adding MCMC repeats to history.
 	* inst/include/sampler.h: Idem.
 
 	* inst/NEWS: Updating with recent issue tickets and pull requests.
+
+	* R/LinRegLA_adapt.R: An adaptive version of LinRegLA.
+	* src/LinReg_LA_adapt.cpp: Idem.
+	* inst/include/LinReg_LA_adapt.h: Idem.
+	* man/LinReg.Rd: Documenting the new function.
+
+	* NAMESPACE: Adding the new function to the namespace.
+
+	* src/RcppExports.cpp: Regenerated.
+	* R/RcppExports.R: Idem.
 
 2017-08-07  Leah South  <leah.south@hdr.qut.edu.au>
 
