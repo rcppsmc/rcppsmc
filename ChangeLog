@@ -6,6 +6,8 @@
 	* inst/include/history.h: Adding MCMC repeats to history.
 	* inst/include/sampler.h: Idem.
 
+	* inst/NEWS: Updating with recent issue tickets and pull requests.
+
 2017-08-07  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* inst/include/staticModelAdapt.h: A class for commonly used

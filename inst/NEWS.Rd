@@ -5,26 +5,15 @@
 
 \section{Changes in RcppSMC version 0.1.6 [unreleased] (2017-xx-yy)}{
   \itemize{
-    \item Also use \code{.registration=TRUE} in \code{useDynLib} in
-    \code{NAMESPACE}
-    \item The particles are now represented internally as a population 
-    level object rather than particle level objects. As a result, 
-    the user defined initialisation, move and MCMC functions 
-    take a different format (Leah South in \ghpr{2} and \ghpr{3}). 
-    \item Rcpp attributes are now used (Leah South in \ghpr{2}). 
-    \item The automatic RNGscope from Rcpp attributes is used 
-    (Leah South in \ghpr{4} and \ghpr{5}). 
-    \item Estimation of the log ratio of normalising constants 
-    can now be performed via the standard SMC estimator and 
-    multiple path sampling methods (Leah South in \ghpr{7}) 
-    \item A linear regression example has been added to  
-    demonstrate how the package can be used to perform  
-    inference for static Bayesian models and 
-    Bayesian model choice (Leah South in \ghit{9} 
-    and \ghpr{10}). 
-    \item An example of particle marginal Metropolis
-    Hastings has been added (Leah South in \ghit{11} 
-    and \ghpr{13}). 
+    \item Also use \code{.registration=TRUE} in \code{useDynLib} in \code{NAMESPACE}
+    \item Switching to population level objects (Leah South in \ghpr{2} and \ghpr{3}). 
+    \item Using Rcpp attributes (Leah South in \ghpr{2}). 
+    \item Using automatic RNGscope (Leah South in \ghpr{4} and \ghpr{5}). 
+    \item Adding multiple normalising constant estimators (Leah South in \ghpr{7}) 
+    \item Static Bayesian model example: linear regression  (Leah South in \ghit{9} and \ghpr{10}). 
+    \item Adding a PMMH example (Leah South in \ghit{11} and \ghpr{13}).
+    \item Framework for additional algorithm parameters and adaptation (Leah South in \ghit{16} and \ghpr{19}).
+    \item Common adaptation methods for static Bayesian models (Leah South in \ghit{17} and \ghpr{20}).
   }
 }
   
