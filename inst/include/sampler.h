@@ -339,7 +339,7 @@ namespace smc {
         if(htHistoryMode != HistoryType::NONE) {
             History.clear();
             historyelement<Space> histel;
-            histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
+            histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
             History.push_back(histel);          
         }  
 
@@ -403,7 +403,7 @@ namespace smc {
         throw SMC_EXCEPTION(SMCX_MISSING_HISTORY, "The path sampling integral cannot be computed as the history of the system was not stored.");
 
         // historyelement<Space> histel;
-        // histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
+        // histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
         // History.push_back(histel);
         
         
@@ -490,6 +490,7 @@ namespace smc {
         N =recent.GetNumber();
         nAccepted = recent.AcceptCount();
         nResampled = recent.WasResampled();
+        nRepeats = recent.mcmcRepeats();
         T--;
         return;
     }
@@ -537,7 +538,7 @@ namespace smc {
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
             historyelement<Space> histel;
-            histel.Set(N, pPopulation, nAccepted, historyflags(nResampled));
+            histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
             History.push_back(histel);
         }
         

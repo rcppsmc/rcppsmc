@@ -1,7 +1,10 @@
 2017-08-08  Leah South  <leah.south@hdr.qut.edu.au>
 
-	* src/staticModelAdapt.cpp: Adding missing absolute value
-	to calculations of MCMC repeats.
+	* src/staticModelAdapt.cpp: Adding missing absolute value 
+	to calculations of MCMC repeats. 
+
+	* inst/include/history.h: Adding MCMC repeats to history.
+	* inst/include/sampler.h: Idem.
 
 2017-08-07  Leah South  <leah.south@hdr.qut.edu.au>
 

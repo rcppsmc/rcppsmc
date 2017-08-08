@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// history.h: Rcpp integration of SMC library -- sampler history 
+// history.h: Rcpp integration of SMC library -- sampler history
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
@@ -53,6 +53,7 @@ namespace smc {
     private:
         long number; //!< The number of particles (presently redundant as this is not a function of iteration)
         int nAccepted; //!< Number of MCMC moves accepted during this iteration.
+        int nRepeat; //!< Number of MCMC iterations performed at this iteration (per particle)
         population<Space> pop; //!< The particles themselves (values and weights)
         historyflags flags; //!< Flags associated with this iteration.
         
@@ -60,7 +61,7 @@ namespace smc {
         /// The null constructor creates an empty history element.
         historyelement();
         /// A constructor with four arguments initialises the particle set.
-        historyelement(long lNumber, population<Space> pNew, int nAccepts, historyflags hf);
+        historyelement(long lNumber, population<Space> pNew, int nAccepts, int nRepeats, historyflags hf);
 
         /// The destructor tidies up.
         ~historyelement();
@@ -80,10 +81,12 @@ namespace smc {
         /// Monte Carlo estimate of the variance of the supplied function with respect to the empirical measure of the particle ensemble (to be used in second order trapezoidal correction).
         long double Integrate_Var(long lTime, double (*pIntegrand)(long,const Space&,void*), double Expectation, void* pAuxiliary) const;
         /// Sets the particle set to the specified values.
-        void Set(long lNumber, const population<Space> &New, int inAccepted, const historyflags &histflags){number = lNumber; pop = New; nAccepted = inAccepted; flags = histflags;};
+        void Set(long lNumber, const population<Space> &New, int inAccepted, int nRepeats, const historyflags &histflags){number = lNumber; pop = New; nAccepted = inAccepted; nRepeat = nRepeats; flags = histflags;};
 
         /// Returns the number of MCMC moves accepted during this iteration.
         int AcceptCount(void) {return nAccepted; }
+        /// Returns the number of MCMC iterations performed during this iteration.
+        int mcmcRepeats(void) {return nRepeat; }
         /// Returns true if the particle set 
         int WasResampled(void) {return flags.WasResampled(); }
 
@@ -97,17 +100,19 @@ namespace smc {
     {
         number = 0;
         nAccepted = 0;
+        nRepeat = 0;
     }
 
 
     /// \param lNumber The number of particles present in the particle generation
     /// \param New    The array of particles which are present in the particle generation
     /// \param nAccepts The number of MCMC moves that were accepted during this particle generation
+    /// \param nRepeats The number of MCMC iterations that were performed during this particle generation
     /// \param hf      The historyflags associated with the particle generation
 
     template <class Space>
-    historyelement<Space>::historyelement(long lNumber, population<Space> New, int nAccepts, historyflags hf) :
-    number(lNumber), nAccepted(nAccepts), pop(New), flags(hf)
+    historyelement<Space>::historyelement(long lNumber, population<Space> New, int nAccepts, int nRepeats, historyflags hf) :
+    number(lNumber), nAccepted(nAccepts), nRepeat(nRepeats), pop(New), flags(hf)
     {
     }
 
