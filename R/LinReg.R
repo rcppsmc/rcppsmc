@@ -1,9 +1,9 @@
 LinReg<- function(model, particles=1000, plot=FALSE) {
 
     if (model ==1){
-        Data <- cbind(radiata$y,radiata$x1)
+        Data <- cbind(RcppSMC::radiata$y,RcppSMC::radiata$x1)
     } else if (model == 2){
-        Data <- cbind(radiata$y,radiata$x2)
+        Data <- cbind(RcppSMC::radiata$y,RcppSMC::radiata$x2)
     } else{
         stop("Please choose a valid model (1 or 2).")
     }
@@ -27,6 +27,3 @@ LinReg<- function(model, particles=1000, plot=FALSE) {
 
     invisible(res)
 }
-
-## silence a NOTE from 'R CMD check --as-cran'
-utils::globalVariables(c("radiata"))

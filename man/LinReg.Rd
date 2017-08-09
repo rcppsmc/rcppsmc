@@ -1,11 +1,14 @@
 \name{LinReg}
 \alias{LinReg}
 \alias{LinRegLA}
+\alias{LinRegLA_adapt}
 \title{Simple Linear Regression}
 \usage{
 LinReg(model, particles = 1000, plot = FALSE)
 
 LinRegLA(model, particles = 1000, temperatures = seq(0, 1, 0.05)^5)
+
+LinRegLA_adapt(model, particles = 1000, resampTol = 0.5, tempTol = 0.9)
 }
 \arguments{
 \item{model}{Choice of regression model (1 for density as the predictor
@@ -19,6 +22,14 @@ and 2 for adjusted density as the predictor).}
 where \eqn{0=\gamma_0\le \ldots \le \gamma_T = 1} can be referred to
 as the temperatures, \eqn{P(y|\theta)} is the likelihood and \eqn{P(\theta)}
 is the prior.}
+
+\item{resampTol}{The adaptive implementation of likelihood annealing SMC allows for
+the resampling tolerance to be specified. This parameter can be set to a value in
+the range [0,1) corresponding to a fraction of the size of the particle set or it
+may be set to an integer corresponding to an actual effective sample size.}
+
+\item{tempTol}{A tolerance for adaptive choice of the temperature schedule such
+that the conditional ESS is maintained at tempTol*particles.}
 }
 \value{
 The \code{LinReg} function returns a \code{list} containing the final particle
@@ -29,6 +40,10 @@ The \code{LinRegLA} function returns a \code{list} containing the population
 of particles and their associates log likelihoods, log priors and weights at each iteration. The
 effective sample size at each of the iterations and several different
 estimates of the logarithm of the model evidence are also returned.
+
+The \code{LinRegLA_adapt} function returns a \code{list} containing all of the same
+output as \code{LinRegLA}, in addition to the adaptively chosen temperature schedule
+and number of MCMC repeats.
 }
 \description{
 A simple example based on estimating the parameters of a linear regression model
@@ -37,6 +52,9 @@ using
 * Data annealing sequential Monte Carlo (\code{LinReg}).
 
 * Likelihood annealing sequential Monte Carlo (\code{LinRegLA}).
+
+* Likelihood annealing sequential Monte Carlo with the temperature schedule,
+number of MCMC repeats and random walk covariance matrices adapted online (\code{LinRegLA_adapt}).
 }
 \details{
 Williams (1959) considers two competing linear regression models
@@ -64,11 +82,17 @@ for both of the competing models. The log evidence is -309.9 for model 1 and
 The \code{LinReg} function implements a data annealing approach to this example.
 
 The \code{LinRegLA} function implements a likelihood annealing approach to this example.
+
+The \code{LinRegLA_adapt} function implements a likelihood annealing approach to this example
+with adaptation of the temperature schedule, number of MCMC repeats and random walk covariance
+matrices.
 }
 \examples{
 res <- LinReg(model=1, particles=1000, plot=TRUE)
 
 res <- LinRegLA(model=1, particles=1000)
+
+res <- LinRegLA_adapt(model=1, particles=1000)
 
 }
 \references{
@@ -86,7 +110,7 @@ Williams, E. (1959). Regression analysis. Wiley.
 Adam M. Johansen, Dirk Eddelbuettel and Leah F. South
 }
 \concept{
-static Bayesian annealing
+static Bayesian annealing adaptive
 
 path
 }

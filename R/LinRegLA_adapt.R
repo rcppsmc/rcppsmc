@@ -1,4 +1,4 @@
-LinRegLA<- function(model, particles=1000,temperatures = seq(0,1,0.05)^5) {
+LinRegLA_adapt<- function(model, particles = 1000, resampTol = 0.5, tempTol = 0.9) {
 
     if (model ==1){
         Data <- cbind(RcppSMC::radiata$y,RcppSMC::radiata$x1)
@@ -7,8 +7,8 @@ LinRegLA<- function(model, particles=1000,temperatures = seq(0,1,0.05)^5) {
     } else{
         stop("Please choose a valid model (1 or 2).")
     }
-
-    res <- LinRegLA_impl(as.matrix(Data), as.matrix(temperatures), particles)
+    
+    res <- LinRegLA_adapt_impl(as.matrix(Data), particles, resampTol, tempTol)
 
     invisible(res)
 }
