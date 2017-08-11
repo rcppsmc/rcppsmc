@@ -46,9 +46,9 @@ namespace LinReg_LA {
     double logLikelihood(const rad_state & value);
     double logPrior(const rad_state & value);
     
-    void fInitialise(rad_state & value, double & logweight);
-    void fMove(long lTime, rad_state & value, double & logweight);
-    bool fMCMC(long lTime, rad_state & value, double & logweight);
+    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
     
     double integrand_ps(long,const rad_state &, void *);
     double width_ps(long, void *);

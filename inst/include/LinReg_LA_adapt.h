@@ -48,19 +48,20 @@ namespace LinReg_LA_adapt {
     double logLikelihood(const rad_state & value);
     double logPrior(const rad_state & value);
     
-    void fInitialise(rad_state & value, double & logweight);
-    void fMove(long lTime, rad_state & value, double & logweight);
-    bool fMCMC(long lTime, rad_state & value, double & logweight);
+    void fInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & param);
+    void fMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
     
     double integrand_ps(long,const rad_state &, void *);
     double width_ps(long, void *);
     
+    //A derived class for adaptation which adapts parameters of type smc::staticModelAdapt
     class rad_adapt:
-    public smc::algParam<rad_state,smc::staticModelAdapt>
+    public smc::adaptMethods<rad_state,smc::staticModelAdapt>
     {
     public:
 
-        void updateForMove(const smc::population<rad_state> & pop) {
+        void updateForMove(smc::staticModelAdapt & param, const smc::population<rad_state> & pop) {
             unsigned long N = pop.GetNumber();
             arma::vec loglike(N);
             for (unsigned int i=0; i<N; i++){
@@ -69,7 +70,7 @@ namespace LinReg_LA_adapt {
             param.ChooseTemp(pop.GetLogWeight(),loglike,rho*N);
         }
 
-        void updateForMCMC(const smc::population<rad_state> & pop, double acceptProb, int nResampled, int & nRepeats) {
+        void updateForMCMC(smc::staticModelAdapt & param, const smc::population<rad_state> & pop, double acceptProb, int nResampled, int & nRepeats) {
             if (nResampled == 0) {
                 nRepeats = 0;
             } else {
@@ -87,6 +88,6 @@ namespace LinReg_LA_adapt {
 
     };
 
-    smc::algParam<rad_state,smc::staticModelAdapt> * myParams;
-    
+    smc::sampler<rad_state,smc::staticModelAdapt> * Sampler;
+    smc::adaptMethods<rad_state,smc::staticModelAdapt> * myAdapt;
 }

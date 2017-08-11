@@ -62,8 +62,8 @@ Rcpp::DataFrame pfLineartBS_impl(arma::mat data, unsigned long part, bool usef, 
         y.y_pos = data.col(1);
 
         //Initialise and run the sampler
-        smc::sampler<cv_state> Sampler(lNumber, HistoryType::NONE);  
-        smc::moveset<cv_state> Moveset(fInitialise, fMove, NULL);
+        smc::sampler<cv_state,smc::nullParams> Sampler(lNumber, HistoryType::NONE);  
+        smc::moveset<cv_state,smc::nullParams> Moveset(fInitialise, fMove, NULL);
 
         Sampler.SetResampleParams(ResampleType::RESIDUAL, 0.5);
         Sampler.SetMoveSet(Moveset);
@@ -141,7 +141,8 @@ namespace pflineart {
 
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    void fInitialise(cv_state & value, double & logweight)
+    /// \param param Additional algorithm parameters
+    void fInitialise(cv_state & value, double & logweight, smc::nullParams & param)
     {
         value.x_pos = R::rnorm(0.0,sqrt(var_s0));
         value.y_pos = R::rnorm(0.0,sqrt(var_s0));
@@ -156,7 +157,8 @@ namespace pflineart {
     ///\param lTime The sampler iteration.
     ///\param value The value of the particle being moved
     ///\param logweight The log weight of the particle being moved
-    void fMove(long lTime, cv_state & value, double & logweight)
+    /// \param param Additional algorithm parameters
+    void fMove(long lTime, cv_state & value, double & logweight, smc::nullParams & param)
     {
         value.x_pos += value.x_vel * Delta + R::rnorm(0.0,sqrt(var_s));
         value.x_vel += R::rnorm(0.0,sqrt(var_u));

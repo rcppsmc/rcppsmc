@@ -56,8 +56,8 @@ Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
     long lIterates = y.n_rows;
 
     //Initialise and run the sampler
-    smc::sampler<double> Sampler(lNumber, HistoryType::NONE);  
-    smc::moveset<double> Moveset(fInitialise, fMove, NULL);
+    smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE);  
+    smc::moveset<double,smc::nullParams> Moveset(fInitialise, fMove, NULL);
 
     Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 1.01 * lNumber);
     Sampler.SetMoveSet(Moveset);
@@ -90,7 +90,8 @@ namespace nonlinbs {
 
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    void fInitialise(double & value, double & logweight) {
+    /// \param param Additional algorithm parameters
+    void fInitialise(double & value, double & logweight, smc::nullParams & param) {
         value = R::rnorm(0.0,std_x0);
         logweight = logLikelihood(0,value);
     }
@@ -100,7 +101,8 @@ namespace nonlinbs {
     /// \param lTime The sampler iteration.
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    void fMove(long lTime, double & value, double & logweight) {
+    /// \param param Additional algorithm parameters
+    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param) {
         value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + R::rnorm(0.0,std_x);
         logweight += logLikelihood(lTime, value);
     }

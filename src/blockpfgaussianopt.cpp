@@ -47,8 +47,8 @@ Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag)
     lIterates = y.size();
 
     //Initialise and run the sampler
-    smc::sampler<arma::vec> Sampler(lNumber, HistoryType::NONE);  
-    smc::moveset<arma::vec> Moveset(fInitialise, fMove, NULL);
+    smc::sampler<arma::vec,smc::nullParams> Sampler(lNumber, HistoryType::NONE);  
+    smc::moveset<arma::vec,smc::nullParams> Moveset(fInitialise, fMove, NULL);
 
     Sampler.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
     Sampler.SetMoveSet(Moveset);
@@ -76,7 +76,8 @@ namespace BSPFG {
     ///
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
-    void fInitialise(arma::vec & value, double & logweight)
+    /// \param param Additional algorithm parameters
+    void fInitialise(arma::vec & value, double & logweight, smc::nullParams & param)
     {
         value = arma::zeros<arma::vec>(lIterates);
         value(0) = R::rnorm(0.5 * y(0),1.0/sqrt(2.0));
@@ -88,7 +89,8 @@ namespace BSPFG {
     ///\param lTime The sampler iteration.
     ///\param value The value of the particle being moved
     ///\param logweight The log weight of the particle being moved
-    void fMove(long lTime, arma::vec & value, double & logweight)
+    ///\param param Additional algorithm parameters
+    void fMove(long lTime, arma::vec & value, double & logweight, smc::nullParams & param)
     {
         if(lTime == 1) {
             value(lTime) = (value(lTime-1) + y(lTime))/2.0 + R::rnorm(0.0,1.0/sqrt(2.0));
