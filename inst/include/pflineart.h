@@ -39,8 +39,8 @@ namespace pflineart {
 
     double logLikelihood(long lTime, const cv_state & X);
 
-    void fInitialise(cv_state & value, double & logweight);
-    void fMove(long lTime, cv_state & value, double & logweight);
+    void fInitialise(cv_state & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, cv_state & value, double & logweight, smc::nullParams & param);
 
     double integrand_mean_x(const cv_state&, void*);
     double integrand_mean_y(const cv_state&, void*);

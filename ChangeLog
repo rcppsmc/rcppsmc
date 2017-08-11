@@ -1,15 +1,37 @@
 2017-08-11  Leah South  <leah.south@hdr.qut.edu.au>
 
-	* inst/include/adaptMethods.h: Changing the name (from algParams.h) and
-	removing the parameter object so it is not a member of the class.
+	* inst/include/adaptMethods.h: Changing the name (from algParams.h) and 
+	removing the parameter object so it is not a member of the class. 
 	Instead, it is passed by reference to the adaptation functions.
-	* inst/include/sampler.h: Adding the parameter object as a member of
-	this class and updating accordingly.
+	* inst/include/moveset.h: Passing a reference to the algorithm  
+	parameters to all functions. 
+	* inst/include/sampler.h: Adding the parameter object as a member of 
+	this class and updating accordingly. Passing the algorithm parameters
+	by reference to the adaptation and initialisation/move/MCMC functions.
+	parameters to all functions.
 
-	* inst/include/LinReg_LA_adapt.h: Switching to a pointer for the
-	sampler object and passing the parameter objects by reference to
-	the adaptation functions.
-	* src/LinReg_LA_adapt.cpp: Idem.
+	* inst/include/LinReg_LA_adapt.h: Switching to a pointer for the 
+	sampler object and passing the parameter objects by reference to 
+	the adaptation and move functions.
+	* src/LinReg_LA_adapt.cpp:  Idem. Also adding the adaptation object
+	type to the template arguments for moveset.
+
+	* inst/include/blockpfgaussianopt.h: Adding params to the moveset
+	function arguments with an empty class as the type.
+	* inst/include/LinReg.h: Idem.
+	* inst/include/LinReg_LA.h: Idem.
+	* inst/include/nonLinPMMH.h: Idem.
+	* inst/include/pflineart.h: Idem.
+	* inst/include/pfnonlinbs.h: Idem.
+
+	* src/blockpfgaussianopt.cpp: Adding params to the moveset
+	function arguments and template arguments for sampler and moveset.
+	Using an empty class as the type.
+	* src/LinReg.cpp: Idem.
+	* src/LinReg_LA.cpp: Idem.
+	* src/nonLinPMMH.cpp: Idem.
+	* src/pflineart.cpp: Idem.
+	* src/pfnonlinbs.cpp: Idem.
 
 2017-08-09  Leah South  <leah.south@hdr.qut.edu.au>
 

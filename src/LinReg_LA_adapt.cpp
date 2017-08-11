@@ -48,11 +48,11 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
         // Initialise the sampler
         myAdapt = new rad_adapt;
         Sampler = new smc::sampler<rad_state,smc::staticModelAdapt>(lNumber, HistoryType::RAM);
-        smc::moveset<rad_state> Moveset(fInitialise, fMove, fMCMC);
+        smc::moveset<rad_state,smc::staticModelAdapt> Moveset(fInitialise, fMove, fMCMC);
         
         Sampler->SetResampleParams(ResampleType::SYSTEMATIC, resampTol);
         Sampler->SetMoveSet(Moveset);
-        Sampler->SetAlgParam(smc::staticModelAdapt());  
+        Sampler->SetAlgParam(smc::staticModelAdapt());
         Sampler->SetAdaptMethods(myAdapt);
         Sampler->Initialise();
         
@@ -135,7 +135,8 @@ namespace LinReg_LA_adapt {
 
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
-    void fInitialise(rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         // drawing from the prior
         value.theta = arma::zeros(3);
@@ -144,7 +145,7 @@ namespace LinReg_LA_adapt {
         value.theta(2) = log(pow(R::rgamma(3,pow(2.0*300.0*300.0,-1.0)),-1.0));
         value.loglike = logLikelihood(value);
         value.logprior = logPrior(value);
-        logweight = Sampler->GetAlgParams().GetTemp(0)*value.loglike;
+        logweight = params.GetTemp(0)*value.loglike;
     }
 
     ///The proposal function.
@@ -152,9 +153,10 @@ namespace LinReg_LA_adapt {
     ///\param lTime         The sampler iteration.
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
-    void fMove(long lTime, rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
-        logweight += (Sampler->GetAlgParams().GetTemp(lTime) - Sampler->GetAlgParams().GetTemp(lTime-1))*logLikelihood(value);
+        logweight += (params.GetTemp(lTime) - params.GetTemp(lTime-1))*logLikelihood(value);
     }
 
     ///The MCMC function.
@@ -162,14 +164,15 @@ namespace LinReg_LA_adapt {
     ///\param lTime         The sampler iteration.
     ///\param value         Reference to the value of the particle being moved
     ///\param logweight     Reference to the log weight of the particle being moved
-    bool fMCMC(long lTime, rad_state & value, double & logweight)
+    ///\param param        Additional algorithm parameters
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         rad_state value_prop;
-        value_prop.theta = value.theta + Sampler->GetAlgParams().GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
+        value_prop.theta = value.theta + params.GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
         value_prop.loglike = logLikelihood(value_prop);
         value_prop.logprior = logPrior(value_prop);
         
-        double MH_ratio = exp(Sampler->GetAlgParams().GetTemp(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
+        double MH_ratio = exp(params.GetTemp(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
         
         if (MH_ratio>R::runif(0,1)){
             value = value_prop;

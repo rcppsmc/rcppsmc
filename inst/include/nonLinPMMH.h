@@ -33,8 +33,8 @@ namespace nonLinPMMH {
     arma::vec y; //data
     
     double logPrior(const parameters & proposal);
-    void fInitialise(double & value, double & logweight);
-    void fMove(long lTime, double & value, double & logweight);
+    void fInitialise(double & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
     
     parameters theta_prop;
 }

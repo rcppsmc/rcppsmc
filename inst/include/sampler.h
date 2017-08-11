@@ -95,8 +95,8 @@ namespace smc {
         ///The particles within the system.
         population<Space> pPopulation;
         ///The set of moves available.
-        moveset<Space> Moves;
-        /// The additional algorithm parameters.  
+        moveset<Space,Params> Moves;
+        /// The additional algorithm parameters.
         Params algParams;
         /// An object for adapting additional algorithm parameters
         adaptMethods<Space,Params>* pAdapt;
@@ -185,12 +185,12 @@ namespace smc {
         ///Resample the particle set using the specified resampling scheme.
         void Resample(ResampleType::Enum lMode);
         ///Sets the entire moveset to the one which is supplied
-        void SetMoveSet(moveset<Space>& pNewMoveset) { Moves = pNewMoveset; }
+        void SetMoveSet(moveset<Space,Params>& pNewMoveset) { Moves = pNewMoveset; }
         ///Set Resampling Parameters
         void SetResampleParams(ResampleType::Enum rtMode, double dThreshold);
         ///Set additional algorithm parameters
         void SetAlgParam(Params parameters) {algParams = parameters;}
-        ///Set the methods to adapt the additional algorithm parameters  
+        ///Set the methods to adapt the additional algorithm parameters
         void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {delete pAdapt; pAdapt = adaptMethod; adaptBelong = 0;}
         ///Sets the number of MCMC repeats
         void SetMcmcRepeats(int reps) {nRepeats = reps;}
@@ -214,30 +214,30 @@ namespace smc {
         double CalcLogNC(void) const {return stableLogSumWeights(pPopulation.GetLogWeight());}
     };
 
-    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles 
-    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to 
-    /// store the particle set. 
-    /// 
-    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity) 
-    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so. 
-    /// \tparam Space The class used to represent a point in the sample space. 
-    /// \tparam Params (optional) The class used for any additional parameters. 
-    template <class Space, class Params> 
-    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM) 
-    { 
-        N = lSize; 
-        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N)); 
+    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
+    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
+    /// store the particle set.
+    ///
+    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \tparam Space The class used to represent a point in the sample space.
+    /// \tparam Params (optional) The class used for any additional parameters.
+    template <class Space, class Params>
+    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM)
+    {
+        N = lSize;
+        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
         
-        //Some workable defaults. 
-        htHistoryMode = htHM; 
-        rtResampleMode = ResampleType::STRATIFIED;; 
-        dResampleThreshold = 0.5 * N; 
+        //Some workable defaults.
+        htHistoryMode = htHM;
+        rtResampleMode = ResampleType::STRATIFIED;;
+        dResampleThreshold = 0.5 * N;
         
-        //Create an empty adaptation object by default 
-        pAdapt = new adaptMethods<Space,Params>; 
-        adaptBelong = 1; 
-        nRepeats = 1; 
-    } 
+        //Create an empty adaptation object by default
+        pAdapt = new adaptMethods<Space,Params>;
+        adaptBelong = 1;
+        nRepeats = 1;
+    }
 
     template <class Space, class Params>
     sampler<Space,Params>::~sampler()
@@ -276,7 +276,7 @@ namespace smc {
         std::vector<Space> InitVal(N);
         arma::vec InitWeights(N);
         pPopulation = population<Space>(InitVal,InitWeights);
-        Moves.DoInit(pPopulation,N);
+        Moves.DoInit(pPopulation,N,algParams);
 
         //Scaling weights by 1/N (for evidence computation)
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
@@ -302,7 +302,7 @@ namespace smc {
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC =  Moves.DoMCMC(0,pPopulation, N, nRepeats, nAccepted);
+        bool didMCMC =  Moves.DoMCMC(0,pPopulation, N, nRepeats, nAccepted,algParams);
         if (didMCMC){
             acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
@@ -502,7 +502,7 @@ namespace smc {
         }
         
         //A possible MCMC step should be included here.
-        bool didMCMC = Moves.DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted);
+        bool didMCMC = Moves.DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted,algParams);
         if (didMCMC){
             acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
@@ -536,7 +536,7 @@ namespace smc {
     template <class Space, class Params>
     void sampler<Space,Params>::MoveParticles(void)
     {
-        Moves.DoMove(T+1,pPopulation, N);
+        Moves.DoMove(T+1,pPopulation, N,algParams);
     }
 
     template <class Space, class Params>

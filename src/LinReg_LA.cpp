@@ -57,8 +57,8 @@ Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumbe
         long lTemps = temps.n_rows;
         
         //Initialise and run the sampler
-        smc::sampler<rad_state> Sampler(lNumber, HistoryType::RAM);
-        smc::moveset<rad_state> Moveset(fInitialise, fMove, fMCMC);
+        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM);
+        smc::moveset<rad_state,smc::nullParams> Moveset(fInitialise, fMove, fMCMC);
         
         Sampler.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
         Sampler.SetMoveSet(Moveset);
@@ -140,7 +140,8 @@ namespace LinReg_LA {
 
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
-    void fInitialise(rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param)
     {
         // drawing from the prior
         value.theta = arma::zeros(3);
@@ -157,17 +158,19 @@ namespace LinReg_LA {
     ///\param lTime         The sampler iteration.
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
-    void fMove(long lTime, rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         logweight += (temps(lTime) - temps(lTime-1))*logLikelihood(value);
     }
 
-    ///The proposal function.
+    ///The MCMC function.
 
     ///\param lTime         The sampler iteration.
     ///\param value         Reference to the value of the particle being moved
     ///\param logweight     Reference to the log weight of the particle being moved
-    bool fMCMC(long lTime, rad_state & value, double & logweight)
+    ///\param param         Additional algorithm parameters
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         rad_state value_prop;
         value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            

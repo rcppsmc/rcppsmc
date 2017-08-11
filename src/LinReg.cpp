@@ -56,8 +56,8 @@ Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber) {
         mean_x = arma::sum(data.x)/lIterates;
         
         //Initialise and run the sampler
-        smc::sampler<rad_state> Sampler(lNumber, HistoryType::RAM);  
-        smc::moveset<rad_state> Moveset(fInitialise, fMove, fMCMC);
+        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM);  
+        smc::moveset<rad_state,smc::nullParams> Moveset(fInitialise, fMove, fMCMC);
         
         Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
         Sampler.SetMoveSet(Moveset);
@@ -124,7 +124,8 @@ namespace LinReg {
 
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
-    void fInitialise(rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param)
     {
         value.theta = arma::zeros(3);
         // drawing from the prior
@@ -140,7 +141,8 @@ namespace LinReg {
     /// \param lTime        The sampler iteration.
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
-    void fMove(long lTime, rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         logweight += logWeight(lTime, value);
     }
@@ -150,7 +152,8 @@ namespace LinReg {
     /// \param lTime        The sampler iteration.
     /// \param value        Reference to the current particle value
     /// \param logweight    Reference to the log weight of the particle being moved
-    bool fMCMC(long lTime, rad_state & value, double & logweight)
+    /// \param param        Additional algorithm parameters
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         double logposterior_curr = logPosterior(lTime, value);
         

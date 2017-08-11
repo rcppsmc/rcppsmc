@@ -41,7 +41,7 @@ namespace LinReg {
     
     double logWeight(long lTime, const rad_state & value);
     double logPosterior(long lTime, const rad_state & value);
-    void fInitialise(rad_state & value, double & logweight);
-    void fMove(long lTime, rad_state & value, double & logweight);
-    bool fMCMC(long lTime, rad_state & value, double & logweight);
+    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
 }
