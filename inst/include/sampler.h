@@ -36,7 +36,7 @@
 #include "population.h"
 #include "history.h"
 #include "moveset.h"
-#include "algParam.h"
+#include "adaptMethods.h"
 #include "smc-exception.h"
 #include "staticModelAdapt.h"
 
@@ -65,12 +65,10 @@ namespace HistoryType
         RAM};
 }
 
-///Class for additional algorithm parameters
-class nullParams{
-
-};
-
 namespace smc {
+    
+    /// An empty class for use when additional algorithm parameters are not required.
+    class nullParams{};
 
     /// A template class for an interacting particle system suitable for SMC sampling
     template <class Space, class Params = nullParams>
@@ -98,10 +96,12 @@ namespace smc {
         population<Space> pPopulation;
         ///The set of moves available.
         moveset<Space> Moves;
-        ///An object for tracking and adapting additional algorithm parameters.
-        algParam<Space,Params>* pAlgParams;
+        /// The additional algorithm parameters.  
+        Params algParams;
+        /// An object for adapting additional algorithm parameters
+        adaptMethods<Space,Params>* pAdapt;
         ///A flag to track whether the adaptation object needs to be included in this destructor.
-        bool pAlgBelong;
+        bool adaptBelong;
 
         ///The number of MCMC moves which have been accepted during this iteration
         int nAccepted;
@@ -126,8 +126,6 @@ namespace smc {
     public:
         ///Create an particle system containing lSize uninitialised particles with the specified mode.
         sampler(long lSize, HistoryType::Enum htHistoryMode);
-        ///Create a particle system containing lSize uninitialised particles with the specified history mode and adaptation object.
-        sampler(long lSize, HistoryType::Enum htHistoryMode, algParam<Space,Params>* adaptSet);
         ///Dispose of a sampler.
         ~sampler();
         ///Calculates and Returns the Effective Sample Size.
@@ -146,8 +144,8 @@ namespace smc {
         long GetNumber(void) const {return N;}
         ///Returns the number of evolution times stored in the history.
         long GetHistoryLength(void) const {return History.size();}
-        ///Returns a pointer to the additional algorithm parameter and adaptation object.
-        algParam<Space,Params> * GetAlgParams(void) const { return pAlgParams; }
+        ///Returns the additional algorithm parameters.
+        const Params & GetAlgParams(void) const {return algParams;}
         ///Return the value of particle n
         const Space &  GetParticleValueN(long n) const { return pPopulation.GetValueN(n); }
         ///Return the logarithmic unnormalized weight of particle n
@@ -190,6 +188,10 @@ namespace smc {
         void SetMoveSet(moveset<Space>& pNewMoveset) { Moves = pNewMoveset; }
         ///Set Resampling Parameters
         void SetResampleParams(ResampleType::Enum rtMode, double dThreshold);
+        ///Set additional algorithm parameters
+        void SetAlgParam(Params parameters) {algParams = parameters;}
+        ///Set the methods to adapt the additional algorithm parameters  
+        void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {delete pAdapt; pAdapt = adaptMethod; adaptBelong = 0;}
         ///Sets the number of MCMC repeats
         void SetMcmcRepeats(int reps) {nRepeats = reps;}
         ///Dump a specified particle to the specified output stream in a human readable form
@@ -212,60 +214,36 @@ namespace smc {
         double CalcLogNC(void) const {return stableLogSumWeights(pPopulation.GetLogWeight());}
     };
 
-
-    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
-    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
-    /// store the particle set.
-    ///
-    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
-    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
-    /// \tparam Space The class used to represent a point in the sample space.
-    /// \tparam Params (optional) The class used for any additional parameters.
-    template <class Space, class Params>
-    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM)
-    {
-        N = lSize;
-        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
+    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles 
+    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to 
+    /// store the particle set. 
+    /// 
+    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity) 
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so. 
+    /// \tparam Space The class used to represent a point in the sample space. 
+    /// \tparam Params (optional) The class used for any additional parameters. 
+    template <class Space, class Params> 
+    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM) 
+    { 
+        N = lSize; 
+        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N)); 
         
-        pAlgParams = new algParam<Space,Params>;
-        pAlgBelong = 1;
-        nRepeats = 1;
-
-        //Some workable defaults.
-        htHistoryMode = htHM;
-        rtResampleMode = ResampleType::STRATIFIED;;
-        dResampleThreshold = 0.5 * N;
-    }
-
-    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
-    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
-    /// store the particle set.
-    ///
-    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
-    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
-    /// \param adaptSet The class derived from algParam for parameter adaptation.
-    /// \tparam Space The class used to represent a point in the sample space.
-    /// \tparam Params The class used for additional algorithm parameters.
-    template <class Space, class Params>
-    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM, algParam<Space,Params>* adaptSet)
-    {
-        N = lSize;
-        pAlgParams = adaptSet;
-        pAlgBelong = 0;
-        nRepeats = 1;
-        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
-
-        //Some workable defaults.
-        htHistoryMode = htHM;
-        rtResampleMode = ResampleType::STRATIFIED;
-        dResampleThreshold = 0.5 * N;
-    }
+        //Some workable defaults. 
+        htHistoryMode = htHM; 
+        rtResampleMode = ResampleType::STRATIFIED;; 
+        dResampleThreshold = 0.5 * N; 
+        
+        //Create an empty adaptation object by default 
+        pAdapt = new adaptMethods<Space,Params>; 
+        adaptBelong = 1; 
+        nRepeats = 1; 
+    } 
 
     template <class Space, class Params>
     sampler<Space,Params>::~sampler()
     {
-        if(pAlgBelong)
-        delete pAlgParams;
+        if(adaptBelong)
+        delete pAdapt;
     }
 
     template <class Space, class Params>
@@ -315,12 +293,12 @@ namespace smc {
         double ESS = GetESS();
         if(ESS < dResampleThreshold) {
             nResampled = 1;
-            pAlgParams->updateForMCMC(pPopulation,acceptProb,nResampled,nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
             Resample(rtResampleMode);
         }
         else {
             nResampled = 0;
-            pAlgParams->updateForMCMC(pPopulation,acceptProb,nResampled,nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
         //A possible MCMC step should be included here.
@@ -333,7 +311,7 @@ namespace smc {
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
         
         //Perform any final updates to the additional algorithm parameters.
-        pAlgParams->updateEnd(pPopulation);
+        pAdapt->updateEnd(algParams,pPopulation);
         
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE) {
@@ -407,58 +385,58 @@ namespace smc {
         // History.push_back(histel);
         
         
-		long lTime = 1;
-		long double rValue = 0.0;
-		typename std::vector<historyelement<Space> >::const_iterator it;	
-		
-		switch(PStype) {
-		case PathSamplingType::RECTANGLE:
-			{
-				for(it = ++History.begin(); it!=History.end(); it++){
-					rValue += it->Integrate(lTime, pIntegrand, pAuxiliary) * static_cast<long double>(pWidth(lTime,pAuxiliary));
-					lTime++;
-				}
-				break;
-			}
-			
-			
-		case PathSamplingType::TRAPEZOID1:
-			{	
+        long lTime = 1;
+        long double rValue = 0.0;
+        typename std::vector<historyelement<Space> >::const_iterator it;	
+        
+        switch(PStype) {
+        case PathSamplingType::RECTANGLE:
+            {
+                for(it = ++History.begin(); it!=History.end(); it++){
+                    rValue += it->Integrate(lTime, pIntegrand, pAuxiliary) * static_cast<long double>(pWidth(lTime,pAuxiliary));
+                    lTime++;
+                }
+                break;
+            }
+            
+            
+        case PathSamplingType::TRAPEZOID1:
+            {	
 
-				long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
-				long double current_expt;
-				for(it = ++History.begin(); it!=History.end(); it++){
-					current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
-					rValue += static_cast<long double>(pWidth(lTime,pAuxiliary))/2.0 * (previous_expt + current_expt) ;
-					lTime++;
-					previous_expt = current_expt;
-				}
-				
-				break;
-			}
+                long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
+                long double current_expt;
+                for(it = ++History.begin(); it!=History.end(); it++){
+                    current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
+                    rValue += static_cast<long double>(pWidth(lTime,pAuxiliary))/2.0 * (previous_expt + current_expt) ;
+                    lTime++;
+                    previous_expt = current_expt;
+                }
+                
+                break;
+            }
 
-		case PathSamplingType::TRAPEZOID2:
-		default:
-			{
-				long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
-				long double previous_var = History.begin()->Integrate_Var(0,pIntegrand,previous_expt,pAuxiliary);
-				long double current_expt;
-				long double current_var;
-				long double width = 0.0;
-				for(it = ++History.begin(); it!=History.end(); it++){
-					current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
-					current_var = it->Integrate_Var(lTime, pIntegrand, current_expt, pAuxiliary);
-					width = static_cast<long double>(pWidth(lTime,pAuxiliary));
-					rValue += width/2.0 * (previous_expt + current_expt) - pow(width,2.0)/12.0*(current_var - previous_var);
-					lTime++;
-					previous_expt = current_expt;
-					previous_var = current_var;
-				}	
-				
-				break;
-			}
+        case PathSamplingType::TRAPEZOID2:
+        default:
+            {
+                long double previous_expt = History.begin()->Integrate(0,pIntegrand,pAuxiliary);
+                long double previous_var = History.begin()->Integrate_Var(0,pIntegrand,previous_expt,pAuxiliary);
+                long double current_expt;
+                long double current_var;
+                long double width = 0.0;
+                for(it = ++History.begin(); it!=History.end(); it++){
+                    current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
+                    current_var = it->Integrate_Var(lTime, pIntegrand, current_expt, pAuxiliary);
+                    width = static_cast<long double>(pWidth(lTime,pAuxiliary));
+                    rValue += width/2.0 * (previous_expt + current_expt) - pow(width,2.0)/12.0*(current_var - previous_var);
+                    lTime++;
+                    previous_expt = current_expt;
+                    previous_var = current_var;
+                }	
+                
+                break;
+            }
 
-		}
+        }
         
         // History.pop_back();
         
@@ -498,7 +476,7 @@ namespace smc {
     template <class Space, class Params>
     double sampler<Space,Params>::IterateEss(void)
     {
-        pAlgParams->updateForMove(pPopulation);
+        pAdapt->updateForMove(algParams,pPopulation);
 
         //Move the particle set.
         MoveParticles();
@@ -515,12 +493,12 @@ namespace smc {
         double ESS = GetESS();
         if(ESS < dResampleThreshold) {
             nResampled = 1;
-            pAlgParams->updateForMCMC(pPopulation,acceptProb,nResampled,nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
             Resample(rtResampleMode);
         }
         else {
             nResampled = 0;
-            pAlgParams->updateForMCMC(pPopulation,acceptProb,nResampled,nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
         
         //A possible MCMC step should be included here.
@@ -533,7 +511,7 @@ namespace smc {
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
         
         //Perform any final updates to the additional algorithm parameters.
-        pAlgParams->updateEnd(pPopulation);
+        pAdapt->updateEnd(algParams,pPopulation);
         
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){

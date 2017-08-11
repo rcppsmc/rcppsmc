@@ -46,24 +46,26 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
         mean_x = arma::sum(data.x)/lIterates;
         
         // Initialise the sampler
-        myParams = new rad_adapt;
-        smc::sampler<rad_state,smc::staticModelAdapt> Sampler(lNumber, HistoryType::RAM, myParams);
+        myAdapt = new rad_adapt;
+        Sampler = new smc::sampler<rad_state,smc::staticModelAdapt>(lNumber, HistoryType::RAM);
         smc::moveset<rad_state> Moveset(fInitialise, fMove, fMCMC);
         
-        Sampler.SetResampleParams(ResampleType::SYSTEMATIC, resampTol);
-        Sampler.SetMoveSet(Moveset);
-        Sampler.Initialise();
+        Sampler->SetResampleParams(ResampleType::SYSTEMATIC, resampTol);
+        Sampler->SetMoveSet(Moveset);
+        Sampler->SetAlgParam(smc::staticModelAdapt());  
+        Sampler->SetAdaptMethods(myAdapt);
+        Sampler->Initialise();
         
         //Run the sampler
-        while (myParams->GetParams().GetTempCurr() != 1){
-            Sampler.Iterate();
-        }           
+        while (Sampler->GetAlgParams().GetTempCurr() != 1){
+            Sampler->Iterate();
+        }
         
         //Storing the results in a sensible format
-        std::vector<double> temps = myParams->GetParams().GetTemps();
+        std::vector<double> temps = Sampler->GetAlgParams().GetTemps();
         int lTemps = temps.size();
         
-        std::vector<smc::historyelement<rad_state> > Hist = Sampler.GetHistory();
+        std::vector<smc::historyelement<rad_state> > Hist = Sampler->GetHistory();
         
         arma::cube theta(lNumber,3,lTemps);
         arma::mat loglike(lNumber,lTemps), logprior(lNumber,lTemps), Weights(lNumber,lTemps);
@@ -80,12 +82,12 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
             mcmcRepeats(n) = Hist[n].mcmcRepeats();
         }
         
-        double logNC_standard = Sampler.GetLogNCPath();
-        double logNC_ps_trap2 = Sampler.IntegratePathSampling(integrand_ps,width_ps, NULL);
-        double logNC_ps_rect = Sampler.IntegratePathSampling(PathSamplingType::RECTANGLE,integrand_ps,width_ps, NULL);
-        double logNC_ps_trap = Sampler.IntegratePathSampling(PathSamplingType::TRAPEZOID1,integrand_ps,width_ps, NULL);
+        double logNC_standard = Sampler->GetLogNCPath();
+        double logNC_ps_trap2 = Sampler->IntegratePathSampling(integrand_ps,width_ps, NULL);
+        double logNC_ps_rect = Sampler->IntegratePathSampling(PathSamplingType::RECTANGLE,integrand_ps,width_ps, NULL);
+        double logNC_ps_trap = Sampler->IntegratePathSampling(PathSamplingType::TRAPEZOID1,integrand_ps,width_ps, NULL);
         
-        delete myParams;
+        delete myAdapt;
 
         return Rcpp::List::create(
         Rcpp::Named("theta") = theta,
@@ -111,7 +113,7 @@ namespace LinReg_LA_adapt {
     double integrand_ps(long lTime,const rad_state & value,  void *) { return logLikelihood(value);}    
 
     double width_ps(long lTime, void *){
-        return (myParams->GetParams().GetTemp(lTime) - myParams->GetParams().GetTemp(lTime-1));
+        return (Sampler->GetAlgParams().GetTemp(lTime) - Sampler->GetAlgParams().GetTemp(lTime-1));
     }   
 
     ///The function corresponding to the log likelihood at specified position
@@ -142,7 +144,7 @@ namespace LinReg_LA_adapt {
         value.theta(2) = log(pow(R::rgamma(3,pow(2.0*300.0*300.0,-1.0)),-1.0));
         value.loglike = logLikelihood(value);
         value.logprior = logPrior(value);
-        logweight = myParams->GetParams().GetTemp(0)*value.loglike;
+        logweight = Sampler->GetAlgParams().GetTemp(0)*value.loglike;
     }
 
     ///The proposal function.
@@ -152,10 +154,10 @@ namespace LinReg_LA_adapt {
     /// \param logweight    Refernce to the current particle log weight
     void fMove(long lTime, rad_state & value, double & logweight)
     {
-        logweight += (myParams->GetParams().GetTemp(lTime) - myParams->GetParams().GetTemp(lTime-1))*logLikelihood(value);
+        logweight += (Sampler->GetAlgParams().GetTemp(lTime) - Sampler->GetAlgParams().GetTemp(lTime-1))*logLikelihood(value);
     }
 
-    ///The proposal function.
+    ///The MCMC function.
 
     ///\param lTime         The sampler iteration.
     ///\param value         Reference to the value of the particle being moved
@@ -163,11 +165,11 @@ namespace LinReg_LA_adapt {
     bool fMCMC(long lTime, rad_state & value, double & logweight)
     {
         rad_state value_prop;
-        value_prop.theta = value.theta + myParams->GetParams().GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
+        value_prop.theta = value.theta + Sampler->GetAlgParams().GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
         value_prop.loglike = logLikelihood(value_prop);
         value_prop.logprior = logPrior(value_prop);
         
-        double MH_ratio = exp(myParams->GetParams().GetTemp(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
+        double MH_ratio = exp(Sampler->GetAlgParams().GetTemp(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
         
         if (MH_ratio>R::runif(0,1)){
             value = value_prop;

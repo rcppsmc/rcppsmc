@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// algParam: A class that holds all of the algorithm parameters that can be adapted
+// adaptMethods: A class that adapts the algorithm parameters
 //
 // Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
@@ -21,12 +21,11 @@
 
 
 //! \file
-//! \brief A base class containing algorithm parameters and virtual
-//! functions to adapt them.
+//! \brief A base class with virtual functions to adapt parameters
 //!
 
-#ifndef __SMC_ALGPARAM_H
-#define __SMC_ALGPARAM_H 1.0
+#ifndef __SMC_ADAPTMETHODS_H
+#define __SMC_ADAPTMETHODS_H 1.0
 
 #include <population.h>
 
@@ -34,28 +33,22 @@
 namespace smc {
 
     /// A base class which contains the algorithm parameters and virtual functions to adapt them.
-    template <class Space, class Params> class algParam {
-
-    protected:
-        Params param;
-
+    template <class Space, class Params> class adaptMethods {
+ 
     public:
 
         /// Free the workspace allocated for the algorithm parameters.
-        virtual ~algParam() {
+        virtual ~adaptMethods() {
         }
 
         /// Holder function for updates to be done before the move step.
-        virtual void updateForMove(const population<Space> & pop) {}
+        virtual void updateForMove(Params &, const population<Space> & pop) {}
 
         /// Holder function for updates to be done before the MCMC step.
-        virtual void updateForMCMC(const population<Space> & pop, double acceptProb, int nResampled, int & nRepeats) {}
+        virtual void updateForMCMC(Params &, const population<Space> & pop, double acceptProb, int nResampled, int & nRepeats) {}
 
         /// Holder function for updates to be done at the end of each iteration.
-        virtual void updateEnd(const population<Space> & pop) {}
-
-        /// Returns the parameters.
-        const Params & GetParams(void) const {return param;}
+        virtual void updateEnd(Params &, const population<Space> & pop) {}
     };
 }
 
