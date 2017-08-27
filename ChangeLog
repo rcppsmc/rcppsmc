@@ -1,18 +1,22 @@
+2017-08-27  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
 2017-08-11  Leah South  <leah.south@hdr.qut.edu.au>
 
-	* inst/include/adaptMethods.h: Changing the name (from algParams.h) and 
-	removing the parameter object so it is not a member of the class. 
+	* inst/include/adaptMethods.h: Changing the name (from algParams.h)
+	and removing the parameter object so it is not a member of the class.
 	Instead, it is passed by reference to the adaptation functions.
-	* inst/include/moveset.h: Passing a reference to the algorithm  
-	parameters to all functions. 
-	* inst/include/sampler.h: Adding the parameter object as a member of 
-	this class and updating accordingly. Passing the algorithm parameters
-	by reference to the adaptation and initialisation/move/MCMC functions.
+	* inst/include/moveset.h: Passing a reference to the algorithm
 	parameters to all functions.
+	* inst/include/sampler.h: Adding the parameter object as a member of
+	this class and updating accordingly. Passing the algorithm parameters
+	by reference to the adaptation and initialisation/move/MCMC
+	functions.  parameters to all functions.
 
-	* inst/include/LinReg_LA_adapt.h: Switching to a pointer for the 
-	sampler object and passing the parameter objects by reference to 
-	the adaptation and move functions.
+	* inst/include/LinReg_LA_adapt.h: Switching to a pointer for the
+	sampler object and passing the parameter objects by reference to the
+	adaptation and move functions.
 	* src/LinReg_LA_adapt.cpp:  Idem. Also adding the adaptation object
 	type to the template arguments for moveset.
 
