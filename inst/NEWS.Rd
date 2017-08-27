@@ -13,17 +13,17 @@
       \item Switching to population level objects (\ghpr{2} and \ghpr{3}). 
       \item Using Rcpp attributes (\ghpr{2}). 
       \item Using automatic RNGscope (\ghpr{4} and \ghpr{5}). 
-      \item Adding multiple normalising constant estimators (\ghpr{7}) 
+      \item Adding multiple normalising constant estimators (\ghpr{7}).
       \item Static Bayesian model example: linear regression  (\ghpr{10}
       addressing \ghit{9}). 
       \item Adding a PMMH example (\ghpr{13} addressing \ghit{11}).
       \item Framework for additional algorithm parameters and adaptation
-      (\ghpr{19} addressing \ghit{16}). 
+      (\ghpr{19} addressing \ghit{16}; also \ghpr{24} addressing \ghit{23}). 
       \item Common adaptation methods for static Bayesian models
       (\ghpr{20} addressing \ghit{17}).
-      \item Supporting MCMC repeated runs (\ghpr{21})
+      \item Supporting MCMC repeated runs (\ghpr{21}).
       \item Adding adaptation to linear regression example (\ghpr{22}
-      and \ghpr{24}, addressing \ghit{23} and \ghit{18})
+      addressing \ghit{18}).
     }
   }
 }
