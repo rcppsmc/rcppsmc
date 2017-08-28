@@ -3,7 +3,7 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
 
-\section{Changes in RcppSMC version 0.2.0 [unreleased] (2017-xx-yy)}{
+\section{Changes in RcppSMC version 0.2.0 (2017-08-28)}{
   \itemize{
     \item Also use \code{.registration=TRUE} in \code{useDynLib} in
     \code{NAMESPACE}
