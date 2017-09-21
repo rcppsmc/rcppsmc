@@ -1,16 +1,16 @@
 Package: RcppSMC
 Type: Package
 Title: Rcpp Bindings for Sequential Monte Carlo
-Version: 0.1.5.1
-Date: 2017-03-04
-Author: Dirk Eddelbuettel and Adam M. Johansen
+Version: 0.2.0.1
+Date: 2017-08-27
+Author: Dirk Eddelbuettel, Adam M. Johansen and Leah F. South
 Maintainer: Dirk Eddelbuettel <edd@debian.org>
 Description: R access to the Sequential Monte Carlo Template Classes
- by Johansen (Journal of Statistical Software, 2009, v30, i6) is provided.
- At present, two additional examples have been added, and the first 
- example from the JSS paper has been extended. Further integration 
- and extensions are planned.
+ by Johansen <doi:10.18637/jss.v030.i06> is provided. At present, four
+ additional examples have been added, and the first example from the JSS
+ paper has been extended. Further integration and extensions are planned.
 License: GPL (>= 2)
 LazyLoad: yes
 Imports: Rcpp (>= 0.11.0), methods
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
+LazyData: true

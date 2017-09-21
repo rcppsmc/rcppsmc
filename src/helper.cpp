@@ -1,13 +1,7 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pfnonlinbs.h: Rcpp integration of SMC library -- PF Nonlinear Bootstrp
+// helper.cpp: Rcpp integration of SMC library -- helper functions of general interest
 //
-//    The declarations and externals for an implementation of the bootstrap
-//    particle filter of "Novel approaches to nonlinear non-Gaussian
-//    Bayesian state estimation", Gordon Salmond and Smith, 
-//    IEE PROCEEDINGS-F 140(2):107-113, 1993
-//
-// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 // Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
@@ -27,12 +21,17 @@
 
 #include "smctc.h"
 
-namespace nonlinbs {
-    double logLikelihood(long lTime, const double & X);
-    
-    void fInitialise(double & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+//! \file
+//! \brief This file contains the untemplated functions of general interest.
 
-    double integrand_mean_x(const double&, void*);
-    double integrand_var_x(const double&, void*);
+namespace smc {
+    /// This function performs a stable calculation of the log sum of the weights, which is useful for
+    /// normalising weights, calculating the effective sample size and estimating the normalising constant.
+    ///
+    /// \param logw The log weights of interest.
+    double stableLogSumWeights(const arma::vec & logw){
+        double dMaxWeight = arma::max(logw);
+        double sum = arma::sum(exp(logw - dMaxWeight));
+        return (dMaxWeight + log(sum));
+    }
 }

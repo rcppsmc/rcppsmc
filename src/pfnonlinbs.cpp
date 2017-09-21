@@ -8,7 +8,8 @@
 //    IEE PROCEEDINGS-F 140(2):107-113, 1993
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2012 - 2013  Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2012 - 2017  Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
 //
@@ -32,7 +33,7 @@
 #include <cmath>
 
 namespace nonlinbs {
-    const double std_x0 = 2;
+    const double std_x0 = 2.0;
     const double var_x0 = std_x0 * std_x0;
     const double std_x  = sqrt(10.0);
     const double var_x  = std_x * std_x;
@@ -41,23 +42,24 @@ namespace nonlinbs {
     const double scale_y = 1.0 / 20.0;
 
     ///The observations
-    Rcpp::NumericVector y;
+    arma::vec y;
 }
 
 using namespace std;
 using namespace nonlinbs;
 
-extern "C" SEXP pfNonlinBS(SEXP dataS, SEXP partS) {
-    long lNumber = Rcpp::as<long>(partS);
+// [[Rcpp::export]]
+Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
+    long lNumber = part;
 
-    y = Rcpp::NumericVector(dataS);
-    long lIterates = y.size();
+    y = data;
+    long lIterates = y.n_rows;
 
     //Initialise and run the sampler
-    smc::sampler<double> Sampler(lNumber, SMC_HISTORY_NONE);  
-    smc::moveset<double> Moveset(fInitialise, fMove, NULL);
+    smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE);  
+    smc::moveset<double,smc::nullParams> Moveset(fInitialise, fMove, NULL);
 
-    Sampler.SetResampleParams(SMC_RESAMPLE_MULTINOMIAL, 1.01 * lNumber);
+    Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 1.01 * lNumber);
     Sampler.SetMoveSet(Moveset);
     Sampler.Initialise();
 
@@ -65,14 +67,14 @@ extern "C" SEXP pfNonlinBS(SEXP dataS, SEXP partS) {
     Rcpp::NumericVector resSD   = Rcpp::NumericVector(lIterates);
     for(int n=0 ; n < lIterates ; ++n) {
         if(n > 0)
-            Sampler.Iterate();
+        Sampler.Iterate();
 
         resMean(n) = Sampler.Integrate(integrand_mean_x,NULL);      
         resSD(n)  = sqrt(Sampler.Integrate(integrand_var_x, (void*)&resSD(n)));      
     }
 
     return Rcpp::List::create(Rcpp::_["mean"] = resMean,
-                              Rcpp::_["sd"] = resSD);
+    Rcpp::_["sd"] = resSD);
 }
 
 namespace nonlinbs {
@@ -81,35 +83,30 @@ namespace nonlinbs {
     ///  \param lTime The current time (i.e. the index of the current distribution)
     ///  \param X     The state to consider 
     double logLikelihood(long lTime, const double & x) {
-        return -0.5 * pow(y[int(lTime)] - x*x*scale_y,2) / var_y;
+        return -0.5 * pow(y(lTime) - x*x*scale_y,2.0) / var_y;
     }
 
     ///A function to initialise particles
-    
-    /// \param pRng A pointer to the random number generator which is to be used
-    smc::particle<double> fInitialise(smc::rng *pRng) {
-        double x;
-  
-        x = pRng->Normal(0,std_x0);
 
-        return smc::particle<double>(x,logLikelihood(0,x));
+    /// \param value The value of the particle being moved
+    /// \param logweight The log weight of the particle being moved
+    /// \param param Additional algorithm parameters
+    void fInitialise(double & value, double & logweight, smc::nullParams & param) {
+        value = R::rnorm(0.0,std_x0);
+        logweight = logLikelihood(0,value);
     }
 
     ///The proposal function.
 
-    ///\param lTime The sampler iteration.
-    ///\param pFrom The particle to move.
-    ///\param pRng  A random number generator.
-    void fMove(long lTime, smc::particle<double> & pFrom, smc::rng *pRng) {
-        double *to = pFrom.GetValuePointer();
-
-        double x = 0.5 * (*to) + 25.0*(*to) / (1.0 + (*to) * (*to)) + 8.0 * cos(1.2  * ( lTime)) + pRng->Normal(0.0,std_x);
-        
-        *to = x;
-
-        pFrom.AddToLogWeight(logLikelihood(lTime, *to));
+    /// \param lTime The sampler iteration.
+    /// \param value The value of the particle being moved
+    /// \param logweight The log weight of the particle being moved
+    /// \param param Additional algorithm parameters
+    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param) {
+        value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + R::rnorm(0.0,std_x);
+        logweight += logLikelihood(lTime, value);
     }
-    
+
 
     double integrand_mean_x(const double& x, void *) {
         return x;

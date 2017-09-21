@@ -1,13 +1,8 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pfnonlinbs.h: Rcpp integration of SMC library -- PF Nonlinear Bootstrp
+// LinReg.h: Rcpp wrapper for SMC library -- A simple example for estimating
+// the parameters of a linear regression model using data annealing SMC.
 //
-//    The declarations and externals for an implementation of the bootstrap
-//    particle filter of "Novel approaches to nonlinear non-Gaussian
-//    Bayesian state estimation", Gordon Salmond and Smith, 
-//    IEE PROCEEDINGS-F 140(2):107-113, 1993
-//
-// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 // Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
@@ -27,12 +22,26 @@
 
 #include "smctc.h"
 
-namespace nonlinbs {
-    double logLikelihood(long lTime, const double & X);
-    
-    void fInitialise(double & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+namespace LinReg {
 
-    double integrand_mean_x(const double&, void*);
-    double integrand_var_x(const double&, void*);
+    class rad_state
+    {
+    public:
+        arma::vec theta; // (alpha,beta,phi)
+    };
+
+    class rad_obs
+    {
+    public:
+        arma::vec y, x;
+    };
+
+    rad_obs data;
+    double mean_x;
+    
+    double logWeight(long lTime, const rad_state & value);
+    double logPosterior(long lTime, const rad_state & value);
+    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
 }

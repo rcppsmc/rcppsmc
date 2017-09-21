@@ -1,10 +1,30 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
+\newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
+\newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
 
-\section{Changes in RcppSMC version 0.1.6 (2017-xx-yy)}{
+\section{Changes in RcppSMC version 0.2.0 (2017-08-28)}{
   \itemize{
     \item Also use \code{.registration=TRUE} in \code{useDynLib} in
-    \code{NAMESPACE} 
+    \code{NAMESPACE}
+    \item Multiple Sequential Monte Carlo extensions (Leah South as part of
+    Google Summer of Code 2017)
+    \itemize{
+      \item Switching to population level objects (\ghpr{2} and \ghpr{3}). 
+      \item Using Rcpp attributes (\ghpr{2}). 
+      \item Using automatic RNGscope (\ghpr{4} and \ghpr{5}). 
+      \item Adding multiple normalising constant estimators (\ghpr{7}).
+      \item Static Bayesian model example: linear regression  (\ghpr{10}
+      addressing \ghit{9}). 
+      \item Adding a PMMH example (\ghpr{13} addressing \ghit{11}).
+      \item Framework for additional algorithm parameters and adaptation
+      (\ghpr{19} addressing \ghit{16}; also \ghpr{24} addressing \ghit{23}). 
+      \item Common adaptation methods for static Bayesian models
+      (\ghpr{20} addressing \ghit{17}).
+      \item Supporting MCMC repeated runs (\ghpr{21}).
+      \item Adding adaptation to linear regression example (\ghpr{22}
+      addressing \ghit{18}).
+    }
   }
 }
   

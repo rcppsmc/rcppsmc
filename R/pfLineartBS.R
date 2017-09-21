@@ -20,11 +20,10 @@ pfLineartBS<- function(data, particles=1000, plot=FALSE, onlinePlot) {
               colnames(data) == c("x", "y"),
               class(onlinePlot) == "function")
 
-    res <- .Call("pfLineartBS", as.matrix(data),
+    res <- pfLineartBS_impl(as.matrix(data),
                  particles,
                  useOnline,
-                 onlinePlot,
-                 PACKAGE="RcppSMC")
+                 onlinePlot)
 
     if (plot) {
         ## plot 5.1 from vignette / paper

@@ -1,13 +1,9 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// pfnonlinbs.h: Rcpp integration of SMC library -- PF Nonlinear Bootstrp
+// nonLinPMMH.h: Example 3.1 of Andrieu et al. (2010). Implementing particle marginal
+// Metropolis-Hastings for a toy non-linear state space model previously described in
+// Gordon et al. (1993) and Kitagawa (1996).
 //
-//    The declarations and externals for an implementation of the bootstrap
-//    particle filter of "Novel approaches to nonlinear non-Gaussian
-//    Bayesian state estimation", Gordon Salmond and Smith, 
-//    IEE PROCEEDINGS-F 140(2):107-113, 1993
-//
-// Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
 // Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
@@ -27,12 +23,19 @@
 
 #include "smctc.h"
 
-namespace nonlinbs {
-    double logLikelihood(long lTime, const double & X);
+namespace nonLinPMMH {
+
+    class parameters 
+    {
+    public:
+        double sigv, sigw;
+    };
+    arma::vec y; //data
     
+    double logPrior(const parameters & proposal);
     void fInitialise(double & value, double & logweight, smc::nullParams & param);
     void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
-
-    double integrand_mean_x(const double&, void*);
-    double integrand_var_x(const double&, void*);
+    
+    parameters theta_prop;
 }
+

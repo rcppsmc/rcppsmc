@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
 //
 // This file is part of RcppSMC.
 //
@@ -22,27 +23,28 @@
 
 #include "smctc.h"
 
-class cv_state 
-{
-public:
-    double x_pos, y_pos;
-    double x_vel, y_vel;
-};
+namespace pflineart {
+    class cv_state 
+    {
+    public:
+        double x_pos, y_pos;
+        double x_vel, y_vel;
+    };
 
-class cv_obs
-{
-public:
-    double x_pos, y_pos;
-};
+    class cv_obs
+    {
+    public:
+        arma::vec x_pos, y_pos;
+    };
 
-double logLikelihood(long lTime, const cv_state & X);
+    double logLikelihood(long lTime, const cv_state & X);
 
-smc::particle<cv_state> fInitialise(smc::rng *pRng);
-long fSelect(long lTime, const smc::particle<cv_state> & p, smc::rng *pRng);
-void fMove(long lTime, smc::particle<cv_state> & pFrom, smc::rng *pRng);
+    void fInitialise(cv_state & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, cv_state & value, double & logweight, smc::nullParams & param);
 
-extern double nu_x;
-extern double nu_y;
-extern double Delta;
+    double integrand_mean_x(const cv_state&, void*);
+    double integrand_mean_y(const cv_state&, void*);
+    double integrand_var_x(const cv_state&, void*);
+    double integrand_var_y(const cv_state&, void*);
 
-extern std::vector<cv_obs> y;
+}

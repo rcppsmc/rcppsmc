@@ -3,6 +3,7 @@
 // blockpfgaussianopt.h: Rcpp integration of SMC library -- Block PF Gaussian
 //
 // Copyright (C) 2012         Dirk Eddelbuettel and Adam Johansen
+// Copyright (C) 2017         Dirk Eddelbuettel, Adam Johansen and Leah South
 //
 // This file is part of RcppSMC.
 //
@@ -20,17 +21,8 @@
 // along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "smctc.h"
-#include <vector>
 
-using namespace std;
-
-smc::particle<vector<double> > fInitialiseBSPFG(smc::rng *pRng);
-//long fSelectBSPFG(long lTime, const smc::particle<vector<double> > & p, smc::rng *pRng);
-void fMoveBSPFG(long lTime, smc::particle<vector<double> > & pFrom, smc::rng *pRng);
-
-namespace BSPFG {
-    extern Rcpp::NumericVector y; 
+namespace BSPFG {    
+    void fInitialise(arma::vec & value, double & logweight, smc::nullParams & param);
+    void fMove(long lTime, arma::vec & value, double & logweight, smc::nullParams & param);
 }
-using BSPFG::y;
-
-extern long lLag;
