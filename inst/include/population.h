@@ -39,7 +39,15 @@
 namespace smc {
 
     /// A stable calculation of the log sum of the weights, used in ESS calculations
-    double stableLogSumWeights(const arma::vec & logw);
+    /// This function performs a stable calculation of the log sum of the weights, which is useful for
+    /// normalising weights, calculating the effective sample size and estimating the normalising constant.
+    ///
+    /// \param logw The log weights of interest.
+    inline double stableLogSumWeights(const arma::vec & logw){
+        double dMaxWeight = arma::max(logw);
+        double sum = arma::sum(exp(logw - dMaxWeight));
+        return (dMaxWeight + log(sum));
+    }
     
     /// A template class for the particles of an SMC algorithm
     template <class Space> class population
