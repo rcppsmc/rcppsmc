@@ -3,6 +3,13 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
 
+\section{Changes in RcppSMC version 0.2.1 (201x-yy-zz)}{
+  \itemize{
+    \item The sampler now has a copy constructor and assignment overload
+    (Brian Ni in \ghpr{289}).
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.0 (2017-08-28)}{
   \itemize{
     \item Also use \code{.registration=TRUE} in \code{useDynLib} in
