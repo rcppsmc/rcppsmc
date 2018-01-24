@@ -530,7 +530,7 @@ namespace smc {
     void sampler<Space,Params>::IterateBack(void)
     {
         if(htHistoryMode == HistoryType::NONE)
-        throw SMC_EXCEPTION(SMCX_MISSING_HISTORY, "An attempt to undo an iteration was made; unforunately, the system history has not been stored.");
+        throw SMC_EXCEPTION(SMCX_MISSING_HISTORY, "An attempt to undo an iteration was made; unfortunately, the system history has not been stored.");
 
         History.pop_back();
         historyelement<Space> recent = History.back();
