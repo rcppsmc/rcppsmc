@@ -17,15 +17,8 @@
 #include <RcppArmadillo.h>
 
 #include <adaptMethods.h>
-#include <blockpfgaussianopt.h>
 #include <history.h>
-#include <LinReg.h>
-#include <LinReg_LA_adapt.h>
-#include <LinReg_LA.h>
 #include <moveset.h>
-#include <nonLinPMMH.h>
-#include <pflineart.h>
-#include <pfnonlinbs.h>
 #include <population.h>
 #include <sampler.h>
 #include <smc-exception.h>
