@@ -40,8 +40,20 @@ namespace smc {
         /// true if the particle system was resampled during the described iteration.
         unsigned int Resampled : 1;
     public:
-        ///Create a new set of history flags corresponding to the specified properties
-        historyflags(int wasResampled);
+      // ///Create a new set of history flags corresponding to the specified properties
+      // historyflags(int wasResampled);
+      
+      /// This constructor produces an initialised historyflags instance.
+      ///
+      /// \param wasResampled An indicator which should be nonzero if the particle 
+      /// system was resampled during the iteration being described
+      historyflags(int wasResampled)
+      {
+	if(wasResampled)
+	  Resampled = 1;
+	else
+	  Resampled = 0;
+      }
 
         ///This function returns true if the flag set indicates that the ensemble was resampled during the described iteration.
         int WasResampled(void) {return Resampled;}

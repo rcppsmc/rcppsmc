@@ -6,7 +6,11 @@
 \section{Changes in RcppSMC version 0.2.1 (201x-yy-zz)}{
   \itemize{
     \item The sampler now has a copy constructor and assignment overload
-    (Brian Ni in \ghpr{289}).
+    (Brian Ni in \ghpr{28}).
+    \item The SMC library component can now be used in header-only mode
+    (Martin Lysy in \ghpr{29}).
+    \item Plugin support was added for use via \code{cppFunction()} and other
+    Rcpp Attributes (or \pkg{inline} functions.
   }
 }
 

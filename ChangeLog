@@ -1,3 +1,23 @@
+2018-01-26  Dirk Eddelbuettel  <edd@debian.org>
+
+	* R/plugin.R (inlineCxxPlugin): Plugin support for Rcpp Attributes
+	and inline
+
+2018-01-24  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): New minor version
+
+	* README.md: Correct link for Travis CI badge
+
+2018-01-23  Martin Lysys  <mlysy@uwaterloo.ca>
+
+	* inst/include/history.h: Converted for header-only library use
+	* inst/include/populattion.h: Ditto
+	* inst/include/sampler.h: Ditto
+	* inst/include/smc-exception.h: Ditto
+	* inst/include/statisModelAdapt.h: Ditto
+	* deprecated/*cpp: Moved several now replaced cppp files
+
 2017-11-27  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): New minor version
