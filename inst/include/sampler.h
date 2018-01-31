@@ -247,6 +247,7 @@ namespace smc {
         delete pAdapt;
     }
 
+    // deep-copy, to be used both for copy constructor and assignment overload.
     template <class Space, class Params>
     void sampler<Space, Params>::_copy(const sampler<Space,Params> & sFrom)
     {
@@ -273,10 +274,21 @@ namespace smc {
         Moves = sFrom.Moves;
         /// The additional algorithm parameters.
         algParams = sFrom.algParams;
-        /// An object for adapting additional algorithm parameters
-        pAdapt = sFrom.pAdapt;
-        ///A flag to track whether the adaptation object needs to be included in this destructor.
-        adaptBelong = sFrom.adaptBelong;
+        if(sFrom.adaptBelong) {
+            // this can only happen if the default adaptMethods was used,
+            // i.e., no call to SetAdaptMethods
+            pAdapt = new adaptMethods<Space,Params>;
+            adaptBelong = 1;
+        } else {
+            // this can only happen if SetAdaptMethods was called,
+            // i.e., pAdapt points to an external object which should not be deleted with sampler
+            pAdapt = sFrom.pAdapt;
+            adaptBelong = 0;
+        }
+        // /// An object for adapting additional algorithm parameters
+        // pAdapt = sFrom.pAdapt;
+        // ///A flag to track whether the adaptation object needs to be included in this destructor.
+        // adaptBelong = sFrom.adaptBelong sFrom.adaptBelong;
 
         ///The number of MCMC moves which have been accepted during this iteration
         nAccepted = sFrom.nAccepted;
