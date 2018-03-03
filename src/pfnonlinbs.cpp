@@ -33,10 +33,10 @@
 #include <cmath>
 
 namespace nonlinbs {
-    const double std_x0 = 2.0;
-    const double var_x0 = std_x0 * std_x0;
-    const double std_x  = sqrt(10.0);
-    const double var_x  = std_x * std_x;
+    const double var_x0 = 10.0;
+    const double std_x0 = sqrt(var_x0);
+    const double var_x  = 10.0;
+    const double std_x  = sqrt(var_x);
     const double var_y  = 1.0;
 
     const double scale_y = 1.0 / 20.0;
@@ -70,7 +70,7 @@ Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
         Sampler.Iterate();
 
         resMean(n) = Sampler.Integrate(integrand_mean_x,NULL);      
-        resSD(n)  = sqrt(Sampler.Integrate(integrand_var_x, (void*)&resSD(n)));      
+        resSD(n)  = sqrt(Sampler.Integrate(integrand_var_x, (void*)&resMean(n)));      
     }
 
     return Rcpp::List::create(Rcpp::_["mean"] = resMean,
