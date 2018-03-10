@@ -155,6 +155,8 @@ namespace smc {
         population<Space> GetHistoryPopulation(void) const {return History.GetValues();}
         ///Returns a reference to the particle set stored in the history.
         population<Space> & GetHistoryPopulationRefs(void) {return History.GetValues();}
+        ///Returns the history flags
+        historyflags GetHistoryFlags(void) {return History.GetFlags();}
         ///Returns the additional algorithm parameters.
         const Params & GetAlgParams(void) const {return algParams;}
         ///Return the value of particle n

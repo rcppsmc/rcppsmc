@@ -4,7 +4,7 @@
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// 
+//
 // This file is part of RcppSMC.
 //
 // RcppSMC is free software: you can redistribute it and/or modify it
@@ -42,10 +42,10 @@ namespace smc {
     public:
       // ///Create a new set of history flags corresponding to the specified properties
       // historyflags(int wasResampled);
-      
+
       /// This constructor produces an initialised historyflags instance.
       ///
-      /// \param wasResampled An indicator which should be nonzero if the particle 
+      /// \param wasResampled An indicator which should be nonzero if the particle
       /// system was resampled during the iteration being described
       historyflags(int wasResampled)
       {
@@ -68,7 +68,7 @@ namespace smc {
         int nRepeat; //!< Number of MCMC iterations performed at this iteration (per particle)
         population<Space> pop; //!< The particles themselves (values and weights)
         historyflags flags; //!< Flags associated with this iteration.
-        
+
     public:
         /// The null constructor creates an empty history element.
         historyelement();
@@ -83,7 +83,7 @@ namespace smc {
         /// Returns the flags
         historyflags GetFlags(void) const{return flags;}
         /// Returns the number of particles present.
-        long GetNumber(void) const {return number;} 
+        long GetNumber(void) const {return number;}
         /// Returns the current particle set.
         population<Space> GetValues(void) const { return pop; }
         /// Returns a reference to the current particle set.
@@ -99,11 +99,11 @@ namespace smc {
         int AcceptCount(void) {return nAccepted; }
         /// Returns the number of MCMC iterations performed during this iteration.
         int mcmcRepeats(void) {return nRepeat; }
-        /// Returns true if the particle set 
+        /// Returns true if the particle set
         int WasResampled(void) {return flags.WasResampled(); }
 
-        
-        
+
+
 
     };
 
@@ -174,7 +174,7 @@ namespace smc {
         rValue /= wSum;
         return rValue;
     }
-    
+
 }
 
 #endif
