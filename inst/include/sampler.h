@@ -152,11 +152,15 @@ namespace smc {
         ///Returns the number of evolution times stored in the history.
         long GetHistoryLength(void) const {return History.size();}
         ///Returns the current particle set stored in the history.
-        population<Space> GetHistoryPopulation(void) const {return History.GetValues();}
+        population<Space> GetHistoryPopulation(long n) const {return History[n].GetValues();}
         ///Returns a reference to the particle set stored in the history.
-        population<Space> & GetHistoryPopulationRefs(void) {return History.GetValues();}
+        population<Space> & GetHistoryPopulationRefs(long n) {return History[n].GetValues();}
         ///Returns the history flags
-        historyflags GetHistoryFlags(void) {return History.GetFlags();}
+        historyflags GetHistoryFlags(long n) {return History[n].GetFlags();}
+        ///Returns the history ###################
+        long GetHistoryESS(long n) {return History[n].GetESS();}
+        ///Returns the history ###################
+        int GetHistorymcmcRepeats(long n) {return History[n].mcmcRepeats();}
         ///Returns the additional algorithm parameters.
         const Params & GetAlgParams(void) const {return algParams;}
         ///Return the value of particle n
