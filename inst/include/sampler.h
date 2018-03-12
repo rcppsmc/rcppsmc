@@ -154,7 +154,7 @@ namespace smc {
         ///Returns the current particle set stored in the history.
         population<Space> GetHistoryPopulation(long n) const {return History[n].GetValues();}
         ///Returns a reference to the particle set stored in the history.
-        population<Space> & GetHistoryPopulationRefs(long n) const {return History[n].GetValues();}
+        const population<Space> & GetHistoryPopulationRefs(long n) const {return History[n].GetValues();}
         ///Returns the history flags
         historyflags GetHistoryFlags(long n) const {return History[n].GetFlags();}
         ///Returns the history effective sample size.
