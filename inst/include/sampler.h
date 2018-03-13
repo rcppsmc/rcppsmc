@@ -156,7 +156,7 @@ namespace smc {
         ///Returns the history flags
         historyflags GetHistoryFlags(long n) const {return History[n].GetFlags();}
         /// Returns the Effective Sample Size of the specified particle generation.
-        const double GetESS(long n) {return History[n].GetESS();}
+        double GetESS(long n) const {return History[n].GetESS();}
         ///Returns the history number of MCMC iterations performed during this iteration.
         int GetHistorymcmcRepeats(long n) {return History[n].mcmcRepeats();}
         ///Returns the additional algorithm parameters.
