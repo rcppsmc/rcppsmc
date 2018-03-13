@@ -137,8 +137,6 @@ namespace smc {
         sampler<Space,Params> & operator=(const sampler<Space,Params> & sFrom);
         ///Calculates and Returns the Effective Sample Size.
         double GetESS(void) const;
-        /// Returns the Effective Sample Size of the specified particle generation.
-        double GetESS(long lGeneration) const;
         ///Returns the number of accepted proposals from the most recent MCMC iteration
         int GetAccepted(void) const {return nAccepted;}
         ///Returns a flag for whether the ensemble was resampled during the most recent iteration
@@ -151,6 +149,16 @@ namespace smc {
         long GetNumber(void) const {return N;}
         ///Returns the number of evolution times stored in the history.
         long GetHistoryLength(void) const {return History.size();}
+        ///Returns the current particle set stored in the history.
+        population<Space> GetHistoryPopulation(long n) const {return History[n].GetValues();}
+        ///Returns a reference to the particle set stored in the history.
+        const population<Space> & GetHistoryPopulationRefs(long n) const {return History[n].GetValues();}
+        ///Returns the history flags
+        historyflags GetHistoryFlags(long n) const {return History[n].GetFlags();}
+        /// Returns the Effective Sample Size of the specified particle generation.
+        double GetESS(long n) const {return History[n].GetESS();}
+        ///Returns the history number of MCMC iterations performed during this iteration.
+        int GetHistorymcmcRepeats(long n) {return History[n].mcmcRepeats();}
         ///Returns the additional algorithm parameters.
         const Params & GetAlgParams(void) const {return algParams;}
         ///Return the value of particle n
@@ -332,15 +340,6 @@ namespace smc {
     double sampler<Space,Params>::GetESS(void) const
     {
         return expl(2*stableLogSumWeights(pPopulation.GetLogWeight())-stableLogSumWeights(2.0*pPopulation.GetLogWeight()));
-    }
-
-
-    template <class Space, class Params>
-    double  sampler<Space,Params>::GetESS(long lGeneration) const
-    {
-        typename std::vector<historyelement<Space> >::const_iterator it = History.begin();
-        std::advance(it,lGeneration);
-        return it->GetESS();
     }
 
     /// At present this function resets the system evolution time to 0 and calls the moveset initialisor to assign each

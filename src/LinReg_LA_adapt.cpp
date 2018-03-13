@@ -32,61 +32,59 @@ namespace LinReg_LA_adapt {
 using namespace std;
 using namespace LinReg_LA_adapt;
 
-// LinRegLA_adapt_impl() function callable from R via Rcpp:: 
+// LinRegLA_adapt_impl() function callable from R via Rcpp::
 // [[Rcpp::export]]
-Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double resampTol, double tempTol) {     
+Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double resampTol, double tempTol) {
 
 
     try {
         rho = tempTol;
-        
+
         lIterates = Data.n_rows;
         data.y = Data.col(0);
         data.x = Data.col(1);
         mean_x = arma::sum(data.x)/lIterates;
-        
+
         // Initialise the sampler
         myAdapt = new rad_adapt;
         Sampler = new smc::sampler<rad_state,smc::staticModelAdapt>(lNumber, HistoryType::RAM);
         smc::moveset<rad_state,smc::staticModelAdapt> Moveset(fInitialise, fMove, fMCMC);
-        
+
         Sampler->SetResampleParams(ResampleType::SYSTEMATIC, resampTol);
         Sampler->SetMoveSet(Moveset);
         Sampler->SetAlgParam(smc::staticModelAdapt());
         Sampler->SetAdaptMethods(myAdapt);
         Sampler->Initialise();
-        
+
         //Run the sampler
         while (Sampler->GetAlgParams().GetTempCurr() != 1){
             Sampler->Iterate();
         }
-        
+
         //Storing the results in a sensible format
         std::vector<double> temps = Sampler->GetAlgParams().GetTemps();
         int lTemps = temps.size();
-        
-        std::vector<smc::historyelement<rad_state> > Hist = Sampler->GetHistory();
-        
+
         arma::cube theta(lNumber,3,lTemps);
         arma::mat loglike(lNumber,lTemps), logprior(lNumber,lTemps), Weights(lNumber,lTemps);
         arma::vec ESS(lTemps), mcmcRepeats(lTemps);
-        
+
         for(int n=0; n < lTemps; ++n) {
             for (unsigned int i=0; i<lNumber; i++){
-                theta.slice(n).row(i) = Hist[n].GetValues().GetValueN(i).theta.t();
-                loglike(i,n) = Hist[n].GetValues().GetValueN(i).loglike;
-                logprior(i,n) = Hist[n].GetValues().GetValueN(i).logprior;
+                theta.slice(n).row(i) = Sampler->GetHistoryPopulation(n).GetValueN(i).theta.t();
+                loglike(i,n) = Sampler->GetHistoryPopulation(n).GetValueN(i).loglike;
+                logprior(i,n) = Sampler->GetHistoryPopulation(n).GetValueN(i).logprior;
             }
-            Weights.col(n) = Hist[n].GetValues().GetWeight();
-            ESS(n) = Hist[n].GetESS();
-            mcmcRepeats(n) = Hist[n].mcmcRepeats();
+            Weights.col(n) = Sampler->GetHistoryPopulation(n).GetWeight();
+            ESS(n) = Sampler->GetESS(n);
+            mcmcRepeats(n) = Sampler->GetHistorymcmcRepeats(n);
         }
-        
+
         double logNC_standard = Sampler->GetLogNCPath();
         double logNC_ps_trap2 = Sampler->IntegratePathSampling(integrand_ps,width_ps, NULL);
         double logNC_ps_rect = Sampler->IntegratePathSampling(PathSamplingType::RECTANGLE,integrand_ps,width_ps, NULL);
         double logNC_ps_trap = Sampler->IntegratePathSampling(PathSamplingType::TRAPEZOID1,integrand_ps,width_ps, NULL);
-        
+
         delete myAdapt;
 
         return Rcpp::List::create(
@@ -105,28 +103,28 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
     catch(smc::exception  e) {
         Rcpp::Rcout << e;
     }
-    return R_NilValue;              // to provide a return 
+    return R_NilValue;              // to provide a return
 }
 
 namespace LinReg_LA_adapt {
-    
-    double integrand_ps(long lTime,const rad_state & value,  void *) { return logLikelihood(value);}    
+
+    double integrand_ps(long lTime,const rad_state & value,  void *) { return logLikelihood(value);}
 
     double width_ps(long lTime, void *){
         return (Sampler->GetAlgParams().GetTemp(lTime) - Sampler->GetAlgParams().GetTemp(lTime-1));
-    }   
+    }
 
     ///The function corresponding to the log likelihood at specified position
-    /// \param value        The state to consider 
+    /// \param value        The state to consider
     double logLikelihood(const rad_state & value){
 
         double sigma = pow(expl(value.theta(2)),0.5);
         arma::vec mean_reg = value.theta(0) + value.theta(1)*(data.x - mean_x);
-        return arma::sum(-log(sigma) - pow(data.y - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI));  
+        return arma::sum(-log(sigma) - pow(data.y - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI));
 
     }
     ///The function corresponding to the (unnormalised) log prior at a specified position
-    /// \param value        The state to consider 
+    /// \param value        The state to consider
     double logPrior(const rad_state & value){
         return -log(1000.0)- pow(value.theta(0) - 3000.0,2.0)/(2.0*1000.0*1000.0) -log(100.0)- pow(value.theta(1) - 185.0,2.0)/(2.0*100.0*100.0) + value.theta(2)-1.0/b_prior/expl(value.theta(2)) -value.theta(2)*(a_prior+1.0);
     }
@@ -168,12 +166,12 @@ namespace LinReg_LA_adapt {
     bool fMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         rad_state value_prop;
-        value_prop.theta = value.theta + params.GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
+        value_prop.theta = value.theta + params.GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));
         value_prop.loglike = logLikelihood(value_prop);
         value_prop.logprior = logPrior(value_prop);
-        
+
         double MH_ratio = exp(params.GetTemp(lTime)*(value_prop.loglike - value.loglike) + value_prop.logprior - value.logprior);
-        
+
         if (MH_ratio>R::runif(0,1)){
             value = value_prop;
             return TRUE;

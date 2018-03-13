@@ -1,3 +1,9 @@
+2018-03-13  Tiberiu Lepadatu  <tiberiulepadatu14@gmail.com>
+
+	* inst/include/sampler.h: Improve the history getters so we can have a more
+  natural interface to work with.
+  * src/LinReg_LA_adapt.cpp: Replace the old methods.
+
 2018-03-03  Adam M. Johansen  <adam.johansen@gmail.com>
 
 	* src/pfnonlinbs.cpp (pfNonlinBS_impl): Bugfix for SD estimation.
