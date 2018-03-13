@@ -76,7 +76,7 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
                 logprior(i,n) = Sampler->GetHistoryPopulation(n).GetValueN(i).logprior;
             }
             Weights.col(n) = Sampler->GetHistoryPopulation(n).GetWeight();
-            ESS(n) = Sampler->GetHistoryESS(n);
+            ESS(n) = Sampler->GetESS(n);
             mcmcRepeats(n) = Sampler->GetHistorymcmcRepeats(n);
         }
 
