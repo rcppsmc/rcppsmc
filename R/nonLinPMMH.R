@@ -1,18 +1,18 @@
-nonLinPMMH<- function(data, particles=5000, iterations=10000, burnin = 0, plot=FALSE) {
+nonLinPMMH<- function(data, particles=5000, iterations=10000, burnin = 0, plot=FALSE, verbouse=FALSE) {
 
     if (missing(data)) {
          warning("data argument contained no data, using data simulated from the model.")
          data <- simNonlin(len=500,var_init=5,var_evol=10,var_obs=1,cosSeqOffset=0)$data
     }
-    
+
     if (burnin>=iterations) {
         stop("Burn-in must be less than iterations.")
     }
-    
-    res <- nonLinPMMH_impl(as.matrix(data), particles, iterations)
-    
+
+  res <- nonLinPMMH_impl(as.matrix(data), particles, iterations, verbouse)
+
 	res.plot <- res[burnin+1:iterations,]
-	
+
     # Replicating Figure 4(c) from Andrieu et al. (2010).
     # May want to add autocorrelation plots of the parameters, like in Figures 5(b) and 5(d).
     if (plot) {
@@ -39,7 +39,7 @@ nonLinPMMH<- function(data, particles=5000, iterations=10000, burnin = 0, plot=F
                        main = NA,xlim=c(0,iterations-burnin)))
         title("Posterior Estimates",outer=TRUE)
         par(mfrow=c(1,1))
-    }  
+    }
 
     invisible(res)
 }

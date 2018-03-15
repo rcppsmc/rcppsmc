@@ -17,8 +17,8 @@ LinRegLA_impl <- function(Data, intemps, lNumber) {
     .Call(`_RcppSMC_LinRegLA_impl`, Data, intemps, lNumber)
 }
 
-nonLinPMMH_impl <- function(data, lNumber, lMCMCits) {
-    .Call(`_RcppSMC_nonLinPMMH_impl`, data, lNumber, lMCMCits)
+nonLinPMMH_impl <- function(data, lNumber, lMCMCits, verbouse) {
+    .Call(`_RcppSMC_nonLinPMMH_impl`, data, lNumber, lMCMCits, verbouse)
 }
 
 pfLineartBS_impl <- function(data, part, usef, fun) {

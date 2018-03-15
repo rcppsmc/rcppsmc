@@ -60,15 +60,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // nonLinPMMH_impl
-Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits);
-RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP) {
+Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits, bool verbouse);
+RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP, SEXP verbouseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
     Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
     Rcpp::traits::input_parameter< unsigned long >::type lMCMCits(lMCMCitsSEXP);
-    rcpp_result_gen = Rcpp::wrap(nonLinPMMH_impl(data, lNumber, lMCMCits));
+    Rcpp::traits::input_parameter< bool >::type verbouse(verbouseSEXP);
+    rcpp_result_gen = Rcpp::wrap(nonLinPMMH_impl(data, lNumber, lMCMCits, verbouse));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -104,7 +105,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_RcppSMC_LinReg_impl", (DL_FUNC) &_RcppSMC_LinReg_impl, 2},
     {"_RcppSMC_LinRegLA_adapt_impl", (DL_FUNC) &_RcppSMC_LinRegLA_adapt_impl, 4},
     {"_RcppSMC_LinRegLA_impl", (DL_FUNC) &_RcppSMC_LinRegLA_impl, 3},
-    {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 3},
+    {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 4},
     {"_RcppSMC_pfLineartBS_impl", (DL_FUNC) &_RcppSMC_pfLineartBS_impl, 4},
     {"_RcppSMC_pfNonlinBS_impl", (DL_FUNC) &_RcppSMC_pfNonlinBS_impl, 2},
     {NULL, NULL, 0}

@@ -34,7 +34,7 @@ using namespace nonLinPMMH;
 
 // nonLinPMMH_impl() function callable from R via Rcpp::
 // [[Rcpp::export]]
-Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits) {
+Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits, bool verbouse) {
 
     try {
         arma::vec sigv(lMCMCits+1), sigw(lMCMCits+1);
@@ -54,7 +54,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
 
         sigv(0) = theta_prop.sigv;
         sigw(0) = theta_prop.sigw;
-        
+
         Rcpp::NumericVector sigvInnovation = Rcpp::rnorm(lMCMCits,0,0.15);
         Rcpp::NumericVector sigwInnovation = Rcpp::rnorm(lMCMCits,0,0.08);
         Rcpp::NumericVector unifRands = Rcpp::runif(lMCMCits);
@@ -71,6 +71,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
         logprior(0) = logPrior(theta_prop);
 
         double MH_ratio;
+        double MH_ratio_total = 0;
         for (unsigned int i = 1; i<lMCMCits+1; i++){
             // RW proposal for parameters
             theta_prop.sigv = sigv(i-1) + sigvInnovation(i-1);
@@ -85,6 +86,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
             logprior_prop = logPrior(theta_prop);
 
             MH_ratio = exp(loglike_prop - loglike(i-1) + logprior_prop - logprior(i-1));
+            MH_ratio_total += std :: min (1.0, MH_ratio);
 
             if (MH_ratio>unifRands(i-1)){
                 sigv(i) = theta_prop.sigv;
@@ -96,6 +98,14 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
                 sigw(i) = sigw(i-1);
                 loglike(i) = loglike(i-1);
                 logprior(i) = logprior(i-1);
+            }
+            if (i % 100 == 0 && verbouse){
+		Rcpp::Rcout << "========================="<< endl;
+		Rcpp::Rcout << "Iteration number: " << i << endl;
+		Rcpp::Rcout << "The MH_ratio is: " << std :: min(1.0, MH_ratio) << endl;
+		Rcpp::Rcout << "The MH_ratio_average is: " << MH_ratio_total / i << endl;
+		Rcpp::Rcout << "Logarithmic probability: " << loglike_prop << endl;
+		Rcpp::Rcout << "========================\n"<< endl;
             }
         }
 
