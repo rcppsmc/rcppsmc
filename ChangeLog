@@ -1,3 +1,7 @@
+2018-03-16  Adam M. Johansen  <adam.johansen@gmail.com>
+
+	* README.md: Added link to rcppsmc google group.
+
 2018-03-13  Tiberiu Lepadatu  <tiberiulepadatu14@gmail.com>
 
 	* inst/include/sampler.h: Improve the history getters so we can have
