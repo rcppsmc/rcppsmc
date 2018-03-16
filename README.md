@@ -12,7 +12,7 @@ At present, four additional examples have been added, and the first example
 from the JSS paper has been extended. Further integration and extensions are
 planned.
 
-For support and discussion please make us of the [rcppsmc mailing list][https://groups.google.com/forum/#!forum/rcppsmc].
+For support and discussion please make us of the [rcppsmc mailing list](https://groups.google.com/forum/#!forum/rcppsmc).
 
 ### Authors
 
