@@ -168,7 +168,7 @@ namespace smc {
         long double wSum = expl(stableLogSumWeights(pop.GetLogWeight()));
         for(long i =0; i < number; i++)
         {
-            rValue += expl(pop.GetLogWeightN(i)) * pow(static_cast<long double>(pIntegrand(lTime, pop.GetValueN(i), pAuxiliary) - Expectation),2.0);
+            rValue += expl(pop.GetLogWeightN(i)) * std::pow(static_cast<long double>(pIntegrand(lTime, pop.GetValueN(i), pAuxiliary) - Expectation),2.0);
         }
 
         rValue /= wSum;

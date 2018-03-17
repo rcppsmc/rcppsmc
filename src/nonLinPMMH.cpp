@@ -129,7 +129,7 @@ namespace nonLinPMMH {
     void fInitialise(double & X, double & logweight, smc::nullParams & param)
     {
         X = R::rnorm(0.0,sqrt(5.0));
-        double mean = pow(X,2)/20.0;
+        double mean = std::pow(X,2)/20.0;
         logweight = R::dnorm(y(0),mean,theta_prop.sigw,TRUE);
     }
 
@@ -141,8 +141,8 @@ namespace nonLinPMMH {
     /// \param param        Additional algorithm parameters
     void fMove(long lTime, double & X, double & logweight, smc::nullParams & param)
     {
-        X = X/2.0 + 25.0*X/(1+pow(X,2)) + 8*cos(1.2*(lTime+1)) + R::rnorm(0.0,theta_prop.sigv);
-        double mean = pow(X,2)/20.0;
+        X = X/2.0 + 25.0*X/(1+std::pow(X,2)) + 8*cos(1.2*(lTime+1)) + R::rnorm(0.0,theta_prop.sigv);
+        double mean = std::pow(X,2)/20.0;
         logweight += R::dnorm(y(lTime),mean,theta_prop.sigw,TRUE);
     }
 

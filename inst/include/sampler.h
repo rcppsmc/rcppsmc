@@ -508,7 +508,7 @@ namespace smc {
                     current_expt = it->Integrate(lTime, pIntegrand, pAuxiliary);
                     current_var = it->Integrate_Var(lTime, pIntegrand, current_expt, pAuxiliary);
                     width = static_cast<long double>(pWidth(lTime,pAuxiliary));
-                    rValue += width/2.0 * (previous_expt + current_expt) - pow(width,2.0)/12.0*(current_var - previous_var);
+                    rValue += width/2.0 * (previous_expt + current_expt) - std::pow(width,2.0)/12.0*(current_var - previous_var);
                     lTime++;
                     previous_expt = current_expt;
                     previous_var = current_var;
