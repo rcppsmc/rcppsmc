@@ -1,3 +1,7 @@
+2018-03-17  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): New minor version
+
 2018-03-16  Adam M. Johansen  <adam.johansen@gmail.com>
 
 	* README.md: Added link to rcppsmc google group.
@@ -13,10 +17,15 @@
 	* src/pfnonlinbs.cpp (pfNonlinBS_impl): Bugfix for SD estimation.
 	(nonlinbs): Changed initial variance for consistency with simulator.
 
+2018-01-30  Martin Lysys  <mlysy@uwaterloo.ca>
+
+	* inst/include/sampler.h: Corrected sampler copy ctor/assignment
+
 2018-01-26  Dirk Eddelbuettel  <edd@debian.org>
 
 	* R/plugin.R (inlineCxxPlugin): Plugin support for Rcpp Attributes
 	and inline
+	* inst/inclide/RcppSMC.h: Header for plugin use
 
 2018-01-24  Dirk Eddelbuettel  <edd@debian.org>
 
