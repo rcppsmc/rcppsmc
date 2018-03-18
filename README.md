@@ -12,6 +12,14 @@ At present, four additional examples have been added, and the first example
 from the JSS paper has been extended. Further integration and extensions are
 planned.
 
+### More Examples
+
+See the packages [ToyPackage](https://github.com/rcppsmc/ToyPackage) and
+[RickerExample](https://github.com/rcppsmc/RickerExample) repositories next
+to this one in the [RcppSMC](https://github.com/rcppsmc) organization.
+
+### Help
+
 For support and discussion please make us of the [rcppsmc mailing list](https://groups.google.com/forum/#!forum/rcppsmc).
 
 ### Authors
