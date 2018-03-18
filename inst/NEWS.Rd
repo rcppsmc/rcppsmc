@@ -12,7 +12,7 @@
     \item Plugin support was added for use via \code{cppFunction()} and other
     Rcpp Attributes (or \pkg{inline} functions (Dirk \ghpr{30}).
     \item The sampler copy ctor/assigment operator is now
-    Copy-Constructor Safe (Martin Lysy In \ghpr{32}).
+    copy-constructor safe (Martin Lysy In \ghpr{32}).
     \item A bug in state variance calculation was corrected (Adam in
     \ghpr{36} addressubf \ghit{34}).
     \item History getter methods are now more user-friendly (Tiberiu
