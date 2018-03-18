@@ -35,7 +35,7 @@ namespace LinReg {
     arma::mat covRW("2500 -2.5 0.03; -2.5 130.0 0.0; 0.03 0.0 0.04");
     arma::mat cholCovRW = arma::chol(covRW);
     const double a_prior = 3.0;
-    const double b_prior = pow(2.0*300.0*300.0,-1.0);
+    const double b_prior = std::pow(2.0*300.0*300.0,-1.0);
 }
 
 using namespace std;
@@ -92,8 +92,8 @@ namespace LinReg {
     double logWeight(long lTime, const rad_state & value){
 
         double mean_reg = value.theta(0) + value.theta(1)*(data.x(lTime) - mean_x);
-        double sigma = pow(expl(value.theta(2)),0.5);
-        return -log(sigma) - pow(data.y(lTime) - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI);
+        double sigma = std::pow(expl(value.theta(2)),0.5);
+        return -log(sigma) - std::pow(data.y(lTime) - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI);
 
     }
 
@@ -103,15 +103,15 @@ namespace LinReg {
     /// \param value        The state to consider 
     double logPosterior(long lTime, const rad_state & value){
 
-        double log_prior = -log(1000.0)- pow(value.theta(0) - 3000.0,2.0)/(2.0*1000.0*1000.0) -log(100.0)- pow(value.theta(1) - 185.0,2.0)/(2.0*100.0*100.0) + value.theta(2)-1.0/b_prior/expl(value.theta(2)) -value.theta(2)*(a_prior+1.0);
+        double log_prior = -log(1000.0)- std::pow(value.theta(0) - 3000.0,2.0)/(2.0*1000.0*1000.0) -log(100.0)- std::pow(value.theta(1) - 185.0,2.0)/(2.0*100.0*100.0) + value.theta(2)-1.0/b_prior/expl(value.theta(2)) -value.theta(2)*(a_prior+1.0);
 
-        double sigma = pow(expl(value.theta(2)),0.5);
+        double sigma = std::pow(expl(value.theta(2)),0.5);
 
         double log_normpdf;
 
         if (lTime==0){
             double mean_reg = value.theta(0) + value.theta(1)*(data.x(0) - mean_x);
-            log_normpdf = -log(sigma) - pow(data.y(0) - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI);
+            log_normpdf = -log(sigma) - std::pow(data.y(0) - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI);
         } else{
             arma::vec mean_reg = value.theta(0) + value.theta(1)*(data.x.rows(0,lTime) - mean_x);
             log_normpdf = arma::sum(-log(sigma) - pow(data.y.rows(0,lTime) - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI));
@@ -131,7 +131,7 @@ namespace LinReg {
         // drawing from the prior
         value.theta(0) = R::rnorm(3000.0,1000.0);
         value.theta(1) = R::rnorm(185.0,100.0);
-        value.theta(2) = log(pow(R::rgamma(3,pow(2.0*300.0*300.0,-1.0)),-1.0));
+        value.theta(2) = log(std::pow(R::rgamma(3,std::pow(2.0*300.0*300.0,-1.0)),-1.0));
         
         logweight = logWeight(0, value);
     }

@@ -125,7 +125,7 @@ namespace LinReg_LA {
     /// \param value        The state to consider 
     double logLikelihood(const rad_state & value){
 
-        double sigma = pow(expl(value.theta(2)),0.5);
+        double sigma = std::pow(expl(value.theta(2)),0.5);
         arma::vec mean_reg = value.theta(0) + value.theta(1)*(data.x - mean_x);
         return arma::sum(-log(sigma) - pow(data.y - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI));  
 

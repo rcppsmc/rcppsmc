@@ -134,7 +134,7 @@ namespace pflineart {
     ///  \param X     The state to consider 
     double logLikelihood(long lTime, const cv_state & X)
     {
-        return - 0.5 * (nu_y + 1.0) * (log(1 + pow((X.x_pos - y.x_pos(lTime))/scale_y,2) / nu_y) + log(1 + pow((X.y_pos - y.y_pos(lTime))/scale_y,2) / nu_y));
+        return - 0.5 * (nu_y + 1.0) * (log(1 + std::pow((X.x_pos - y.x_pos(lTime))/scale_y,2) / nu_y) + log(1 + std::pow((X.y_pos - y.y_pos(lTime))/scale_y,2) / nu_y));
     }
 
     ///A function to initialise particles

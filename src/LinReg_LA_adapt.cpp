@@ -26,7 +26,7 @@
 
 namespace LinReg_LA_adapt {
     const double a_prior = 3.0;
-    const double b_prior = pow(2.0*300.0*300.0,-1.0);
+    const double b_prior = std::pow(2.0*300.0*300.0,-1.0);
 }
 
 using namespace std;
@@ -118,7 +118,7 @@ namespace LinReg_LA_adapt {
     /// \param value        The state to consider
     double logLikelihood(const rad_state & value){
 
-        double sigma = pow(expl(value.theta(2)),0.5);
+        double sigma = std::pow(expl(value.theta(2)),0.5);
         arma::vec mean_reg = value.theta(0) + value.theta(1)*(data.x - mean_x);
         return arma::sum(-log(sigma) - pow(data.y - mean_reg,2.0)/(2.0*sigma*sigma) -0.5*log(2.0*M_PI));
 
@@ -126,7 +126,7 @@ namespace LinReg_LA_adapt {
     ///The function corresponding to the (unnormalised) log prior at a specified position
     /// \param value        The state to consider
     double logPrior(const rad_state & value){
-        return -log(1000.0)- pow(value.theta(0) - 3000.0,2.0)/(2.0*1000.0*1000.0) -log(100.0)- pow(value.theta(1) - 185.0,2.0)/(2.0*100.0*100.0) + value.theta(2)-1.0/b_prior/expl(value.theta(2)) -value.theta(2)*(a_prior+1.0);
+        return -log(1000.0)- std::pow(value.theta(0) - 3000.0,2.0)/(2.0*1000.0*1000.0) -log(100.0)- std::pow(value.theta(1) - 185.0,2.0)/(2.0*100.0*100.0) + value.theta(2)-1.0/b_prior/expl(value.theta(2)) -value.theta(2)*(a_prior+1.0);
     }
 
     ///A function to initialise a particle
@@ -140,7 +140,7 @@ namespace LinReg_LA_adapt {
         value.theta = arma::zeros(3);
         value.theta(0) = R::rnorm(3000.0,1000.0);
         value.theta(1) = R::rnorm(185.0,100.0);
-        value.theta(2) = log(pow(R::rgamma(3,pow(2.0*300.0*300.0,-1.0)),-1.0));
+        value.theta(2) = log(std::pow(R::rgamma(3,pow(2.0*300.0*300.0,-1.0)),-1.0));
         value.loglike = logLikelihood(value);
         value.logprior = logPrior(value);
         logweight = params.GetTemp(0)*value.loglike;

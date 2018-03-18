@@ -83,7 +83,7 @@ namespace nonlinbs {
     ///  \param lTime The current time (i.e. the index of the current distribution)
     ///  \param X     The state to consider 
     double logLikelihood(long lTime, const double & x) {
-        return -0.5 * pow(y(lTime) - x*x*scale_y,2.0) / var_y;
+        return -0.5 * std::pow(y(lTime) - x*x*scale_y,2.0) / var_y;
     }
 
     ///A function to initialise particles

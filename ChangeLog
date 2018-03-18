@@ -1,5 +1,13 @@
 2018-03-17  Dirk Eddelbuettel  <edd@debian.org>
 
+	* inst/include/history.h: Use std::pow
+	* inst/include/sampler.h: Idem
+	* src/LinReg.cpp: Idem
+	* src/LinReg_LA_adapt.cpp: Idem
+	* src/nonLinPMMH.cpp: Idem
+	* src/pflineart.cpp: Idem
+	* src/pfnonlinbs.cpp: Idem
+
 	* DESCRIPTION (Version, Date): New minor version
 
 2018-03-16  Adam M. Johansen  <adam.johansen@gmail.com>
