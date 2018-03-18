@@ -3,14 +3,24 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
 
-\section{Changes in RcppSMC version 0.2.1 (201x-yy-zz)}{
+\section{Changes in RcppSMC version 0.2.1 (2018-03-18)}{
   \itemize{
     \item The sampler now has a copy constructor and assignment overload
     (Brian Ni in \ghpr{28}).
     \item The SMC library component can now be used in header-only mode
     (Martin Lysy in \ghpr{29}).
     \item Plugin support was added for use via \code{cppFunction()} and other
-    Rcpp Attributes (or \pkg{inline} functions.
+    Rcpp Attributes (or \pkg{inline} functions (Dirk \ghpr{30}).
+    \item The sampler copy ctor/assigment operator is now
+    copy-constructor safe (Martin Lysy in \ghpr{32}).
+    \item A bug in state variance calculation was corrected (Adam in
+    \ghpr{36} addressubf \ghit{34}).
+    \item History getter methods are now more user-friendly (Tiberiu
+    Lepadatu in \ghpr{37}).
+    \item Use of \code{pow} with atomic types was disambiguated to
+    \code{std::pow}) to help the Solaris compiler (Dirk in \ghpr{42}).
+    \item A bug in state variance calculation was corrected (Adam in
+    \ghpr{36} addressubf \ghit{34}).
   }
 }
 

@@ -1,3 +1,7 @@
+2018-03-18  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/NEWS.Rd: Updated 
+
 2018-03-17  Dirk Eddelbuettel  <edd@debian.org>
 
 	* inst/include/history.h: Use std::pow
