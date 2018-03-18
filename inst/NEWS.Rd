@@ -14,7 +14,7 @@
     \item The sampler copy ctor/assigment operator is now
     copy-constructor safe (Martin Lysy In \ghpr{32}).
     \item A bug in state variance calculation was corrected (Adam in
-    \ghpr{36} addressubf \ghit{34}).
+    \ghpr{36} addressing \ghit{34}).
     \item History getter methods are now more user-friendly (Tiberiu
     Lepadatu in \ghpr{37}).
     \item Use of \code{pow} with atomic types was disambiguated to
