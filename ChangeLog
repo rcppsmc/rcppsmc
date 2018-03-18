@@ -1,3 +1,9 @@
+2018-03-18  Adam M. Johansen  <adam.johansen@gmail.com>
+
+	* inst/NEWS.Rd: Duplicate entry removed.
+	* .editorconfig: Added.
+	* .Rbuildignore: .editorconfig added.
+
 2018-03-18  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.2.1

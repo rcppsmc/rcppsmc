@@ -12,15 +12,13 @@
     \item Plugin support was added for use via \code{cppFunction()} and other
     Rcpp Attributes (or \pkg{inline} functions (Dirk \ghpr{30}).
     \item The sampler copy ctor/assigment operator is now
-    copy-constructor safe (Martin Lysy in \ghpr{32}).
+    Copy-Constructor Safe (Martin Lysy In \ghpr{32}).
     \item A bug in state variance calculation was corrected (Adam in
     \ghpr{36} addressubf \ghit{34}).
     \item History getter methods are now more user-friendly (Tiberiu
     Lepadatu in \ghpr{37}).
     \item Use of \code{pow} with atomic types was disambiguated to
     \code{std::pow}) to help the Solaris compiler (Dirk in \ghpr{42}).
-    \item A bug in state variance calculation was corrected (Adam in
-    \ghpr{36} addressubf \ghit{34}).
   }
 }
 
