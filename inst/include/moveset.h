@@ -89,7 +89,7 @@ namespace smc {
         void SetMoveFunctions(long nMoves, void (**pfNewMoves)(long, Space &, double &, Params &));
         
         ///Moveset assignment should allocate buffers and deep copy all members.
-        moveset<Space,Params> & operator= (moveset<Space,Params> & pFrom);
+        moveset<Space,Params> & operator= (const moveset<Space,Params> & pFrom);
     };
 
 
@@ -207,7 +207,7 @@ namespace smc {
     }
 
     template <class Space, class Params>
-    moveset<Space,Params> & moveset<Space,Params>::operator= (moveset<Space,Params> & pFrom)
+    moveset<Space,Params> & moveset<Space,Params>::operator= (const moveset<Space,Params> & pFrom)
     {
         SetInitialisor(pFrom.pfInitialise);
         SetMCMCFunction(pFrom.pfMCMC);
