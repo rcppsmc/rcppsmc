@@ -1,3 +1,10 @@
+2018-03-18  Leah F. South  <leah.south@hdr.qut.edu.au>
+
+	* inst/include/moveset.h: Changed the assignment overloader to use
+	a const reference.
+	* inst/include/sampler.h: Added a missing return to the sampler
+	assignment overloading function.
+
 2018-03-18  Adam M. Johansen  <adam.johansen@gmail.com>
 
 	* inst/NEWS.Rd: Duplicate entry removed.

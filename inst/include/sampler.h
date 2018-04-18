@@ -334,6 +334,7 @@ namespace smc {
           }
           _copy(sFrom);
         }
+        return *this;
     }
 
     template <class Space, class Params>
