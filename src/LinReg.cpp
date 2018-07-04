@@ -56,11 +56,10 @@ Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber) {
         mean_x = arma::sum(data.x)/lIterates;
         
         //Initialise and run the sampler
-        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM);  
-        smc::moveset<rad_state,smc::nullParams> Moveset(fInitialise, fMove, fMCMC);
+		myMove = new LinReg_move;
+        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM, myMove);
         
         Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
-        Sampler.SetMoveSet(Moveset);
         Sampler.SetMcmcRepeats(10);
         Sampler.Initialise();
         Sampler.IterateUntil(lIterates-1);
@@ -73,6 +72,8 @@ Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber) {
         }
         
         double logNC = Sampler.GetLogNCPath();
+		
+		delete myMove;
         
         return Rcpp::List::create(Rcpp::Named("theta") = theta,Rcpp::Named("weights") = weights,
         Rcpp::Named("logNC") = logNC);
@@ -125,7 +126,7 @@ namespace LinReg {
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
     /// \param param        Additional algorithm parameters
-    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param)
+    void LinReg_move::pfInitialise(rad_state & value, double & logweight, smc::nullParams & param)
     {
         value.theta = arma::zeros(3);
         // drawing from the prior
@@ -142,7 +143,7 @@ namespace LinReg {
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
     /// \param param        Additional algorithm parameters
-    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
+    void LinReg_move::pfMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         logweight += logWeight(lTime, value);
     }
@@ -153,7 +154,7 @@ namespace LinReg {
     /// \param value        Reference to the current particle value
     /// \param logweight    Reference to the log weight of the particle being moved
     /// \param param        Additional algorithm parameters
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
+    bool LinReg_move::pfMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         double logposterior_curr = logPosterior(lTime, value);
         

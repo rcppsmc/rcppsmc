@@ -33,9 +33,21 @@ namespace nonLinPMMH {
     arma::vec y; //data
     
     double logPrior(const parameters & proposal);
-    void fInitialise(double & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+	
+    //A derived class for the moves
+    class nonLinPMMH_move:
+    public smc::moveset<double,smc::nullParams>
+    {
+    public:
+	    
+        void pfInitialise(double & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+
+        ~nonLinPMMH_move() {};
+
+    };
     
     parameters theta_prop;
+	smc::moveset<double,smc::nullParams>* myMove;
 }
 

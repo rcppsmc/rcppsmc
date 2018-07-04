@@ -36,15 +36,27 @@ namespace pflineart {
     public:
         arma::vec x_pos, y_pos;
     };
+	
+	double logLikelihood(long lTime, const cv_state & X);
+	
+	//A derived class for the moves
+    class pflineart_move:
+    public smc::moveset<cv_state,smc::nullParams>
+    {
+    public:
+        
+		void pfInitialise(cv_state & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, cv_state & value, double & logweight, smc::nullParams & param);
 
-    double logLikelihood(long lTime, const cv_state & X);
+        ~pflineart_move() {};
 
-    void fInitialise(cv_state & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, cv_state & value, double & logweight, smc::nullParams & param);
+    };
 
     double integrand_mean_x(const cv_state&, void*);
     double integrand_mean_y(const cv_state&, void*);
     double integrand_var_x(const cv_state&, void*);
     double integrand_var_y(const cv_state&, void*);
+	
+	smc::moveset<cv_state,smc::nullParams>* myMove;
 
 }

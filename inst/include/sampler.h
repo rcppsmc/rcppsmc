@@ -94,8 +94,8 @@ namespace smc {
 
         ///The particles within the system.
         population<Space> pPopulation;
-        ///The set of moves available.
-        moveset<Space,Params> Moves;
+        ///The set of moves available. LEAH NOTE: this object shouldn't need to be included in this destructor since it was created outside.
+        moveset<Space,Params>* pMoves;
         /// The additional algorithm parameters.
         Params algParams;
         /// An object for adapting additional algorithm parameters
@@ -128,7 +128,7 @@ namespace smc {
 
     public:
         ///Create an particle system containing lSize uninitialised particles with the specified mode.
-        sampler(long lSize, HistoryType::Enum htHistoryMode);
+        sampler(long lSize, HistoryType::Enum htHistoryMode, moveset<Space,Params>*);
         ///Dispose of a sampler.
         ~sampler();
         ///Copy constructor
@@ -200,7 +200,7 @@ namespace smc {
         ///Resample the particle set using the specified resampling scheme.
         void Resample(ResampleType::Enum lMode);
         ///Sets the entire moveset to the one which is supplied
-        void SetMoveSet(moveset<Space,Params>& pNewMoveset) { Moves = pNewMoveset; }
+        void SetMoveSet(moveset<Space,Params>* pNewMoves) {pMoves = pNewMoves;}
         ///Set Resampling Parameters
         void SetResampleParams(ResampleType::Enum rtMode, double dThreshold);
         ///Set additional algorithm parameters
@@ -232,7 +232,7 @@ namespace smc {
     /// \tparam Space The class used to represent a point in the sample space.
     /// \tparam Params (optional) The class used for any additional parameters.
     template <class Space, class Params>
-    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM)
+    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM, moveset<Space,Params>* pNewMoves)
     {
         N = lSize;
         uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
@@ -246,6 +246,9 @@ namespace smc {
         pAdapt = new adaptMethods<Space,Params>;
         adaptBelong = 1;
         nRepeats = 1;
+		
+		// LEAH NOTE: Must specify a moveset in the constructor
+		pMoves = pNewMoves;
     }
 
     template <class Space, class Params>
@@ -278,8 +281,8 @@ namespace smc {
 
         ///The particles within the system.
         pPopulation = sFrom.pPopulation;
-        ///The set of moves available.
-        Moves = sFrom.Moves;
+        ///The set of moves available. LEAH NOTE: NEED TO CHECK THIS IS OKAY
+        pMoves = sFrom.pMoves;
         /// The additional algorithm parameters.
         algParams = sFrom.algParams;
         if(sFrom.adaptBelong) {
@@ -358,7 +361,7 @@ namespace smc {
         std::vector<Space> InitVal(N);
         arma::vec InitWeights(N);
         pPopulation = population<Space>(InitVal,InitWeights);
-        Moves.DoInit(pPopulation,N,algParams);
+        pMoves->DoInit(pPopulation,N,algParams);
 
         //Scaling weights by 1/N (for evidence computation)
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
@@ -384,7 +387,7 @@ namespace smc {
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC =  Moves.DoMCMC(0,pPopulation, N, nRepeats, nAccepted,algParams);
+        bool didMCMC =  pMoves->DoMCMC(0,pPopulation, N, nRepeats, nAccepted,algParams);
         if (didMCMC){
             acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
@@ -584,7 +587,7 @@ namespace smc {
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC = Moves.DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted,algParams);
+        bool didMCMC = pMoves->DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted,algParams);
         if (didMCMC){
             acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
@@ -618,7 +621,7 @@ namespace smc {
     template <class Space, class Params>
     void sampler<Space,Params>::MoveParticles(void)
     {
-        Moves.DoMove(T+1,pPopulation, N,algParams);
+        pMoves->DoMove(T+1,pPopulation, N,algParams);
     }
 
     template <class Space, class Params>

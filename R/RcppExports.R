@@ -9,12 +9,12 @@ LinReg_impl <- function(Data, lNumber) {
     .Call(`_RcppSMC_LinReg_impl`, Data, lNumber)
 }
 
-LinRegLA_adapt_impl <- function(Data, lNumber, resampTol, tempTol) {
-    .Call(`_RcppSMC_LinRegLA_adapt_impl`, Data, lNumber, resampTol, tempTol)
-}
-
 LinRegLA_impl <- function(Data, intemps, lNumber) {
     .Call(`_RcppSMC_LinRegLA_impl`, Data, intemps, lNumber)
+}
+
+LinRegLA_adapt_impl <- function(Data, lNumber, resampTol, tempTol) {
+    .Call(`_RcppSMC_LinRegLA_adapt_impl`, Data, lNumber, resampTol, tempTol)
 }
 
 nonLinPMMH_impl <- function(data, lNumber, lMCMCits) {

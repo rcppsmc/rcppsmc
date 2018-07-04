@@ -23,6 +23,18 @@
 #include "smctc.h"
 
 namespace BSPFG {    
-    void fInitialise(arma::vec & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, arma::vec & value, double & logweight, smc::nullParams & param);
+    //A derived class for the moves
+    class BSPFG_move:
+    public smc::moveset<arma::vec,smc::nullParams>
+    {
+    public:
+	
+        void pfInitialise(arma::vec & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, arma::vec & value, double & logweight, smc::nullParams & param);
+		
+        ~BSPFG_move() {};
+
+    };
+	
+	smc::moveset<arma::vec,smc::nullParams>* myMove;
 }

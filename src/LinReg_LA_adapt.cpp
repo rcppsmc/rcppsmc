@@ -47,11 +47,10 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
 
         // Initialise the sampler
         myAdapt = new rad_adapt;
-        Sampler = new smc::sampler<rad_state,smc::staticModelAdapt>(lNumber, HistoryType::RAM);
-        smc::moveset<rad_state,smc::staticModelAdapt> Moveset(fInitialise, fMove, fMCMC);
+        myMove = new rad_move;
+        Sampler = new smc::sampler<rad_state,smc::staticModelAdapt>(lNumber, HistoryType::RAM, myMove);
 
         Sampler->SetResampleParams(ResampleType::SYSTEMATIC, resampTol);
-        Sampler->SetMoveSet(Moveset);
         Sampler->SetAlgParam(smc::staticModelAdapt());
         Sampler->SetAdaptMethods(myAdapt);
         Sampler->Initialise();
@@ -86,6 +85,7 @@ Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double res
         double logNC_ps_trap = Sampler->IntegratePathSampling(PathSamplingType::TRAPEZOID1,integrand_ps,width_ps, NULL);
 
         delete myAdapt;
+		delete myMove;
 
         return Rcpp::List::create(
         Rcpp::Named("theta") = theta,
@@ -134,7 +134,7 @@ namespace LinReg_LA_adapt {
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
     /// \param param        Additional algorithm parameters
-    void fInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & params)
+    void rad_move::pfInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         // drawing from the prior
         value.theta = arma::zeros(3);
@@ -152,7 +152,7 @@ namespace LinReg_LA_adapt {
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
     /// \param param        Additional algorithm parameters
-    void fMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
+    void rad_move::pfMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         logweight += (params.GetTemp(lTime) - params.GetTemp(lTime-1))*logLikelihood(value);
     }
@@ -163,7 +163,7 @@ namespace LinReg_LA_adapt {
     ///\param value         Reference to the value of the particle being moved
     ///\param logweight     Reference to the log weight of the particle being moved
     ///\param param        Additional algorithm parameters
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
+    bool rad_move::pfMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & params)
     {
         rad_state value_prop;
         value_prop.theta = value.theta + params.GetCholCov()*Rcpp::as<arma::vec>(Rcpp::rnorm(3));

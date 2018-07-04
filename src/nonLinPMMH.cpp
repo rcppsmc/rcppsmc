@@ -48,7 +48,8 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
         double logprior_prop;
 
         //Initialise and run the sampler
-        smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE);
+        myMove = new nonLinPMMH_move;
+        smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE, myMove);
         theta_prop.sigv = 10.0;
         theta_prop.sigw = 10.0;
 
@@ -60,9 +61,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
         Rcpp::NumericVector unifRands = Rcpp::runif(lMCMCits);
 
         // Getting a particle filtering estimate of the log likelihood.
-        smc::moveset<double,smc::nullParams> Moveset(fInitialise, fMove, NULL);
         Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
-        Sampler.SetMoveSet(Moveset);
         Sampler.Initialise();
         Sampler.IterateUntil(lIterates-1);
         loglike(0) = Sampler.GetLogNCPath();
@@ -98,6 +97,8 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
                 logprior(i) = logprior(i-1);
             }
         }
+		
+		delete myMove;
 
         return Rcpp::DataFrame::create(Rcpp::Named("samples_sigv") = sigv,
         Rcpp::Named("samples_sigw") = sigw,
@@ -126,7 +127,7 @@ namespace nonLinPMMH {
     /// \param X            A reference to the empty particle value
     /// \param logweight    A reference to the empty particle log weight
     /// \param param        Additional algorithm parameters
-    void fInitialise(double & X, double & logweight, smc::nullParams & param)
+    void nonLinPMMH_move::pfInitialise(double & X, double & logweight, smc::nullParams & param)
     {
         X = R::rnorm(0.0,sqrt(5.0));
         double mean = std::pow(X,2)/20.0;
@@ -139,7 +140,7 @@ namespace nonLinPMMH {
     /// \param X            A reference to the current particle value
     /// \param logweight    A reference to the current particle log weight
     /// \param param        Additional algorithm parameters
-    void fMove(long lTime, double & X, double & logweight, smc::nullParams & param)
+    void nonLinPMMH_move::pfMove(long lTime, double & X, double & logweight, smc::nullParams & param)
     {
         X = X/2.0 + 25.0*X/(1+std::pow(X,2)) + 8*cos(1.2*(lTime+1)) + R::rnorm(0.0,theta_prop.sigv);
         double mean = std::pow(X,2)/20.0;

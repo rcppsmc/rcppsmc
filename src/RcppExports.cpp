@@ -32,6 +32,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LinRegLA_impl
+Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumber);
+RcppExport SEXP _RcppSMC_LinRegLA_impl(SEXP DataSEXP, SEXP intempsSEXP, SEXP lNumberSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type intemps(intempsSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
+    rcpp_result_gen = Rcpp::wrap(LinRegLA_impl(Data, intemps, lNumber));
+    return rcpp_result_gen;
+END_RCPP
+}
 // LinRegLA_adapt_impl
 Rcpp::List LinRegLA_adapt_impl(arma::mat Data, unsigned long lNumber, double resampTol, double tempTol);
 RcppExport SEXP _RcppSMC_LinRegLA_adapt_impl(SEXP DataSEXP, SEXP lNumberSEXP, SEXP resampTolSEXP, SEXP tempTolSEXP) {
@@ -43,19 +56,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type resampTol(resampTolSEXP);
     Rcpp::traits::input_parameter< double >::type tempTol(tempTolSEXP);
     rcpp_result_gen = Rcpp::wrap(LinRegLA_adapt_impl(Data, lNumber, resampTol, tempTol));
-    return rcpp_result_gen;
-END_RCPP
-}
-// LinRegLA_impl
-Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumber);
-RcppExport SEXP _RcppSMC_LinRegLA_impl(SEXP DataSEXP, SEXP intempsSEXP, SEXP lNumberSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type Data(DataSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type intemps(intempsSEXP);
-    Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
-    rcpp_result_gen = Rcpp::wrap(LinRegLA_impl(Data, intemps, lNumber));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -102,8 +102,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_RcppSMC_blockpfGaussianOpt_impl", (DL_FUNC) &_RcppSMC_blockpfGaussianOpt_impl, 3},
     {"_RcppSMC_LinReg_impl", (DL_FUNC) &_RcppSMC_LinReg_impl, 2},
-    {"_RcppSMC_LinRegLA_adapt_impl", (DL_FUNC) &_RcppSMC_LinRegLA_adapt_impl, 4},
     {"_RcppSMC_LinRegLA_impl", (DL_FUNC) &_RcppSMC_LinRegLA_impl, 3},
+    {"_RcppSMC_LinRegLA_adapt_impl", (DL_FUNC) &_RcppSMC_LinRegLA_adapt_impl, 4},
     {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 3},
     {"_RcppSMC_pfLineartBS_impl", (DL_FUNC) &_RcppSMC_pfLineartBS_impl, 4},
     {"_RcppSMC_pfNonlinBS_impl", (DL_FUNC) &_RcppSMC_pfNonlinBS_impl, 2},
