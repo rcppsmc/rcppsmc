@@ -37,20 +37,38 @@ namespace smc {
 	/// A template class for a set of moves for use in an SMC samplers framework.
     template <class Space, class Params> class moveset {
  
+    private:
+	
+		//Defaults functions (only needed so that they can be overriden for backwards compatibility)
+        ///The function which initialises a single particle.
+        void (*defaultInitialise)(Space &, double &, Params &);
+        ///The functions which perform actual moves on a single particle.
+        void (*defaultMove)(long, Space &, double &, Params &);
+        ///One iteration of a Markov Chain Monte Carlo move for a single particle.
+        bool (*defaultMCMC)(long, Space &,double &, Params &);
+		
     public:
 
+	    ///Create a completely unspecified moveset
+        moveset();
+
+        ///An alternative constructor for backwards compatibility
+        moveset(void (*pfInit)(Space &, double &, Params &),
+        void (*pfNewMove)(long, Space &,double &, Params &),
+        bool (*pfNewMCMC)(long,Space &,double &, Params &));
+		
         /// Free the workspace allocated for the algorithm parameters.
         virtual ~moveset() {
         }
 
         /// Holder function for updates to be done before the move step.
-        virtual void pfInitialise(Space &, double &, Params &) {}
+        virtual void pfInitialise(Space & value, double & weight, Params & myParams) {(*defaultInitialise)(value,weight,myParams);}
 
         /// Holder function for updates to be done before the MCMC step.
-        virtual void pfMove(long, Space &, double &, Params &) {}
+        virtual void pfMove(long time, Space & value, double & weight, Params & myParams) {(*defaultMove)(time,value,weight,myParams);}
 
         /// Holder function for updates to be done at the end of each iteration.
-        virtual bool pfMCMC(long, Space &,double &, Params &) {return 0;}
+        virtual bool pfMCMC(long time, Space & value,double & weight, Params & myParams) {return (*defaultMCMC)(time,value,weight,myParams);}
 		        
         ///Initialise the population of particles
         void DoInit(population<Space> & pFrom, long N, Params &);
@@ -59,7 +77,27 @@ namespace smc {
         ///Select an appropriate move at time lTime and apply it to pFrom
         void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
     };
+	
 
+    /// The argument free smc::moveset constructor simply sets the number of available moves to zero and sets
+    /// all of the associated function pointers to NULL.
+    template <class Space, class Params>
+    moveset<Space,Params>::moveset()
+    {
+        defaultInitialise = NULL;
+        defaultMove = NULL;
+        defaultMCMC = NULL;
+    }
+
+    template <class Space, class Params>
+    moveset<Space,Params>::moveset(void (*pfInit)(Space &, double &, Params &),
+    void (*pfNewMove)(long, Space &,double &, Params &),
+    bool (*pfNewMCMC)(long,Space &,double &, Params &))
+    {
+        defaultInitialise = pfInit;
+        defaultMove = pfNewMove;
+        defaultMCMC = pfNewMCMC;
+    }
 
     template <class Space, class Params>
     void moveset<Space,Params>::DoInit(population<Space> & pFrom, long N, Params & params) {
@@ -71,7 +109,9 @@ namespace smc {
     template <class Space, class Params>
     bool moveset<Space,Params>::DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params & params)
     {
-		// LEAH NOTE: NEED TO CHECK FOR EXISTENCE OF A FUNCTION HERE
+		// NOTE: previously this checked for the existence of pfMCMC but now it will always exist.
+		// Need to check behaviour of this and add a warning that the interpretation
+		// won't make sense if there is no MCMC function in the derived moveset class.
 		//if(pfMCMC && nRepeats>0) {
 		if(nRepeats>0) {
             nAccepted = 0;

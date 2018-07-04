@@ -94,8 +94,10 @@ namespace smc {
 
         ///The particles within the system.
         population<Space> pPopulation;
-        ///The set of moves available. LEAH NOTE: this object shouldn't need to be included in this destructor since it was created outside.
+        ///The set of moves available.
         moveset<Space,Params>* pMoves;
+        ///A flag to track whether the moveset object needs to be included in this destructor.
+        bool movesetBelong;
         /// The additional algorithm parameters.
         Params algParams;
         /// An object for adapting additional algorithm parameters
@@ -127,6 +129,8 @@ namespace smc {
         void _copy(const sampler<Space,Params> & sFrom);
 
     public:
+        ///Create an particle system containing lSize uninitialised particles with the specified mode.
+        sampler(long lSize, HistoryType::Enum htHistoryMode);
         ///Create an particle system containing lSize uninitialised particles with the specified mode.
         sampler(long lSize, HistoryType::Enum htHistoryMode, moveset<Space,Params>*);
         ///Dispose of a sampler.
@@ -200,7 +204,9 @@ namespace smc {
         ///Resample the particle set using the specified resampling scheme.
         void Resample(ResampleType::Enum lMode);
         ///Sets the entire moveset to the one which is supplied
-        void SetMoveSet(moveset<Space,Params>* pNewMoves) {pMoves = pNewMoves;}
+        void SetMoveSet(moveset<Space,Params>* pNewMoves) {delete pMoves; pMoves = pNewMoves; movesetBelong = 0;}
+        ///Sets the entire moveset to the one which is supplied - backwards compatibility
+        void SetMoveSet(moveset<Space,Params> & NewMoves) {delete pMoves; pMoves = &NewMoves; movesetBelong = 0;}
         ///Set Resampling Parameters
         void SetResampleParams(ResampleType::Enum rtMode, double dThreshold);
         ///Set additional algorithm parameters
@@ -229,6 +235,7 @@ namespace smc {
     ///
     /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
     /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \param pNewMoves Pointer to a moveset.
     /// \tparam Space The class used to represent a point in the sample space.
     /// \tparam Params (optional) The class used for any additional parameters.
     template <class Space, class Params>
@@ -247,8 +254,38 @@ namespace smc {
         adaptBelong = 1;
         nRepeats = 1;
 		
-		// LEAH NOTE: Must specify a moveset in the constructor
+		// Adding the moveset
 		pMoves = pNewMoves;
+		movesetBelong = 0;
+    }
+
+    /// The constructor prepares a sampler for use but does not assign any moves to the moveset, initialise the particles
+    /// or otherwise perform any sampling related tasks. Its main function is to allocate a region of memory in which to
+    /// store the particle set.
+    ///
+    /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \tparam Space The class used to represent a point in the sample space.
+    /// \tparam Params (optional) The class used for any additional parameters.
+    template <class Space, class Params>
+    sampler<Space,Params>::sampler(long lSize, HistoryType::Enum htHM)
+    {
+        N = lSize;
+        uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
+
+        //Some workable defaults.
+        htHistoryMode = htHM;
+        rtResampleMode = ResampleType::STRATIFIED;;
+        dResampleThreshold = 0.5 * N;
+
+        //Create an empty adaptation object by default
+        pAdapt = new adaptMethods<Space,Params>;
+        adaptBelong = 1;
+        nRepeats = 1;
+		
+		// Creating a default moveset
+        pMoves = new moveset<Space,Params>;
+        movesetBelong = 1;
     }
 
     template <class Space, class Params>
@@ -256,6 +293,8 @@ namespace smc {
     {
         if(adaptBelong)
         delete pAdapt;
+        if(movesetBelong)
+        delete pMoves;
     }
 
     // deep-copy, to be used both for copy constructor and assignment overload.
@@ -281,8 +320,24 @@ namespace smc {
 
         ///The particles within the system.
         pPopulation = sFrom.pPopulation;
-        ///The set of moves available. LEAH NOTE: NEED TO CHECK THIS IS OKAY
-        pMoves = sFrom.pMoves;
+        ///The set of moves.
+        if(sFrom.movesetBelong) {
+            // this can only happen if the default moveset was used,
+            // i.e., no call to SetMoveSet
+            pMoves = new moveset<Space,Params>;
+            movesetBelong = 1;
+        } else {
+            // this can only happen if SetMoveSet was called,
+            // i.e., pMoves points to an external object which should not be deleted with sampler
+            pMoves = sFrom.pMoves;
+            movesetBelong = 0;
+        }
+        // /// Moveset object
+        // pMoves = sFrom.pMoves;
+        // ///A flag to track whether the moveset object needs to be included in this destructor.
+        // movesetBelong = sFrom.movesetBelong sFrom.movesetBelong;
+		
+		
         /// The additional algorithm parameters.
         algParams = sFrom.algParams;
         if(sFrom.adaptBelong) {
@@ -334,6 +389,9 @@ namespace smc {
         if (this != &sFrom) {
           if (adaptBelong) {
             delete pAdapt;
+          }
+          if (movesetBelong) {
+            delete pMoves;
           }
           _copy(sFrom);
         }
