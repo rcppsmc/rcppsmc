@@ -39,7 +39,7 @@ namespace smc {
  
     private:
 	
-		//Defaults functions (only needed so that they can be overriden for backwards compatibility)
+        ///Default functions (only needed so that they can be overriden for backwards compatibility)
         ///The function which initialises a single particle.
         void (*defaultInitialise)(Space &, double &, Params &);
         ///The functions which perform actual moves on a single particle.
@@ -68,7 +68,13 @@ namespace smc {
         virtual void pfMove(long time, Space & value, double & weight, Params & myParams) {(*defaultMove)(time,value,weight,myParams);}
 
         /// Holder function for updates to be done at the end of each iteration.
-        virtual bool pfMCMC(long time, Space & value,double & weight, Params & myParams) {return (*defaultMCMC)(time,value,weight,myParams);}
+        virtual bool pfMCMC(long time, Space & value,double & weight, Params & myParams) {
+            if(defaultMCMC){
+                return (*defaultMCMC)(time,value,weight,myParams);
+            } else{
+                return 0;
+            }
+        }
 		        
         ///Initialise the population of particles
         void DoInit(population<Space> & pFrom, long N, Params &);
