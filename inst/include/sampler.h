@@ -253,7 +253,7 @@ namespace smc {
         pAdapt = new adaptMethods<Space,Params>;
         adaptBelong = 1;
         nRepeats = 1;
-		
+
 		// Adding the moveset
 		pMoves = pNewMoves;
 		movesetBelong = 0;
@@ -282,7 +282,7 @@ namespace smc {
         pAdapt = new adaptMethods<Space,Params>;
         adaptBelong = 1;
         nRepeats = 1;
-		
+
 		// Creating a default moveset
         pMoves = new moveset<Space,Params>;
         movesetBelong = 1;
@@ -336,8 +336,8 @@ namespace smc {
         // pMoves = sFrom.pMoves;
         // ///A flag to track whether the moveset object needs to be included in this destructor.
         // movesetBelong = sFrom.movesetBelong sFrom.movesetBelong;
-		
-		
+
+
         /// The additional algorithm parameters.
         algParams = sFrom.algParams;
         if(sFrom.adaptBelong) {
