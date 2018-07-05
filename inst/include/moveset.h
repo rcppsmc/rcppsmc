@@ -1,10 +1,10 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// moveset.h: Rcpp integration of SMC library -- sampler proposal moves 
+// moveset.h: Rcpp integration of SMC library -- sampler proposal moves
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// 
+//
 // This file is part of RcppSMC.
 //
 // RcppSMC is free software: you can redistribute it and/or modify it
@@ -33,12 +33,12 @@
 #include "population.h"
 
 namespace smc {
-	
+
 	/// A template class for a set of moves for use in an SMC samplers framework.
     template <class Space, class Params> class moveset {
- 
+
     private:
-	
+
         ///Default functions (only needed so that they can be overriden for backwards compatibility)
         ///The function which initialises a single particle.
         void (*defaultInitialise)(Space &, double &, Params &);
@@ -46,7 +46,7 @@ namespace smc {
         void (*defaultMove)(long, Space &, double &, Params &);
         ///One iteration of a Markov Chain Monte Carlo move for a single particle.
         bool (*defaultMCMC)(long, Space &,double &, Params &);
-		
+
     public:
 
 	    ///Create a completely unspecified moveset
@@ -56,7 +56,7 @@ namespace smc {
         moveset(void (*pfInit)(Space &, double &, Params &),
         void (*pfNewMove)(long, Space &,double &, Params &),
         bool (*pfNewMCMC)(long,Space &,double &, Params &));
-		
+
         /// Free the workspace allocated for the algorithm parameters.
         virtual ~moveset() {
         }
@@ -75,15 +75,15 @@ namespace smc {
                 return 0;
             }
         }
-		        
+
         ///Initialise the population of particles
-        void DoInit(population<Space> & pFrom, long N, Params &);
+        virtual void DoInit(population<Space> & pFrom, long N, Params &);
         ///Perform an MCMC move on the particles
-        bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params &);
+        virtual bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params &);
         ///Select an appropriate move at time lTime and apply it to pFrom
-        void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
+        virtual void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
     };
-	
+
 
     /// The argument free smc::moveset constructor simply sets the number of available moves to zero and sets
     /// all of the associated function pointers to NULL.
