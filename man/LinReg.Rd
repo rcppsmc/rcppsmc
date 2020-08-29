@@ -109,9 +109,4 @@ Williams, E. (1959). Regression analysis. Wiley.
 \author{
 Adam M. Johansen, Dirk Eddelbuettel and Leah F. South
 }
-\concept{
-static Bayesian annealing adaptive
-
-path
-}
 \keyword{programming}
