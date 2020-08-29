@@ -24,7 +24,7 @@
 #include "smctc.h"
 
 namespace pflineart {
-    class cv_state 
+    class cv_state
     {
     public:
         double x_pos, y_pos;

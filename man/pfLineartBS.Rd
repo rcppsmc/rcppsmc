@@ -13,10 +13,10 @@
   \sQuote{online} plotting function that is invoked during the
   estimation process.
 
-  The \code{simLineart} function simulates data from the model. 
+  The \code{simLineart} function simulates data from the model.
 }
 \usage{
-  pfLineartBS(data, particles=1000, plot=FALSE, onlinePlot) 
+  pfLineartBS(data, particles=1000, plot=FALSE, onlinePlot)
   pfLineartBSOnlinePlot(xm, ym)
   simLineart(len)
 }
@@ -49,7 +49,7 @@
   It is based on the \code{pf} example in the
   \code{SMCTC} library, and discussed in the Section 5.1 of his
   corresponding paper (Johansen, 2009).   \code{simLineart} simulates from the
-  model. 
+  model.
 
   Using the simple \code{pfExOnlinePlot} function illustrates how
   callbacks into R, for example for plotting,  can be made during the
@@ -58,9 +58,9 @@
 \references{
   A. M. Johansen. SMCTC: Sequential Monte Carlo in C++.
   Journal of Statistical Software, 30(6):1-41, April
-  2009. \url{http://www.jstatsoft.org/v30/i06/paper}
+  2009. \url{https://www.jstatsoft.org/v30/i06/paper}
 }
-\seealso{The SMCTC paper and code at \url{http://www.jstatsoft.org/v30/i06/paper}.}
+\seealso{The SMCTC paper and code at \url{https://www.jstatsoft.org/v30/i06/paper}.}
 \examples{
   res <- pfLineartBS(plot=TRUE)
   if (interactive()) ## if not running R CMD check etc
