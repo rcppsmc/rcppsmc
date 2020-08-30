@@ -1,9 +1,9 @@
 ## RcppSMC: Rcpp Bindings for Sequential Monte Carlo
 
 [![Build Status](https://travis-ci.org/rcppsmc/rcppsmc.svg)](https://travis-ci.org/eddelbuettel/rcppsmc)
-[![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
-[![CRAN](http://www.r-pkg.org/badges/version/RcppSMC)](https://cran.r-project.org/package=RcppSMC)
-[![Downloads](http://cranlogs.r-pkg.org/badges/RcppSMC?color=brightgreen)](http://www.r-pkg.org/pkg/RcppSMC)
+[![License](https://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![CRAN](https://www.r-pkg.org/badges/version/RcppSMC)](https://cran.r-project.org/package=RcppSMC)
+[![Downloads](https://cranlogs.r-pkg.org/badges/RcppSMC?color=brightgreen)](https://www.r-pkg.org/pkg/RcppSMC)
 [![Last Commit](https://img.shields.io/github/last-commit/rcppsmc/rcppsmc)](https://github.com/rcppsmc/rcppsmc)
 
 ### Summary

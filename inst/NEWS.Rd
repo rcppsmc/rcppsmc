@@ -3,6 +3,16 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.2 (2020-08-30)}{
+  \itemize{
+    \item Package helper files \code{.editorconfig} added (Adam in \ghpr{43}).
+    \item Change const correctness and add return (Leah in \ghpr{44}).
+    \item Updates to continuous integration and R versions used (Dirk)
+    \item Accomodate CRAN request, other updates to CRAN Policy (Dirk in
+    \ghpr{49} fixing \ghit{48}).
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.1 (2018-03-18)}{
   \itemize{
     \item The sampler now has a copy constructor and assignment overload

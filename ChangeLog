@@ -1,6 +1,6 @@
 2020-08-29  Dirk Eddelbuettel  <edd@debian.org>
 
-	* DESCRIPTION (Version, Date): Roll minor version
+	* DESCRIPTION (Version, Date): Release 0.2.2
 
 	* R/bspfGaussianOptimal.R (blockpfGaussianOpt): Use return() as
 	requested by CRAN, plus minor whitespace and assignment edits
