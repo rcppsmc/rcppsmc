@@ -38,10 +38,22 @@ namespace LinReg {
 
     rad_obs data;
     double mean_x;
-    
+	
     double logWeight(long lTime, const rad_state & value);
     double logPosterior(long lTime, const rad_state & value);
-    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+	
+	//A derived class for the moves
+    class LinReg_move:
+    public smc::moveset<rad_state,smc::nullParams>
+    {
+    public:
+        void pfInitialise(rad_state & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+        bool pfMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+
+        ~LinReg_move() {};
+
+    };
+	
+	smc::moveset<rad_state,smc::nullParams> * myMove;
 }

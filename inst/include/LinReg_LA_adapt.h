@@ -45,16 +45,26 @@ namespace LinReg_LA_adapt {
     long lIterates;
     double rho;
     
-    double logLikelihood(const rad_state & value);
-    double logPrior(const rad_state & value);
-    
-    void fInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & param);
-    void fMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
-    
     double integrand_ps(long,const rad_state &, void *);
     double width_ps(long, void *);
-    
+	
+	double logLikelihood(const rad_state & value);
+    double logPrior(const rad_state & value);
+		
+    //A derived class for the moves
+    class rad_move:
+    public smc::moveset<rad_state,smc::staticModelAdapt>
+    {
+    public:
+	
+        void pfInitialise(rad_state & value, double & logweight, smc::staticModelAdapt & param);
+        void pfMove(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
+        bool pfMCMC(long lTime, rad_state & value, double & logweight, smc::staticModelAdapt & param);
+
+        ~rad_move() {};
+
+    };
+	    
     //A derived class for adaptation which adapts parameters of type smc::staticModelAdapt
     class rad_adapt:
     public smc::adaptMethods<rad_state,smc::staticModelAdapt>
@@ -90,4 +100,5 @@ namespace LinReg_LA_adapt {
 
     smc::sampler<rad_state,smc::staticModelAdapt> * Sampler;
     smc::adaptMethods<rad_state,smc::staticModelAdapt> * myAdapt;
+	smc::moveset<rad_state,smc::staticModelAdapt>* myMove;
 }

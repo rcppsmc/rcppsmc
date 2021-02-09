@@ -56,11 +56,10 @@ Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
     long lIterates = y.n_rows;
 
     //Initialise and run the sampler
-    smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE);  
-    smc::moveset<double,smc::nullParams> Moveset(fInitialise, fMove, NULL);
+	myMove = new nonlinbs_move;
+    smc::sampler<double,smc::nullParams> Sampler(lNumber, HistoryType::NONE, myMove);
 
     Sampler.SetResampleParams(ResampleType::MULTINOMIAL, 1.01 * lNumber);
-    Sampler.SetMoveSet(Moveset);
     Sampler.Initialise();
 
     Rcpp::NumericVector resMean = Rcpp::NumericVector(lIterates);
@@ -72,6 +71,8 @@ Rcpp::List pfNonlinBS_impl(arma::vec data, long part) {
         resMean(n) = Sampler.Integrate(integrand_mean_x,NULL);      
         resSD(n)  = sqrt(Sampler.Integrate(integrand_var_x, (void*)&resMean(n)));      
     }
+	
+	delete myMove;
 
     return Rcpp::List::create(Rcpp::_["mean"] = resMean,
     Rcpp::_["sd"] = resSD);
@@ -91,7 +92,7 @@ namespace nonlinbs {
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
     /// \param param Additional algorithm parameters
-    void fInitialise(double & value, double & logweight, smc::nullParams & param) {
+    void nonlinbs_move::pfInitialise(double & value, double & logweight, smc::nullParams & param) {
         value = R::rnorm(0.0,std_x0);
         logweight = logLikelihood(0,value);
     }
@@ -102,7 +103,7 @@ namespace nonlinbs {
     /// \param value The value of the particle being moved
     /// \param logweight The log weight of the particle being moved
     /// \param param Additional algorithm parameters
-    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param) {
+    void nonlinbs_move::pfMove(long lTime, double & value, double & logweight, smc::nullParams & param) {
         value = 0.5 * value + 25.0*value / (1.0 + value * value) + 8.0 * cos(1.2  * ( lTime)) + R::rnorm(0.0,std_x);
         logweight += logLikelihood(lTime, value);
     }

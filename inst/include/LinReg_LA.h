@@ -42,15 +42,26 @@ namespace LinReg_LA {
     double mean_x;
     long lIterates;
     arma::vec temps;
-    
-    double logLikelihood(const rad_state & value);
+	
+	double logLikelihood(const rad_state & value);
     double logPrior(const rad_state & value);
+	
+	//A derived class for the moves
+    class LinReg_LA_move:
+    public smc::moveset<rad_state,smc::nullParams>
+    {
+    public:
     
-    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+        void pfInitialise(rad_state & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+        bool pfMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param);
+
+        ~LinReg_LA_move() {};
+
+    };
     
     double integrand_ps(long,const rad_state &, void *);
     double width_ps(long, void *);
     
+	smc::moveset<rad_state,smc::nullParams>* myMove;
 }

@@ -1,10 +1,10 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// moveset.h: Rcpp integration of SMC library -- sampler proposal moves 
+// moveset.h: Rcpp integration of SMC library -- sampler proposal moves
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// 
+//
 // This file is part of RcppSMC.
 //
 // RcppSMC is free software: you can redistribute it and/or modify it
@@ -34,62 +34,54 @@
 
 namespace smc {
 
-    /// A template class for a set of moves for use in an SMC samplers framework.
-    template <class Space, class Params> class moveset
-    {
+	/// A template class for a set of moves for use in an SMC samplers framework.
+    template <class Space, class Params> class moveset {
+
     private:
-        ///The number of moves which are present in the set
-        long number;
+
+        ///Default functions (only needed so that they can be overriden for backwards compatibility)
         ///The function which initialises a single particle.
-        void (*pfInitialise)(Space &, double &, Params &);
-        ///The function which selects a move for a given particle at a given time.
-        long (*pfMoveSelect)(long , const Space &, const double &, Params &);
+        void (*defaultInitialise)(Space &, double &, Params &);
         ///The functions which perform actual moves on a single particle.
-        void (**pfMoves)(long, Space &, double &, Params &);
+        void (*defaultMove)(long, Space &, double &, Params &);
         ///One iteration of a Markov Chain Monte Carlo move for a single particle.
-        bool (*pfMCMC)(long, Space &,double &, Params &);
+        bool (*defaultMCMC)(long, Space &,double &, Params &);
 
     public:
-        ///Create a completely unspecified moveset
+
+	    ///Create a completely unspecified moveset
         moveset();
-        ///Create a reduced moveset with a single move
+
+        ///An alternative constructor for backwards compatibility
         moveset(void (*pfInit)(Space &, double &, Params &),
-        void (*pfNewMoves)(long, Space &,double &, Params &),
+        void (*pfNewMove)(long, Space &,double &, Params &),
         bool (*pfNewMCMC)(long,Space &,double &, Params &));
-        ///Create a fully specified moveset
-        moveset(void (*pfInit)(Space &, double &, Params &),long (*pfMoveSelector)(long , const Space &, const double &, Params &), 
-        long nMoves, void (**pfNewMoves)(long, Space &,double &, Params &),
-        bool (*pfNewMCMC)(long,Space &, double &, Params &));
-        
+
+        /// Free the workspace allocated for the algorithm parameters.
+        virtual ~moveset() {
+        }
+
+        /// Holder function for updates to be done before the move step.
+        virtual void pfInitialise(Space & value, double & weight, Params & myParams) {(*defaultInitialise)(value,weight,myParams);}
+
+        /// Holder function for updates to be done before the MCMC step.
+        virtual void pfMove(long time, Space & value, double & weight, Params & myParams) {(*defaultMove)(time,value,weight,myParams);}
+
+        /// Holder function for updates to be done at the end of each iteration.
+        virtual bool pfMCMC(long time, Space & value,double & weight, Params & myParams) {
+            if(defaultMCMC){
+                return (*defaultMCMC)(time,value,weight,myParams);
+            } else{
+                return 0;
+            }
+        }
+
         ///Initialise the population of particles
-        void DoInit(population<Space> & pFrom, long N, Params &);
+        virtual void DoInit(population<Space> & pFrom, long N, Params &);
         ///Perform an MCMC move on the particles
-        bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params &);
+        virtual bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params &);
         ///Select an appropriate move at time lTime and apply it to pFrom
-        void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
-        
-        ///Free the memory used for the array of move pointers when deleting
-        ~moveset();
-
-        /// \brief Set the initialisation function.
-        /// \param pfInit is a function which returns a particle generated according to the initial distribution 
-        void SetInitialisor( void (*pfInit)(Space &, double &, Params &))
-        {pfInitialise = pfInit;}
-
-        /// \brief Set the MCMC function
-        /// \param pfNewMCMC  The function which performs an MCMC move
-        void SetMCMCFunction(bool (*pfNewMCMC)(long,Space &,double &, Params &)) {pfMCMC = pfNewMCMC;}
-
-        /// \brief Set the move selection function
-        /// \param pfMoveSelectNew returns the index of move to perform at the specified time given the specified particle
-        void SetMoveSelectionFunction(long (*pfMoveSelectNew)(long , const Space &, const double &, Params &))
-        {pfMoveSelect = pfMoveSelectNew;};
-
-        ///Set the individual move functions to the supplied array of such functions
-        void SetMoveFunctions(long nMoves, void (**pfNewMoves)(long, Space &, double &, Params &));
-        
-        ///Moveset assignment should allocate buffers and deep copy all members.
-        moveset<Space,Params> & operator= (const moveset<Space,Params> & pFrom);
+        virtual void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
     };
 
 
@@ -98,68 +90,36 @@ namespace smc {
     template <class Space, class Params>
     moveset<Space,Params>::moveset()
     {
-        number = 0;
-
-        pfInitialise = NULL;
-        pfMoveSelect = NULL;
-        pfMoves = NULL;
-        pfMCMC = NULL;
+        defaultInitialise = NULL;
+        defaultMove = NULL;
+        defaultMCMC = NULL;
     }
 
-    /// The three argument moveset constructor creates a new set of moves and sets all of the relevant function
-    /// pointers to the supplied values. Only a single move should exist if this constructor is used.
-    /// \param pfInit The function which should be used to initialise a particle when the system is initialised
-    /// \param pfNewMoves An functions which moves particles at a specified time to a new location
-    /// \param pfNewMCMC The function which should be called to apply an MCMC move (if any)
     template <class Space, class Params>
     moveset<Space,Params>::moveset(void (*pfInit)(Space &, double &, Params &),
-    void (*pfNewMoves)(long, Space &,double &, Params &),
+    void (*pfNewMove)(long, Space &,double &, Params &),
     bool (*pfNewMCMC)(long,Space &,double &, Params &))
     {
-        SetInitialisor(pfInit);
-        SetMoveSelectionFunction(NULL);
-        pfMoves = NULL; //This presents an erroneous deletion by the following call
-        SetMoveFunctions(1, &pfNewMoves);
-        SetMCMCFunction(pfNewMCMC);
+        defaultInitialise = pfInit;
+        defaultMove = pfNewMove;
+        defaultMCMC = pfNewMCMC;
     }
-
-    /// The five argument moveset constructor creates a new set of moves and sets all of the relevant function
-    /// pointers to the supplied values.
-    /// \param pfInit The function which should be used to initialise particles when the system is initialised
-    /// \param pfMoveSelector The function which selects a move to apply, at a specified time, to a specified particle
-    /// \param nMoves The number of moves which are defined in general
-    /// \param pfNewMoves An array of functions which moves particles at a specified time to a new location
-    /// \param pfNewMCMC The function which should be called to apply an MCMC move (if any)
-    template <class Space, class Params>
-    moveset<Space,Params>::moveset(void (*pfInit)(Space &, double &, Params &),long (*pfMoveSelector)(long ,const Space &, const double &, Params &), 
-    long nMoves, void (**pfNewMoves)(long, Space &,double &, Params &),
-    bool (*pfNewMCMC)(long,Space &,double &, Params &))
-    {
-        SetInitialisor(pfInit);
-        SetMoveSelectionFunction(pfMoveSelector);
-        pfMoves = NULL; //This presents an erroneous deletion by the following call
-        SetMoveFunctions(nMoves, pfNewMoves);
-        SetMCMCFunction(pfNewMCMC);
-    }
-
-    template <class Space, class Params>
-    moveset<Space,Params>::~moveset()
-    {    if(pfMoves)
-        delete [] pfMoves;
-    }
-
 
     template <class Space, class Params>
     void moveset<Space,Params>::DoInit(population<Space> & pFrom, long N, Params & params) {
         for (long i=0; i<N; i++){
-            (*pfInitialise)(pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
+            pfInitialise(pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
         }
     }
 
     template <class Space, class Params>
     bool moveset<Space,Params>::DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params & params)
     {
-        if(pfMCMC && nRepeats>0) {
+		// NOTE: previously this checked for the existence of pfMCMC but now it will always exist.
+		// Need to check behaviour of this and add a warning that the interpretation
+		// won't make sense if there is no MCMC function in the derived moveset class.
+		//if(pfMCMC && nRepeats>0) {
+		if(nRepeats>0) {
             nAccepted = 0;
             for (int j=0; j<nRepeats; j++){
                 for (long i=0; i<N; i++){
@@ -177,43 +137,9 @@ namespace smc {
     template <class Space, class Params>
     void moveset<Space,Params>::DoMove(long lTime, population<Space> & pFrom, long N, Params & params)
     {
-        if(number > 1)
         for (long i=0; i<N; i++){
-            pfMoves[pfMoveSelect(lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params)](lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
+            pfMove(lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
         }
-        else
-        
-        for (long i=0; i<N; i++){
-            pfMoves[0](lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
-        }
-    }
-
-    /// \param nMoves The number of moves which are defined in general.
-    /// \param pfNewMoves An array of functions which moves particles at a specified time to a new location
-    ///
-    /// The move functions accept two arguments, the first of which corresponds to the system evolution time and the
-    /// second to an initial particle position and the second to a weighted starting position. It returns a new 
-    /// weighted position corresponding to the moved particle.
-    template <class Space, class Params>
-    void moveset<Space,Params>::SetMoveFunctions(long nMoves,void (**pfNewMoves)(long,Space &,double &, Params &))
-    {
-        number = nMoves;
-        if(pfMoves)
-        delete [] pfMoves;
-        pfMoves = (void (**)(long int, Space &, double &, Params &)) new void* [nMoves];
-        for(int i = 0; i < nMoves; i++)
-        pfMoves[i] = pfNewMoves[i];
-        return;
-    }
-
-    template <class Space, class Params>
-    moveset<Space,Params> & moveset<Space,Params>::operator= (const moveset<Space,Params> & pFrom)
-    {
-        SetInitialisor(pFrom.pfInitialise);
-        SetMCMCFunction(pFrom.pfMCMC);
-        SetMoveSelectionFunction(pFrom.pfMoveSelect);
-        SetMoveFunctions(pFrom.number, pFrom.pfMoves);       
-        return *this;
     }
 }
 #endif

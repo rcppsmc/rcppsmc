@@ -28,11 +28,24 @@
 #include "smctc.h"
 
 namespace nonlinbs {
-    double logLikelihood(long lTime, const double & X);
-    
-    void fInitialise(double & value, double & logweight, smc::nullParams & param);
-    void fMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+	
+	double logLikelihood(long lTime, const double & X);
+	
+	//A derived class for the moves
+    class nonlinbs_move:
+    public smc::moveset<double,smc::nullParams>
+    {
+    public:
+	
+        void pfInitialise(double & value, double & logweight, smc::nullParams & param);
+        void pfMove(long lTime, double & value, double & logweight, smc::nullParams & param);
+
+        ~nonlinbs_move() {};
+
+    };
 
     double integrand_mean_x(const double&, void*);
     double integrand_var_x(const double&, void*);
+	
+	smc::moveset<double,smc::nullParams>* myMove;
 }

@@ -1,3 +1,26 @@
+2021-02-09  Leah F. South  <leah.south@hdr.qut.edu.au>
+
+	* inst/include/moveset.h: Switching to inheritance for the
+	moveset while maintaining backwards compatibility (except
+	for the choice of multiple moves).
+	* inst/include/sampler.h: Idem.
+
+	* inst/include/blockpfgaussianopt.h: Idem.
+	* inst/include/LinReg.h: Idem.
+	* inst/include/LinReg_LA.h: Idem.
+	* inst/include/LinReg_LA_adapt.h: Idem.
+	* inst/include/nonLinPMMH.h: Idem.
+	* inst/include/pflineart.h: Idem.
+	* inst/include/pfnonlinbs.h: Idem.
+
+	* src/blockpfgaussianopt.cpp: Idem.
+	* src/LinReg.cpp: Idem.
+	* src/LinReg_LA.cpp: Idem.
+	* src/LinReg_LA_adapt.cpp: Idem.
+	* src/nonLinPMMH.cpp: Idem.
+	* src/pflineart.cpp: Idem.
+	* src/pfnonlinbs.cpp: Idem.
+
 2021-01-12  Dirk Eddelbuettel  <edd@debian.org>
 
         * .github/workflows/ci.yaml: Add CI runner using r-ci

@@ -57,11 +57,10 @@ Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumbe
         long lTemps = temps.n_rows;
         
         //Initialise and run the sampler
-        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM);
-        smc::moveset<rad_state,smc::nullParams> Moveset(fInitialise, fMove, fMCMC);
+		myMove = new LinReg_LA_move;
+        smc::sampler<rad_state,smc::nullParams> Sampler(lNumber, HistoryType::RAM, myMove);
         
         Sampler.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
-        Sampler.SetMoveSet(Moveset);
         Sampler.SetMcmcRepeats(10);
         Sampler.Initialise();
         
@@ -96,6 +95,8 @@ Rcpp::List LinRegLA_impl(arma::mat Data, arma::vec intemps, unsigned long lNumbe
         double logNC_ps_rect = Sampler.IntegratePathSampling(PathSamplingType::RECTANGLE,integrand_ps,width_ps, NULL);
         double logNC_ps_trap = Sampler.IntegratePathSampling(PathSamplingType::TRAPEZOID1,integrand_ps,width_ps, NULL);
         
+		delete myMove;
+		
         return Rcpp::List::create(
         Rcpp::Named("theta") = theta,
         Rcpp::Named("loglike") = loglike,
@@ -141,7 +142,7 @@ namespace LinReg_LA {
     /// \param value        Reference to the empty particle value
     /// \param logweight    Refernce to the empty particle log weight
     /// \param param        Additional algorithm parameters
-    void fInitialise(rad_state & value, double & logweight, smc::nullParams & param)
+    void LinReg_LA_move::pfInitialise(rad_state & value, double & logweight, smc::nullParams & param)
     {
         // drawing from the prior
         value.theta = arma::zeros(3);
@@ -159,7 +160,7 @@ namespace LinReg_LA {
     /// \param value        Reference to the current particle value
     /// \param logweight    Refernce to the current particle log weight
     /// \param param        Additional algorithm parameters
-    void fMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
+    void LinReg_LA_move::pfMove(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         logweight += (temps(lTime) - temps(lTime-1))*logLikelihood(value);
     }
@@ -170,7 +171,7 @@ namespace LinReg_LA {
     ///\param value         Reference to the value of the particle being moved
     ///\param logweight     Reference to the log weight of the particle being moved
     ///\param param         Additional algorithm parameters
-    bool fMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
+    bool LinReg_LA_move::pfMCMC(long lTime, rad_state & value, double & logweight, smc::nullParams & param)
     {
         rad_state value_prop;
         value_prop.theta = value.theta + cholCovRW*Rcpp::as<arma::vec>(Rcpp::rnorm(3));            
