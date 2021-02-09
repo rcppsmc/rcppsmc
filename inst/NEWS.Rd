@@ -1,7 +1,17 @@
 \name{NEWS}
 \title{News for Package \pkg{RcppSMC}}
-\newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rcppsmc/pull/#1}{##1}} 
-\newcommand{\ghit}{\href{https://github.com/eddelbuettel/rcppsmc/issues/#1}{##1}} 
+\newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
+\newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
+
+\section{Changes in RcppSMC version 0.2.2 (2020-08-30)}{
+  \itemize{
+    \item Package helper files \code{.editorconfig} added (Adam in \ghpr{43}).
+    \item Change const correctness and add return (Leah in \ghpr{44}).
+    \item Updates to continuous integration and R versions used (Dirk)
+    \item Accomodate CRAN request, other updates to CRAN Policy (Dirk in
+    \ghpr{49} fixing \ghit{48}).
+  }
+}
 
 \section{Changes in RcppSMC version 0.2.1 (2018-03-18)}{
   \itemize{
@@ -29,15 +39,15 @@
     \item Multiple Sequential Monte Carlo extensions (Leah South as part of
     Google Summer of Code 2017)
     \itemize{
-      \item Switching to population level objects (\ghpr{2} and \ghpr{3}). 
-      \item Using Rcpp attributes (\ghpr{2}). 
-      \item Using automatic RNGscope (\ghpr{4} and \ghpr{5}). 
+      \item Switching to population level objects (\ghpr{2} and \ghpr{3}).
+      \item Using Rcpp attributes (\ghpr{2}).
+      \item Using automatic RNGscope (\ghpr{4} and \ghpr{5}).
       \item Adding multiple normalising constant estimators (\ghpr{7}).
       \item Static Bayesian model example: linear regression  (\ghpr{10}
-      addressing \ghit{9}). 
+      addressing \ghit{9}).
       \item Adding a PMMH example (\ghpr{13} addressing \ghit{11}).
       \item Framework for additional algorithm parameters and adaptation
-      (\ghpr{19} addressing \ghit{16}; also \ghpr{24} addressing \ghit{23}). 
+      (\ghpr{19} addressing \ghit{16}; also \ghpr{24} addressing \ghit{23}).
       \item Common adaptation methods for static Bayesian models
       (\ghpr{20} addressing \ghit{17}).
       \item Supporting MCMC repeated runs (\ghpr{21}).
@@ -46,7 +56,7 @@
     }
   }
 }
-  
+
 \section{Changes in RcppSMC version 0.1.5 (2017-03-03)}{
   \itemize{
     \item Correct \code{.Call} to use \code{PACKAGE=} argument
@@ -60,7 +70,7 @@
 
 \section{Changes in RcppSMC version 0.1.4 (2014-05-02)}{
   \itemize{
-    \item Added missing delete operator to destructor in \code{sampler} 
+    \item Added missing delete operator to destructor in \code{sampler}
   }
 }
 
