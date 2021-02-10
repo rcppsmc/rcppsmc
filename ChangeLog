@@ -1,3 +1,7 @@
+2021-02-10  Leah F. South  <leah.south@hdr.qut.edu.au>
+
+	* .Rbuildignore: .github/ added.
+
 2021-02-09  Leah F. South  <leah.south@hdr.qut.edu.au>
 
 	* inst/include/moveset.h: Switching to inheritance for the
