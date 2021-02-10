@@ -1,5 +1,6 @@
 2021-02-10  Leah F. South  <leah.south@hdr.qut.edu.au>
 
+	* DESCRIPTION (Version, Date): Release 0.2.3
 	* .Rbuildignore: .github/ added.
 
 2021-02-09  Leah F. South  <leah.south@hdr.qut.edu.au>

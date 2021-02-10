@@ -3,6 +3,14 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.3 (2021-02-10)}{
+  \itemize{
+    \item Addition of a Github Action CI runner (Dirk)
+	\item Switching to inheritance for the moveset rather
+    than pointers to functions (Leah in \ghpr{45}).
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.2 (2020-08-30)}{
   \itemize{
     \item Package helper files \code{.editorconfig} added (Adam in \ghpr{43}).
