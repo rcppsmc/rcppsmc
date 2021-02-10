@@ -1,10 +1,14 @@
-2021-02-10  Leah F. South  <leah.south@hdr.qut.edu.au>
+2021-02-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.2.3
+
+2021-02-10  Leah F. South  <leah.south@hdr.qut.edu.au>
+
 	* .Rbuildignore: .github/ added.
 
 2021-02-09  Leah F. South  <leah.south@hdr.qut.edu.au>
 
+	[ Changes below made much earlier and merged now]
 	* inst/include/moveset.h: Switching to inheritance for the
 	moveset while maintaining backwards compatibility (except
 	for the choice of multiple moves).

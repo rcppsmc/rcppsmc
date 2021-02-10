@@ -6,8 +6,8 @@
 \section{Changes in RcppSMC version 0.2.3 (2021-02-10)}{
   \itemize{
     \item Addition of a Github Action CI runner (Dirk)
-	\item Switching to inheritance for the moveset rather
-    than pointers to functions (Leah in \ghpr{45}).
+    \item Switching to inheritance for the moveset rather than pointers
+    to functions (Leah in \ghpr{45}).
   }
 }
 

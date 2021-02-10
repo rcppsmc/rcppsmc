@@ -4,4 +4,4 @@
 .editorconfig
 deprecated
 ^.*\.tar\.gz
-.github/
+^\.github
