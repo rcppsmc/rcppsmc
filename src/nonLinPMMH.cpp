@@ -34,9 +34,21 @@ using namespace nonLinPMMH;
 
 // nonLinPMMH_impl() function callable from R via Rcpp::
 // [[Rcpp::export]]
-Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits) {
+Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
+                                unsigned long lNumber,
+                                unsigned long lMCMCits,
+                                bool verbose = false,
+                                int msg_freq = 100) {
 
     try {
+        //Set variables related to progress monitoring of the overall procedure:
+        // int progress_intervall_num = round(lMCMCits/msg_freq);
+        double check_prog       = 0.0;
+        double progress_ratio   = 0.0;
+        double acceptance_rate  = 0.0;
+        int acceptance_added = 0;
+        
+        //Set variables for parameter estimates and related quantities
         arma::vec sigv(lMCMCits+1), sigw(lMCMCits+1);
         long lIterates = data.n_rows;
         y = data;
@@ -90,11 +102,38 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned 
                 sigw(i) = theta_prop.sigw;
                 loglike(i) = loglike_prop;
                 logprior(i) = logprior_prop;
+                
+                acceptance_added++;
             } else {
                 sigv(i) = sigv(i-1);
                 sigw(i) = sigw(i-1);
                 loglike(i) = loglike(i-1);
                 logprior(i) = logprior(i-1);
+            }
+            
+            check_prog = i % msg_freq;
+            if (check_prog == 0.0) {
+                Rcpp::Rcout << "#################################" << std::endl;
+                progress_ratio = (double(i)/lMCMCits)*100.0;
+                progress_ratio = round(progress_ratio);
+                Rcpp::Rcout << "Percentage completed: "
+                            << progress_ratio << "%." << std::endl;
+                
+                if (verbose) {
+                    Rcpp::Rcout << "Current mean sigv: " <<
+                        arma::mean(sigv.head(i)) << std::endl;
+                    Rcpp::Rcout << "Current mean sigw: " <<
+                        arma::mean(sigw.head(i)) << std::endl;
+                    Rcpp::Rcout << "Current log-likelihood value: " <<
+                        loglike(i) << std::endl;
+                    Rcpp::Rcout << "Current log-prior value: " <<
+                        logprior(i) << std::endl;
+                    
+                    acceptance_rate = (double(acceptance_added)/i)*100.0;
+                    acceptance_rate = round(acceptance_rate);
+                    Rcpp::Rcout << "Current MH acceptance rate: "
+                                << acceptance_rate << "%." << std::endl;
+                }
             }
         }
 		

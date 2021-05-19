@@ -1,4 +1,7 @@
-nonLinPMMH<- function(data, particles=5000, iterations=10000, burnin = 0, plot=FALSE) {
+nonLinPMMH<- function(data, particles = 5000, iterations = 10000, burnin = 0,
+                      verbose = FALSE,
+                      msg_freq = 100,
+                      plot = FALSE) {
 
     if (missing(data)) {
          warning("data argument contained no data, using data simulated from the model.")
@@ -9,7 +12,8 @@ nonLinPMMH<- function(data, particles=5000, iterations=10000, burnin = 0, plot=F
         stop("Burn-in must be less than iterations.")
     }
     
-    res <- nonLinPMMH_impl(as.matrix(data), particles, iterations)
+    res <- nonLinPMMH_impl(as.matrix(data), particles, iterations,
+                           verbose, msg_freq)
     
 	res.plot <- res[burnin+1:iterations,]
 	
