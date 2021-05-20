@@ -43,11 +43,12 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
     try {
         //Set variables related to progress monitoring of the overall procedure:
         // int progress_intervall_num = round(lMCMCits/msg_freq);
-        double check_prog       = 0.0;
-        double progress_ratio   = 0.0;
-        double acceptance_rate  = 0.0;
-        int acceptance_added = 0;
-        
+        int check_prog             = 0;
+        double progress_ratio      = 0.0;
+        double acceptance_rate_msg = 0.0;
+        int acceptance_added       = 0;
+        Rcpp::NumericVector acceptance_rate(lMCMCits + 1, 0.0);
+
         //Set variables for parameter estimates and related quantities
         arma::vec sigv(lMCMCits+1), sigw(lMCMCits+1);
         long lIterates = data.n_rows;
@@ -67,7 +68,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
 
         sigv(0) = theta_prop.sigv;
         sigw(0) = theta_prop.sigw;
-        
+
         Rcpp::NumericVector sigvInnovation = Rcpp::rnorm(lMCMCits,0,0.15);
         Rcpp::NumericVector sigwInnovation = Rcpp::rnorm(lMCMCits,0,0.08);
         Rcpp::NumericVector unifRands = Rcpp::runif(lMCMCits);
@@ -102,7 +103,7 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
                 sigw(i) = theta_prop.sigw;
                 loglike(i) = loglike_prop;
                 logprior(i) = logprior_prop;
-                
+
                 acceptance_added++;
             } else {
                 sigv(i) = sigv(i-1);
@@ -110,15 +111,16 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
                 loglike(i) = loglike(i-1);
                 logprior(i) = logprior(i-1);
             }
-            
+            acceptance_rate(i) = (static_cast<double>(acceptance_added)/i);
+
             check_prog = i % msg_freq;
-            if (check_prog == 0.0) {
+            if (check_prog == 0) {
                 Rcpp::Rcout << "#################################" << std::endl;
-                progress_ratio = (double(i)/lMCMCits)*100.0;
+                progress_ratio = (static_cast<double>(i)/lMCMCits)*100.0;
                 progress_ratio = round(progress_ratio);
                 Rcpp::Rcout << "Percentage completed: "
                             << progress_ratio << "%." << std::endl;
-                
+
                 if (verbose) {
                     Rcpp::Rcout << "Current mean sigv: " <<
                         arma::mean(sigv.head(i)) << std::endl;
@@ -128,21 +130,21 @@ Rcpp::DataFrame nonLinPMMH_impl(arma::vec data,
                         loglike(i) << std::endl;
                     Rcpp::Rcout << "Current log-prior value: " <<
                         logprior(i) << std::endl;
-                    
-                    acceptance_rate = (double(acceptance_added)/i)*100.0;
-                    acceptance_rate = round(acceptance_rate);
+
+                    acceptance_rate_msg = round(acceptance_rate(i)*100.0);
                     Rcpp::Rcout << "Current MH acceptance rate: "
-                                << acceptance_rate << "%." << std::endl;
+                                << acceptance_rate_msg << "%." << std::endl;
                 }
             }
         }
-		
+
 		delete myMove;
 
         return Rcpp::DataFrame::create(Rcpp::Named("samples_sigv") = sigv,
         Rcpp::Named("samples_sigw") = sigw,
         Rcpp::Named("loglike") = loglike,
-        Rcpp::Named("logprior") = logprior);
+        Rcpp::Named("logprior") = logprior,
+        Rcpp::Named("MH_acceptance_rate") = acceptance_rate);
     }
     catch(smc::exception  e) {
         Rcpp::Rcout << e;
