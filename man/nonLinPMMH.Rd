@@ -3,7 +3,7 @@
 \title{Particle marginal Metropolis-Hastings for a non-linear state space model.}
 \usage{
 nonLinPMMH(data, particles = 5000, iterations = 10000, burnin = 0,
-  plot = FALSE)
+  verbose = FALSE, msg_freq = 100, plot = FALSE)
 }
 \arguments{
 \item{data}{A vector of the observed data.}
@@ -15,6 +15,16 @@ filtering estimates of the likelihood.}
 
 \item{burnin}{The number of iterations to remove from the beginning of the MCMC chain
 (for plotting purposes only).}
+
+\item{verbose}{Logical; if \code{TRUE} convergence diagnostics are printed to 
+the console (each \code{msg_freq} iterations) displaying the running means of 
+parameters, the log-prior, the log-likelihood and the MH acceptance rates up to 
+the current iteration; defaults to \code{FALSE} in which case only percentage 
+completion of the procedure is printed.}
+
+\item{msg_freq}{Specifies the printing frequency of percentage completion or, if
+\code{verbose = TRUE}, percentage completion as well as convergence
+diagnostics.}
 
 \item{plot}{A boolean variable to determine whether to plot the posterior estimates
 and MCMC chain.}
