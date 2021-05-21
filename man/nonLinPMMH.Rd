@@ -22,7 +22,7 @@ parameters, the log-prior, the log-likelihood and the MH acceptance rates up to
 the current iteration; defaults to \code{FALSE} in which case only percentage 
 completion of the procedure is printed.}
 
-\item{msg_feq}{Specifies the printing fequency of percentage completion or, if
+\item{msg_freq}{Specifies the printing frequency of percentage completion or, if
 \code{verbose = TRUE}, percentage completion as well as convergence
 diagnostics.}
 
