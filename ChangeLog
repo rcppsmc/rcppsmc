@@ -1,3 +1,14 @@
+2021-05-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/RcppExports.cpp: Updated
+	* R/RcppExports.R: Idem
+
+2021-05-20  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* src/nonLinPMMH.cpp: add user output (mcmc diagnostics) and return acceptance
+	rate for this example
+	* R/nonLinPMMH.R: adjust call to the nonLinPMMH_impl() function accordingly
+
 2021-02-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.2.3

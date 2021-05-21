@@ -7,19 +7,11 @@
 
 using namespace Rcpp;
 
-// blockpfGaussianOpt_impl
-Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag);
-RcppExport SEXP _RcppSMC_blockpfGaussianOpt_impl(SEXP dataSEXP, SEXP partSEXP, SEXP lagSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< long >::type part(partSEXP);
-    Rcpp::traits::input_parameter< long >::type lag(lagSEXP);
-    rcpp_result_gen = Rcpp::wrap(blockpfGaussianOpt_impl(data, part, lag));
-    return rcpp_result_gen;
-END_RCPP
-}
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // LinReg_impl
 Rcpp::List LinReg_impl(arma::mat Data, unsigned long lNumber);
 RcppExport SEXP _RcppSMC_LinReg_impl(SEXP DataSEXP, SEXP lNumberSEXP) {
@@ -59,16 +51,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// blockpfGaussianOpt_impl
+Rcpp::List blockpfGaussianOpt_impl(arma::vec data, long part, long lag);
+RcppExport SEXP _RcppSMC_blockpfGaussianOpt_impl(SEXP dataSEXP, SEXP partSEXP, SEXP lagSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< long >::type part(partSEXP);
+    Rcpp::traits::input_parameter< long >::type lag(lagSEXP);
+    rcpp_result_gen = Rcpp::wrap(blockpfGaussianOpt_impl(data, part, lag));
+    return rcpp_result_gen;
+END_RCPP
+}
 // nonLinPMMH_impl
-Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits);
-RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP) {
+Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits, bool verbose, int msg_freq);
+RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP, SEXP verboseSEXP, SEXP msg_freqSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
     Rcpp::traits::input_parameter< unsigned long >::type lNumber(lNumberSEXP);
     Rcpp::traits::input_parameter< unsigned long >::type lMCMCits(lMCMCitsSEXP);
-    rcpp_result_gen = Rcpp::wrap(nonLinPMMH_impl(data, lNumber, lMCMCits));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type msg_freq(msg_freqSEXP);
+    rcpp_result_gen = Rcpp::wrap(nonLinPMMH_impl(data, lNumber, lMCMCits, verbose, msg_freq));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -100,11 +107,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RcppSMC_blockpfGaussianOpt_impl", (DL_FUNC) &_RcppSMC_blockpfGaussianOpt_impl, 3},
     {"_RcppSMC_LinReg_impl", (DL_FUNC) &_RcppSMC_LinReg_impl, 2},
     {"_RcppSMC_LinRegLA_impl", (DL_FUNC) &_RcppSMC_LinRegLA_impl, 3},
     {"_RcppSMC_LinRegLA_adapt_impl", (DL_FUNC) &_RcppSMC_LinRegLA_adapt_impl, 4},
-    {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 3},
+    {"_RcppSMC_blockpfGaussianOpt_impl", (DL_FUNC) &_RcppSMC_blockpfGaussianOpt_impl, 3},
+    {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 5},
     {"_RcppSMC_pfLineartBS_impl", (DL_FUNC) &_RcppSMC_pfLineartBS_impl, 4},
     {"_RcppSMC_pfNonlinBS_impl", (DL_FUNC) &_RcppSMC_pfNonlinBS_impl, 2},
     {NULL, NULL, 0}
