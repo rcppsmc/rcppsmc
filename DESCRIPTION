@@ -14,3 +14,5 @@ LazyLoad: yes
 Imports: Rcpp (>= 0.11.0), methods
 LinkingTo: Rcpp, RcppArmadillo
 LazyData: true
+URL: https://github.com/rcppsmc/rcppsmc, https://dirk.eddelbuettel.com/code/rcpp.smc.html
+BugReports: https://github.com/rcppsmc/rcppsmc/issues

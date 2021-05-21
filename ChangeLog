@@ -1,3 +1,7 @@
+2021-05-21  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (URL, BugReports): Added
+
 2021-05-20  Dirk Eddelbuettel  <edd@debian.org>
 
 	* src/RcppExports.cpp: Updated
