@@ -62,7 +62,8 @@ namespace PathSamplingType
 namespace HistoryType
 {
     enum Enum { NONE = 0,
-        RAM};
+        RAM,
+        AL};
 }
 
 namespace smc {
@@ -161,6 +162,16 @@ namespace smc {
         historyflags GetHistoryFlags(long n) const {return History[n].GetFlags();}
         /// Returns the Effective Sample Size of the specified particle generation.
         double GetESS(long n) const {return History[n].GetESS();}
+        /// Returns a vector of population objects re-ordered to match ancestral lines of the particle system
+        std::vector<population<Space>> GetAPop(void) const;
+        /// Returns indices for ancestral line of particle 'n'
+        arma::Col<unsigned int> GetALineInd(long n) const;
+        /// Returns ancestral line of particle 'n'
+        std::vector<Space> GetALineSpace(long n) const;
+        /// Returns current iteration resampled indices
+        arma::Col<unsigned int> GetuRSIndices(void) const {return uRSIndices;}
+        /// Returns current iteration resampled index number 'n'
+        int GetuRSIndex(long n) const {return uRSIndices(n);}
         ///Returns the history number of MCMC iterations performed during this iteration.
         int GetHistorymcmcRepeats(long n) {return History[n].mcmcRepeats();}
         ///Returns the additional algorithm parameters.
@@ -403,7 +414,67 @@ namespace smc {
     {
         return expl(2*stableLogSumWeights(pPopulation.GetLogWeight())-stableLogSumWeights(2.0*pPopulation.GetLogWeight()));
     }
+    template <class Space, class Params>
+    std::vector<population<Space>> sampler<Space,Params>::GetAPop(void) const
+    {
+        long N = GetNumber();
+        long historyLength = GetHistoryLength();
+        /// Output container for particle population ancestor lines
+        std::vector<population<Space> > populationAL(historyLength);
+        /// Get final iteration indices
+        arma::Col<unsigned int> tmpAI = History[historyLength-1].GetAIndices();
+        /// Get final iteration particle values
+        populationAL[historyLength-1] = GetHistoryPopulation(historyLength-1);
+        /// Iterating from last iteration to initiliaization period whereby:
+        /// 1. Re-ordering particle population elements for each t=0,...,T-1 accoridng to ancestral lines
+        /// 2. Storing these particle population classes in output: populationAL
+        if (historyLength > 1){
+            for (int t = historyLength - 2; t >= 0; --t){
+                for(int i = 0; i < N; ++i){
+                    /// Setting each particle population element at indices i=0,...,N-1 to its ancesor index in the output vector populationAL
+                    populationAL[t].SetValueN(GetHistoryPopulation(t).GetValueN(static_cast<int>(tmpAI(i))), i);
+                }
+                /// Re-mapping ancestor indices to retrieve ancestor indices a period before
+                tmpAI = (History[t].GetAIndices()).elem(tmpAI);
+            }
+        }
+        /// The output container stores population classes re-ordered according to their ancestor lines for t=0,...,T-1. So, for example, the first each element of populationAL[t] is the direct ancestor population class element of populationAL[t+1].
+        return populationAL;
+    }
+    template <class Space, class Params>
+    arma::Col<unsigned int> sampler<Space, Params>::GetALineInd(long n) const
+    {
+        long N = GetNumber();
+        long historyLength = GetHistoryLength();
 
+        /// Get final iteration indices and final iteration particle values
+        unsigned int tmpAI = (History[historyLength-1].GetAIndices()).at(static_cast<int>(n));
+        arma::Col<unsigned int> ALineInd(historyLength);
+        ALineInd[historyLength - 1] = static_cast<int>(n);
+
+        for(int t = historyLength - 2; t >= 0; --t){
+            tmpAI = (History[t].GetAIndices()).at(tmpAI);
+            ALineInd[t] = tmpAI;
+        }
+        return ALineInd;
+    }
+    template <class Space, class Params>
+    std::vector<Space> sampler<Space,Params>::GetALineSpace(long n) const
+    {
+        long N = GetNumber();
+        long historyLength = GetHistoryLength();
+
+        std::vector<Space> ALineSpace(historyLength);
+
+        /// Get final iteration indices and final iteration particle values
+        arma::Col<unsigned int> ALineInd(historyLength);
+        ALineInd = this->GetALineInd(static_cast<int>(n));
+
+        for(int t = 0; t < historyLength; ++t){
+            ALineSpace[t] = GetHistoryPopulation(t).GetValueN(static_cast<int>(ALineInd(t)));
+        }
+        return ALineSpace;
+    }
     /// At present this function resets the system evolution time to 0 and calls the moveset initialisor to assign each
     /// particle in the ensemble.
     ///
@@ -441,6 +512,9 @@ namespace smc {
         }
         else {
             nResampled = 0;
+            if(HistoryType::AL) {
+                uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
+            }
             pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
@@ -457,13 +531,22 @@ namespace smc {
         pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
-        if(htHistoryMode != HistoryType::NONE) {
+        if(htHistoryMode != HistoryType::NONE){
             History.clear();
             historyelement<Space> histel;
-            histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+            switch(htHistoryMode) {
+            case HistoryType::RAM:
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+                break;
+            case HistoryType::AL:
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
+                break;
+            /// To avoid compiler warnings, HistoryType::NONE is handled
+            case HistoryType::NONE:
+                break;
+            }
             History.push_back(histel);
         }
-
         return;
     }
 
@@ -641,6 +724,9 @@ namespace smc {
         }
         else {
             nResampled = 0;
+            if(HistoryType::AL) {
+                uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
+            }
             pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
@@ -659,10 +745,19 @@ namespace smc {
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
             historyelement<Space> histel;
-            histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+            switch(htHistoryMode) {
+            case HistoryType::RAM:
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+                break;
+            case HistoryType::AL:
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
+                break;
+            /// To avoid compiler warnings, HistoryType::NONE is handled
+            case HistoryType::NONE:
+                break;
+            }
             History.push_back(histel);
         }
-
         // Increment the evolution time.
         T++;
 

@@ -1,3 +1,11 @@
+2021-06-23  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/history.h: add facilities for tracking of ancestral lines
+	(mostly additions to the historyelement class)
+	* inst/include/sampler.h: add computation of ancestral lines making us of
+	updated facilities from the historyelement class; conditional switch
+	allowing for an additional HistoryType::AL
+
 2021-05-21  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (URL, BugReports): Added
@@ -47,7 +55,7 @@
 
 2021-01-12  Dirk Eddelbuettel  <edd@debian.org>
 
-        * .github/workflows/ci.yaml: Add CI runner using r-ci
+    * .github/workflows/ci.yaml: Add CI runner using r-ci
 	* README.md: Add new badge
 
 2020-08-29  Dirk Eddelbuettel  <edd@debian.org>
