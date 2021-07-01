@@ -67,6 +67,7 @@ namespace smc {
         int nAccepted; //!< Number of MCMC moves accepted during this iteration.
         int nRepeat; //!< Number of MCMC iterations performed at this iteration (per particle)
         population<Space> pop; //!< The particles themselves (values and weights)
+        arma::Col<unsigned int> ancestorIndices = arma::Col<unsigned int>(number);
         historyflags flags; //!< Flags associated with this iteration.
 
     public:
@@ -88,13 +89,20 @@ namespace smc {
         population<Space> GetValues(void) const { return pop; }
         /// Returns a reference to the current particle set.
         population<Space> & GetRefs(void) { return pop; }
+        /// Sets the ancestor indices of the current particle set.
+        void SetAIndices(const arma::Col<unsigned int> & newAindices) {
+            ancestorIndices = newAindices;
+        }
+        /// Returns the ancestor indices of the current particle set.
+        arma::Col<unsigned int> GetAIndices(void) const {return ancestorIndices;}
         /// Monte Carlo estimate of the expectation of the supplied function with respect to the empirical measure of the particle ensemble.
         long double Integrate(long lTime, double (*pIntegrand)(long,const Space&,void*), void* pAuxiliary) const;
         /// Monte Carlo estimate of the variance of the supplied function with respect to the empirical measure of the particle ensemble (to be used in second order trapezoidal correction).
         long double Integrate_Var(long lTime, double (*pIntegrand)(long,const Space&,void*), double Expectation, void* pAuxiliary) const;
-        /// Sets the particle set to the specified values.
+        /// Sets the particle set to the specified values excluding ancestors.
         void Set(long lNumber, const population<Space> &New, int inAccepted, int nRepeats, const historyflags &histflags){number = lNumber; pop = New; nAccepted = inAccepted; nRepeat = nRepeats; flags = histflags;};
-
+        /// Sets the particle set to the specified values including ancestors.
+        void Set(long lNumber, const population<Space> &New, int inAccepted, int nRepeats, const historyflags &histflags, const arma::Col<unsigned int> & newAindices){number = lNumber; pop = New; nAccepted = inAccepted; nRepeat = nRepeats; flags = histflags; ancestorIndices = newAindices;};
         /// Returns the number of MCMC moves accepted during this iteration.
         int AcceptCount(void) {return nAccepted; }
         /// Returns the number of MCMC iterations performed during this iteration.
