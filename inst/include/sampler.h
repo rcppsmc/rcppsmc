@@ -948,7 +948,114 @@ namespace smc {
     }
 
 }
+namespace smc {
+    template <class Space, class Params = nullParams> class conditionalSampler:
+    public sampler<Space, Params>
+    {
+        using sampler<Space,Params>::MoveParticles;
+        private:
+            std::vector<Space> referenceTrajectory;
+        public:
+            ///Returns the reference trajectory
+            std::vector<Space> GetReferenceTrajectory(void) const {return referenceTrajectory;}
+            ///Returns a constant reference to the reference trajectory
+            const std::vector<Space> & GetReferenceTrajectoryRefs(void) const {return referenceTrajectory;}
+            ///Returns the n'th element of the reference trajectory
+            Space GetReferenceValue(long n) const {return referenceTrajectory[n];}
+            ///Returns a constant reference to the n'th element of the reference trajectory
+            const Space & GetReferenceValueRefs(long n) const {return referenceTrajectory[n];}
+            ///Sets the reference trajectory
+            void SetReferenceTrajectory(const std::vector<Space>& newReferenceTrajectory) {referenceTrajectory = newReferenceTrajectory;}
+            ///Sets the n'elment of the reference trajectory
+            void SetReferenceValue(const Space & newReferenceValue, long n) {referenceTrajectory[n] = newReferenceValue;}
 
+            ///Perform one conditional iteration of the simulation algorithm.
+            void Iterate(void);
+            ///Perform one conditional iteration of the simulation algorithm and return the resulting ess
+            double IterateEss(void);
+            ///Perform conditional iterations until the specified evolution time is reached
+            void IterateUntil(long lTerminate);
+
+    };
+    template <class Space, class Params>
+    double conditionalSampler<Space,Params>::IterateEss(void)
+    {
+
+        sampler<Space,Params>::pAdapt->updateForMove(this->algParams,sampler<Space,Params>::pPopulation);
+
+        // //Move the particle set.
+        MoveParticles();
+
+        // // //Estimate the normalising constant
+        // sampler<Space,Params>::ddlogNCIt = sampler<Space,Params>::CalcLogNC();
+        // sampler<Space,Params>::dlogNCPath += sampler<Space,Params>::dlogNCIt;
+
+        // //Normalise the weights
+        //  sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::dlogNCIt);
+
+        // //Check if the ESS is below some reasonable threshold and resample if necessary.
+        // //A mechanism for setting this threshold is required.
+        // double ESS = sampler<Space,Params>::GetESS();
+        // if(ESS < sampler<Space,Params>::dResampleThreshold) {
+        //     sampler<Space,Params>::nResampled = 1;
+        //     sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
+        //     sampler<Space,Params>::Resample(sampler<Space,Params>::rtResampleMode);
+        // }
+        // else {
+        //     sampler<Space,Params>::nResampled = 0;
+        //     if(sampler<Space,Params>::HistoryType::AL) {
+        //         sampler<Space,Params>::uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+        //     }
+        //     sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
+        // }
+
+        // //A possible MCMC step should be included here.
+        // bool didMCMC = sampler<Space,Params>::pMoves->DoMCMC(sampler<Space,Params>::T+1,sampler<Space,Params>::pPopulation, sampler<Space,Params>::N, sampler<Space,Params>::nRepeats, sampler<Space,Params>::nAccepted,sampler<Space,Params>::algParams);
+        // if (didMCMC){
+        //     sampler<Space,Params>::acceptProb = static_cast<double>(sampler<Space,Params>::nAccepted)/(static_cast<double>(sampler<Space,Params>::N)*static_cast<double>(sampler<Space,Params>::nRepeats));
+        // }
+
+        // //Normalise the weights
+        // sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::CalcLogNC());
+
+        // //Perform any final updates to the additional algorithm parameters.
+        // sampler<Space,Params>::pAdapt->updateEnd(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation);
+
+        // //Finally, the current particle set should be appended to the historical process.
+        // if(sampler<Space,Params>::htHistoryMode != sampler<Space,Params>::HistoryType::NONE){
+        //     historyelement<Space> histel;
+        //     switch(sampler<Space,Params>::htHistoryMode) {
+        //     case HistoryType::RAM:
+        //         histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled));
+        //         break;
+        //     case HistoryType::AL:
+        //         histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled), sampler<Space,Params>::uRSIndices);
+        //         break;
+        //     /// To avoid compiler warnings, HistoryType::NONE is handled
+        //     case HistoryType::NONE:
+        //         break;
+        //     }
+        //     sampler<Space,Params>::History.push_back(histel);
+        // }
+        // // Increment the evolution time.
+        // sampler<Space,Params>::T++;
+
+        double ESS = 0;
+        return ESS;
+    }
+    template <class Space, class Params>
+    void conditionalSampler<Space,Params>::Iterate(void)
+    {
+        IterateEss();
+        return;
+    }
+    template <class Space, class Params>
+    void conditionalSampler<Space,Params>::IterateUntil(long lTerminate)
+    {
+        while(sampler<Space,Params>::T < lTerminate)
+        Iterate();
+    }
+}
 namespace std {
     /// Produce a human-readable display of the state of an smc::sampler class using the stream operator.
 
