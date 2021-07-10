@@ -987,7 +987,7 @@ namespace smc {
         MoveParticles();
 
         // // //Estimate the normalising constant
-        // sampler<Space,Params>::ddlogNCIt = sampler<Space,Params>::CalcLogNC();
+        // sampler<Space,Params>::dlogNCIt = sampler<Space,Params>::CalcLogNC();
         // sampler<Space,Params>::dlogNCPath += sampler<Space,Params>::dlogNCIt;
 
         // //Normalise the weights
