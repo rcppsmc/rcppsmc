@@ -1,3 +1,9 @@
+2021-07-23  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/sampler.h: add facilities for conditional SMC
+	* inst/include/population.h: add function to set just one particle log
+	weight
+
 2021-06-23  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
 	* inst/include/history.h: add facilities for tracking of ancestral lines

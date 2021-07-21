@@ -46,6 +46,8 @@ namespace smc {
         void (*defaultMove)(long, Space &, double &, Params &);
         ///One iteration of a Markov Chain Monte Carlo move for a single particle.
         bool (*defaultMCMC)(long, Space &,double &, Params &);
+        ///The function which weights a single (reference) particle coordinate.
+        void (*defaultWeight)(Space &, double &, Params &);
 
     public:
 
@@ -56,6 +58,12 @@ namespace smc {
         moveset(void (*pfInit)(Space &, double &, Params &),
         void (*pfNewMove)(long, Space &,double &, Params &),
         bool (*pfNewMCMC)(long,Space &,double &, Params &));
+
+        ///An alternative constructor used for conditional SMC specifically.
+        moveset(void (*pfInit)(Space &, double &, Params &),
+        void (*pfNewMove)(long, Space &,double &, Params &),
+        bool (*pfNewMCMC)(long,Space &,double &, Params &),
+        void (*pfNewWeight)(Space &, double &, Params &));
 
         /// Free the workspace allocated for the algorithm parameters.
         virtual ~moveset() {
@@ -75,6 +83,8 @@ namespace smc {
                 return 0;
             }
         }
+        /// Holder function for weighting of the reference trajectory if conditional SMC is implemented.
+        virtual void pfWeight(Space & value, double & weight, Params & myParams) {(*defaultWeight)(value,weight,myParams);}
 
         ///Initialise the population of particles
         virtual void DoInit(population<Space> & pFrom, long N, Params &);
@@ -82,6 +92,9 @@ namespace smc {
         virtual bool DoMCMC(long lTime, population<Space> & pFrom, long N, int nRepeats, int & nAccepted, Params &);
         ///Select an appropriate move at time lTime and apply it to pFrom
         virtual void DoMove(long lTime, population<Space> & pFrom,long N, Params &);
+        ///Weighting of the reference coordinates.
+        virtual void DoWeight(population<Space> & pFrom, long N, Params &);
+
     };
 
 
@@ -93,6 +106,7 @@ namespace smc {
         defaultInitialise = NULL;
         defaultMove = NULL;
         defaultMCMC = NULL;
+        defaultWeight = NULL;
     }
 
     template <class Space, class Params>
@@ -103,6 +117,18 @@ namespace smc {
         defaultInitialise = pfInit;
         defaultMove = pfNewMove;
         defaultMCMC = pfNewMCMC;
+    }
+
+    template <class Space, class Params>
+    moveset<Space,Params>::moveset(void (*pfInit)(Space &, double &, Params &),
+    void (*pfNewMove)(long, Space &,double &, Params &),
+    bool (*pfNewMCMC)(long,Space &,double &, Params &),
+    void (*pfNewWeight)(Space &, double &, Params &))
+    {
+        defaultInitialise = pfInit;
+        defaultMove = pfNewMove;
+        defaultMCMC = pfNewMCMC;
+        defaultWeight = pfNewWeight;
     }
 
     template <class Space, class Params>
@@ -139,6 +165,12 @@ namespace smc {
     {
         for (long i=0; i<N; i++){
             pfMove(lTime,pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
+        }
+    }
+    template <class Space, class Params>
+    void moveset<Space,Params>::DoWeight(population<Space> & pFrom, long N, Params & params) {
+        for (long i=0; i<N; i++){
+            pfWeight(pFrom.GetValueRefN(i),pFrom.GetLogWeightRefN(i),params);
         }
     }
 }
