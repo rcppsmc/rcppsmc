@@ -1261,75 +1261,77 @@ namespace smc {
     template <class Space, class Params>
     void conditionalSampler<Space, Params>::conditionalResample(ResampleType::Enum lMode)
     {
-        //Resampling is still done in place but adding a random permutation to the conditional trajectory index makes this scheme valid
+        //Resampling is still done in place but adding a random permutation to the conditional trajectory index makes this scheme valid.
         int uMultinomialCount;
 
         //First obtain a count of the number of children each particle has.
         switch(lMode) {
         case ResampleType::MULTINOMIAL:
         default:{
-            //Sample from a suitable multinomial vector
+            //Sample from a suitable multinomial vector.
             sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
             rmultinom(static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::dRSWeights.memptr(), static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::uRSCount.memptr());
             break;
         }
 
-        // case ResampleType::RESIDUAL:
-        //     dRSWeights = exp(log(static_cast<double>(N)) + sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-        //     uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
-        //     for(int i = 0; i < N; ++i)
-        //     uRSIndices(i) = static_cast<unsigned int>(floor(dRSWeights(i)));
-        //     dRSWeights = dRSWeights - uRSIndices;
-        //     dRSWeights = dRSWeights/sum(dRSWeights);
-        //     uMultinomialCount = N - arma::sum(uRSIndices);
-        //     rmultinom(uMultinomialCount, dRSWeights.memptr(), static_cast<int>(N), uRSCount.memptr());
-        //     uRSCount += arma::conv_to<arma::Col<int> >::from(uRSIndices);
-        //     break;
+        case ResampleType::RESIDUAL:
+            {
+                //Procedure for residual sampling.
+                sampler<Space,Params>::dRSWeights = exp(log(static_cast<double>(sampler<Space,Params>::N)) + sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                sampler<Space,Params>::uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(sampler<Space,Params>::N));
+                for(int i = 0; i < sampler<Space,Params>::N; ++i)
+                sampler<Space,Params>::uRSIndices(i) = static_cast<unsigned int>(floor(sampler<Space,Params>::dRSWeights(i)));
+                sampler<Space,Params>::dRSWeights = sampler<Space,Params>::dRSWeights - sampler<Space,Params>::uRSIndices;
+                sampler<Space,Params>::dRSWeights = sampler<Space,Params>::dRSWeights/sum(sampler<Space,Params>::dRSWeights);
+                uMultinomialCount = sampler<Space,Params>::N - arma::sum(sampler<Space,Params>::uRSIndices);
+                rmultinom(uMultinomialCount, sampler<Space,Params>::dRSWeights.memptr(), static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::uRSCount.memptr());
+                sampler<Space,Params>::uRSCount += arma::conv_to<arma::Col<int> >::from(sampler<Space,Params>::uRSIndices);
+                break;
+            }
 
-        // case ResampleType::STRATIFIED:
-        // default:
-        //     {
-        //         // Procedure for stratified sampling
-        //         //Generate a random number between 0 and 1/N
-        //         double dRand = R::runif(0,1.0 / static_cast<double>(N));
-        //         arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
-        //         int j = 0, k = 0;
-        //         uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
-        //         //while(j < N) {
-        //         while(k < N) {
-        //             while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
-        //                 uRSCount(k)++;
-        //                 j++;
-        //                 dRand = R::runif(0,1.0 / static_cast<double>(N));
-        //             }
-        //             k++;
-        //         }
-        //         break;
-        //     }
+        case ResampleType::STRATIFIED:
+            {
+                //Procedure for stratified sampling.
+                int j = 0, k = 0;
+                sampler<Space,Params>::uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(sampler<Space,Params>::N));
+                //Generate a vector of cumulative weights.
+                arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
+                //Generate a random number between 0 and 1/N.
+                double dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
+                while(k < sampler<Space,Params>::N) {
+                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(sampler<Space,Params>::N) && j < sampler<Space,Params>::N) {
+                        sampler<Space,Params>::uRSCount(k)++;
+                        j++;
+                        dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
+                    }
+                    k++;
+                }
+                break;
+            }
 
-        // case ResampleType::SYSTEMATIC:
-        //     {
-        //         // Procedure for stratified sampling but with a common RV for each stratum
-        //         //Generate a random number between 0 and 1/N
-        //         double dRand = R::runif(0,1.0 / static_cast<double>(N));
-        //         int j = 0, k = 0;
-        //         uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(N));
-        //         arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
-        //         //while(j < N) {
-        //         while(k < N) {
-        //             while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(N) && j < N) {
-        //                 uRSCount(k)++;
-        //                 j++;
-        //             }
-        //             k++;
-        //         }
-        //         break;
-        //     }
+        case ResampleType::SYSTEMATIC:
+            {
+                //Procedure for stratified sampling but with a common RV for each stratum.
+                int j = 0, k = 0;
+                sampler<Space,Params>::uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(sampler<Space,Params>::N));
+                //Generate a vector of cumulative weights.
+                arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
+                //Generate a random number between 0 and 1/N.
+                double dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
+                while(k < sampler<Space,Params>::N) {
+                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(sampler<Space,Params>::N) && j < sampler<Space,Params>::N) {
+                        sampler<Space,Params>::uRSCount(k)++;
+                        j++;
+                    }
+                    k++;
+                }
+                break;
+            }
         }
 
         sampler<Space,Params>::uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(sampler<Space,Params>::N));
-        //Map count to indices to allow in-place resampling
-        for (int i=0, j=0; i<sampler<Space,Params>::N; ++i) {
+        //Map count to indices to allow in-place resampling.
+        for (int i=0, j=0; i < sampler<Space,Params>::N; ++i) {
             if (sampler<Space,Params>::uRSCount(i)>0) {
                 sampler<Space,Params>::uRSIndices(i) = i;
                 while (sampler<Space,Params>::uRSCount(i)>1) {
@@ -1340,27 +1342,25 @@ namespace smc {
             }
         }
 
-        //Perform the replication of the chosen.
-        for(int i = 0; i < sampler<Space,Params>::N ; ++i) {
+        // Performs a random permutation of indices to break above deterministic assignment and enforce the exchangeability of indices necessary for valid conditional resampling.
+        sampler<Space,Params>::uRSIndices = sampler<Space,Params>::uRSIndices.elem(arma::randperm(sampler<Space,Params>::N - 1));
+
+        //Perform the replication of the chosen particle coordinates.
+        for(int i = 0; i < sampler<Space,Params>::N; ++i) {
             if(sampler<Space,Params>::uRSIndices(i) != static_cast<unsigned int>(i)){
                 sampler<Space,Params>::pPopulation.SetValueN(sampler<Space,Params>::pPopulation.GetValueN(static_cast<int>(sampler<Space,Params>::uRSIndices(i))), i);
             }
         }
 
-        switch(lMode) {
-        case ResampleType::MULTINOMIAL:
-        default:
-            {
-            //Post-hoc randomization of the conditional index i.e. sampling uniformly on {1,...,N} which corresponds to the correct adjustment in case of conditional multinomial resampling
-            //    1. Generate uniform weights
-            Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
-            //    2. Randomly draw conditional index
-            referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0];
-            //    3. Adjust the ancestor/re-sampling index to the randomly drawn
-            sampler<Space,Params>::uRSIndices(referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1)) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
-            }
-        }
-        //Set equal normalised weights
+        //Post-hoc randomization of the conditional index i.e. sampling uniformly on {1,...,N}.
+        //    1. Generate uniform weights
+        Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
+        //    2. Randomly draw conditional index
+        referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0];
+        //    3. Adjust the ancestor/re-sampling index to the randomly drawn
+        sampler<Space,Params>::uRSIndices(referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1)) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+
+        //After conditional resampling is implemented: a final step is to set equal normalised weights.
         sampler<Space,Params>::pPopulation.SetLogWeight(- log(static_cast<double>(sampler<Space,Params>::N))*arma::ones(sampler<Space,Params>::N));
     }
 }
