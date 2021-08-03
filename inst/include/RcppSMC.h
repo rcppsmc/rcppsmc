@@ -21,6 +21,7 @@
 #include <moveset.h>
 #include <population.h>
 #include <sampler.h>
+#include <conditionalSampler.h>
 #include <smc-exception.h>
 #include <smctc.h>
 #include <staticModelAdapt.h>
