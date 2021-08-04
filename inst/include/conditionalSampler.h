@@ -30,6 +30,7 @@
 #define __SMC_CONDITIONAL_SAMPLER_HH 1.0
 
 #include "sampler.h"
+#include <RcppArmadilloExtensions/sample.h>
 
 namespace smc {
     template <class Space, class Params = nullParams> class conditionalSampler:
@@ -346,105 +347,157 @@ namespace smc {
     template <class Space, class Params>
     void conditionalSampler<Space, Params>::conditionalResample(ResampleType::Enum lMode)
     {
-        //Resampling is still done in place but adding a random permutation to the conditional trajectory index makes this scheme valid.
+        //Conditional resampling performed following the algorithms outlined in Appendix C of the paper "...".
         int uMultinomialCount;
 
-        //First obtain a count of the number of children each particle has.
         switch(lMode) {
         case ResampleType::MULTINOMIAL:
-        default:{
-            //Sample from a suitable multinomial vector.
-            sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-            rmultinom(static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::dRSWeights.memptr(), static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::uRSCount.memptr());
-            break;
-        }
-
-        case ResampleType::RESIDUAL:
+        default:
             {
-                //Procedure for residual sampling.
-                sampler<Space,Params>::dRSWeights = exp(log(static_cast<double>(sampler<Space,Params>::N)) + sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-                sampler<Space,Params>::uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(sampler<Space,Params>::N));
-                for(int i = 0; i < sampler<Space,Params>::N; ++i)
-                sampler<Space,Params>::uRSIndices(i) = static_cast<unsigned int>(floor(sampler<Space,Params>::dRSWeights(i)));
-                sampler<Space,Params>::dRSWeights = sampler<Space,Params>::dRSWeights - sampler<Space,Params>::uRSIndices;
-                sampler<Space,Params>::dRSWeights = sampler<Space,Params>::dRSWeights/sum(sampler<Space,Params>::dRSWeights);
-                uMultinomialCount = sampler<Space,Params>::N - arma::sum(sampler<Space,Params>::uRSIndices);
-                rmultinom(uMultinomialCount, sampler<Space,Params>::dRSWeights.memptr(), static_cast<int>(sampler<Space,Params>::N), sampler<Space,Params>::uRSCount.memptr());
-                sampler<Space,Params>::uRSCount += arma::conv_to<arma::Col<int> >::from(sampler<Space,Params>::uRSIndices);
+                //Algorithm 3
+                //Step 0:
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. uniformly on {1,...,N} in case of Multinmial resampling.
+                //    0.1. Generate uniform weights
+                Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
+                //    0.2. Sample one conditional index from uniform distribution.
+                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0]; // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
+                //Step 1:
+                //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
+                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                //Step 2:
+                //Sample remaining ancestors A_{t - 1}^{-K_t} i.i.d. from a categorical distribution.
+                //    2.1. Generate weights for categorical distribution.
+                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                //    2.2 Sample the remaining N-1 ancestor indices from {1,...,N}.
+                Rcpp::IntegerVector tmpAncestorIndices(sampler<Space,Params>::N - 1);
+                tmpAncestorIndices = Rcpp::sample(sampler<Space,Params>::N - 1, sampler<Space,Params>::N - 1, true, sampler<Space,Params>::dRSWeights);
+                //    2.3. Assign ancestor indices to offspring {1,...,N}\{Kt}.
+                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
+                tmpIterator.erase(tmpIterator.begin() + Kt); //exclude the previoiusly sampled conditional index K_t.
+                long intIncrement = 0;
+                // assign sampled ancestors to children
+                for (int i : tmpIterator) {
+                    sampler<Space,Params>::uRSIndices.at(i) = tmpAncestorIndices(intIncrement);
+                    ++intIncrement;
+                }
                 break;
             }
-
         case ResampleType::STRATIFIED:
             {
-                //Procedure for stratified sampling.
-                int j = 0, k = 0;
-                sampler<Space,Params>::uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(sampler<Space,Params>::N));
-                //Generate a vector of cumulative weights.
-                arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
-                //Generate a random number between 0 and 1/N.
-                double dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
-                while(k < sampler<Space,Params>::N) {
-                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(sampler<Space,Params>::N) && j < sampler<Space,Params>::N) {
-                        sampler<Space,Params>::uRSCount(k)++;
-                        j++;
-                        dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
-                    }
-                    k++;
+                //Algorithm 4
+                //Step 0:
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //    0.1. Calculate normalized particle weights and cumulative normalized weights.
+                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(sampler<Space,Params>::dRSWeights);
+                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
+                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, sampler<Space,Params>::N + 1);
+                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(sampler<Space,Params>::N);
+                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(sampler<Space,Params>::N);
+                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T));
+                double maxWeights = 0;
+                if(referenceTrajectoryIndices.at(sampler<Space,Params>::T) != 0){
+                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T - 1));
+                }
+                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
+                arma::Col<double> strataWeights(sampler<Space,Params>::N);
+                strataWeights.fill(0.0);
+                for(int i = 0; i < sampler<Space,Params>::N; ++i) {
+                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                }
+                //    0.4. Calculate \lambda(k_t|.) distribution.
+                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
+                //    0.5. Sample K_t from 0.4.
+                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, lambdaWeightsStratified)[0];
+                //Step 1:
+                //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
+                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                //Step 2:
+                //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
+                //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
+                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
+                tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
+                arma::Col<unsigned int> minimalJs = arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+                // generate ancestor index and assign to offspring
+                double tmpUnifRnd;
+                for (int i : tmpIterator) {
+                    tmpUnifRnd = R::runif(0,1);
+                    tmpUnifRnd += i - 1;
+                    tmpUnifRnd /= sampler<Space,Params>::N;
+
+                    minimalJs = arma::find(dRSWeightsCumulative.elem(minimalJs) > tmpUnifRnd);
+                    sampler<Space,Params>::uRSIndices.at(i) = minimalJs.at(0);
                 }
                 break;
             }
-
         case ResampleType::SYSTEMATIC:
             {
-                //Procedure for stratified sampling but with a common RV for each stratum.
-                int j = 0, k = 0;
-                sampler<Space,Params>::uRSCount = arma::zeros<arma::Col<int> >(static_cast<int>(sampler<Space,Params>::N));
-                //Generate a vector of cumulative weights.
-                arma::vec dWeightCumulative = arma::cumsum(exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight())));
-                //Generate a random number between 0 and 1/N.
-                double dRand = R::runif(0,1.0 / static_cast<double>(sampler<Space,Params>::N));
-                while(k < sampler<Space,Params>::N) {
-                    while((dWeightCumulative(k) - dRand) > static_cast<double>(j)/static_cast<double>(sampler<Space,Params>::N) && j < sampler<Space,Params>::N) {
-                        sampler<Space,Params>::uRSCount(k)++;
-                        j++;
-                    }
-                    k++;
+                //Algorithm 5
+                //Step 0:
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //    0.1. Calculate normalized particle weights and cumulative normalized weights.
+                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(sampler<Space,Params>::dRSWeights);
+                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
+                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, sampler<Space,Params>::N + 1);
+                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(sampler<Space,Params>::N);
+                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(sampler<Space,Params>::N);
+                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T));
+                double maxWeights = 0;
+                if(referenceTrajectoryIndices.at(sampler<Space,Params>::T) != 0){
+                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T - 1));
+                }
+                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
+                arma::Col<double> strataWeights(sampler<Space,Params>::N);
+                strataWeights.fill(0.0);
+                for(int i = 0; i < sampler<Space,Params>::N; ++i) {
+                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                }
+                //    0.4. Calculate \lambda(k_t|.) distribution.
+                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
+                //    0.5. Sample K_t from 0.4.
+                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, lambdaWeightsStratified)[0];
+                //Step 1:
+                //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
+                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                //Step 2:
+                //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
+                //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
+                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
+                tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
+                arma::Col<unsigned int> minimalJs = arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+                //precompute necessary uniform random variable before assignment
+                double tmpVUpperBound = dRSWeightsCumulative.at(Kt);
+                double tmpVLowerBound;
+                if(Kt == 0) {
+                    tmpVLowerBound = 0;
+                } else {
+                    tmpVLowerBound = dRSWeightsCumulative.at(Kt - 1);
+                }
+                double tmpV = R::runif(tmpVLowerBound, tmpVUpperBound);
+                tmpV = sampler<Space,Params>::N * tmpV - std::floor(sampler<Space,Params>::N * tmpV);
+                double tmpU;
+                // generate ancestor index and assign to offspring
+                for (int i : tmpIterator) {
+                    tmpU = tmpV + i - 1;
+                    tmpU /= sampler<Space,Params>::N;
+
+                    minimalJs = arma::find(dRSWeightsCumulative.elem(minimalJs) > tmpU);
+                    sampler<Space,Params>::uRSIndices.at(i) = minimalJs.at(0);
                 }
                 break;
             }
         }
-
-        sampler<Space,Params>::uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(sampler<Space,Params>::N));
-        //Map count to indices to allow in-place resampling.
-        for (int i=0, j=0; i < sampler<Space,Params>::N; ++i) {
-            if (sampler<Space,Params>::uRSCount(i)>0) {
-                sampler<Space,Params>::uRSIndices(i) = i;
-                while (sampler<Space,Params>::uRSCount(i)>1) {
-                    while (sampler<Space,Params>::uRSCount(j)>0) ++j; // find next free spot
-                    sampler<Space,Params>::uRSIndices(j++) = i; // assign index
-                    --sampler<Space,Params>::uRSCount(i); // decrement number of remaining offsprings
-                }
-            }
-        }
-
-        // Performs a random permutation of indices to break above deterministic assignment and enforce the exchangeability of indices necessary for valid conditional resampling.
-        sampler<Space,Params>::uRSIndices = sampler<Space,Params>::uRSIndices.elem(arma::randperm(sampler<Space,Params>::N - 1));
-
-        //Perform the replication of the chosen particle coordinates.
-        for(int i = 0; i < sampler<Space,Params>::N; ++i) {
+        //Perform the replication of the chosen.
+        for(int i = 0; i < sampler<Space,Params>::N ; ++i) {
             if(sampler<Space,Params>::uRSIndices(i) != static_cast<unsigned int>(i)){
                 sampler<Space,Params>::pPopulation.SetValueN(sampler<Space,Params>::pPopulation.GetValueN(static_cast<int>(sampler<Space,Params>::uRSIndices(i))), i);
             }
         }
-
-        //Post-hoc randomization of the conditional index i.e. sampling uniformly on {1,...,N}.
-        //    1. Generate uniform weights
-        Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
-        //    2. Randomly draw conditional index
-        referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0];
-        //    3. Adjust the ancestor/re-sampling index to the randomly drawn
-        sampler<Space,Params>::uRSIndices(referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1)) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
-
         //After conditional resampling is implemented: a final step is to set equal normalised weights.
         sampler<Space,Params>::pPopulation.SetLogWeight(- log(static_cast<double>(sampler<Space,Params>::N))*arma::ones(sampler<Space,Params>::N));
     }
