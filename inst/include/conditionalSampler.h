@@ -491,6 +491,54 @@ namespace smc {
                 }
                 break;
             }
+        case ResampleType::RESIDUAL:
+            {
+                //Algorithm 6
+                //Step 0:
+                //Declare/initialize container for implementation; compute normalized particle weights.
+                //    0.1. Container setup
+                int numDeterministicOffspring = 0; //Counts the number of deterministically assigned offspring.
+                double expectedNumberOffspring = 0;
+                arma::Col<double> dRSWeightsResidual(sampler<Space,Params>::N);
+                arma::Col<unsigned int> tmpIterator = arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+                //    0.2. Calculate normalized particle weights and cumulative normalized weights.
+                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                //Step 1:
+                //Assign deterministic offpring indices for each i={1,...,N}.
+                for (int i : tmpIterator) {
+                    //Compute (integer part of) expected number of offspring
+                    expectedNumberOffspring = std::floor(sampler<Space,Params>::N * sampler<Space,Params>::dRSWeights);
+                    //Generate D_i set:
+                    if(expectedNumberOffspring > 0.0) {
+                        //Set D_i={numDeterministicOffspring, numDeterministicOffspring + 1, ..., numDeterministicOffspring + expectedNumberOffspring}
+                        // Set Card(D_i)=length(D_i)
+                        // Set numDeterministicOffspring += Card(D_i);
+                    } else {
+                        //Set D_i=EMPTYSET
+                        //Set Card(D_i)= 0;
+                    }
+                    //Deterministic component assignment
+                    //for(int j : D_i) {
+                    //    sampler<Space,Params>::uRSIndices.at(j) = i;
+                    //}
+                    //Convenient way of handling the conditioning path
+                    //if(i == K_{t-1}) store D_{K_{t-1}};
+                    //Compute normalized residual weights \tilde{W}_{t-1}^i
+                }
+                //Step 2:
+                //Sample K_t from appropriate lambda distribution
+                long Kt = 0;
+                // ...........
+                referenceTrajectoryIndices(sampler<Space,Params>::T + 1) = Kt;
+                //Step 3:
+                //Compute residual ancestor indices via sampling from categorical distribution
+                // ...........
+                //Step 4: If not done in 1., assign conditional ancestor index:
+                // if(K_t not in D_{K_{t  1}})
+                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices(sampler<Space,Params>::T);
+                // else already assigned under 1.
+                break;
+            }
         }
         //Perform the replication of the chosen.
         for(int i = 0; i < sampler<Space,Params>::N ; ++i) {
