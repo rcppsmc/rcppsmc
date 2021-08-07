@@ -30,7 +30,6 @@
 #define __SMC_CONDITIONAL_SAMPLER_HH 1.0
 
 #include "sampler.h"
-#include <RcppArmadilloExtensions/sample.h>
 
 namespace smc {
     template <class Space, class Params = nullParams> class conditionalSampler:
@@ -101,16 +100,10 @@ namespace smc {
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        //   A. construct uniform weights in style of Armadillo 10.5 & earlier
-        // arma::Col<double> tmpUniformWeights(sampler<Space,Params>::N, arma::fill::none);
-        // tmpUniformWeights.fill(1.0/sampler<Space,Params>::N);
-        Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
-        //   B. sample uniformly from the grid
-        // referenceTrajectoryIndices.at(T) = arma::sample(arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N), 1, false, tmpUniformWeights)(0);
-        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0];
+        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N));
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectoryIndices(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
 
         //Scaling weights by 1/N (for evidence computation)
         sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - log(static_cast<double>(sampler<Space,Params>::N)));
@@ -191,16 +184,10 @@ namespace smc {
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        //   A. construct uniform weights in style of Armadillo 10.5 & earlier
-        // arma::Col<double> tmpUniformWeights(sampler<Space,Params>::N, arma::fill::none);
-        // tmpUniformWeights.fill(1.0/sampler<Space,Params>::N);
-        Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
-        //   B. sample uniformly from the grid
-        // referenceTrajectoryIndices.at(T) = arma::sample(arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N), 1, false, tmpUniformWeights)(0);
-        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0];
+        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N));
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectoryIndices(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
 
         //Scaling weights by 1/N (for evidence computation)
         sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - log(static_cast<double>(sampler<Space,Params>::N)));
@@ -271,7 +258,7 @@ namespace smc {
 
         //Do add a conditional conditional move:
         //set reference particle coordinate at conditional value and re-weight.
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectoryIndices(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
 
         //Estimate the normalising constant.
         sampler<Space,Params>::dlogNCIt = sampler<Space,Params>::CalcLogNC();
@@ -357,10 +344,7 @@ namespace smc {
                 //Algorithm 3
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. uniformly on {1,...,N} in case of Multinmial resampling.
-                //    0.1. Generate uniform weights
-                Rcpp::NumericVector tmpUniformWeights(sampler<Space,Params>::N, 1.0/sampler<Space,Params>::N);
-                //    0.2. Sample one conditional index from uniform distribution.
-                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, tmpUniformWeights)[0]; // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                long Kt = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
                 referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
@@ -369,11 +353,11 @@ namespace smc {
                 //Sample remaining ancestors A_{t - 1}^{-K_t} i.i.d. from a categorical distribution.
                 //    2.1. Generate weights for categorical distribution.
                 sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-                //    2.2 Sample the remaining N-1 ancestor indices from {1,...,N}.
+                //    2.2 Sample remaining N-1 ancestor indices from {1,...,N}.
                 Rcpp::IntegerVector tmpAncestorIndices(sampler<Space,Params>::N - 1);
-                tmpAncestorIndices = Rcpp::sample(sampler<Space,Params>::N - 1, sampler<Space,Params>::N - 1, true, sampler<Space,Params>::dRSWeights);
+                tmpAncestorIndices = Rcpp::sample(sampler<Space,Params>::N, sampler<Space,Params>::N - 1, true, sampler<Space,Params>::dRSWeights) - 1;
                 //    2.3. Assign ancestor indices to offspring {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); //exclude the previoiusly sampled conditional index K_t.
                 long intIncrement = 0;
@@ -410,7 +394,7 @@ namespace smc {
                 //    0.4. Calculate \lambda(k_t|.) distribution.
                 Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, lambdaWeightsStratified)[0];
+                long Kt = Rcpp::sample(sampler<Space,Params>::N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
                 sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
@@ -459,7 +443,7 @@ namespace smc {
                 //    0.4. Calculate \lambda(k_t|.) distribution.
                 Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(sampler<Space,Params>::N - 1, 1, false, lambdaWeightsStratified)[0];
+                long Kt = Rcpp::sample(sampler<Space,Params>::N, 1, false, lambdaWeightsStratified)[0];
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
                 sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
@@ -498,8 +482,11 @@ namespace smc {
                 //Declare/initialize container for implementation; compute normalized particle weights.
                 //    0.1. Container setup
                 int numDeterministicOffspring = 0; //Counts the number of deterministically assigned offspring.
-                double expectedNumberOffspring = 0;
+                int expectedNumberOffspring = 0;
                 arma::Col<double> dRSWeightsResidual(sampler<Space,Params>::N);
+                arma::Col<unsigned int> DsetCurrent;
+                int CardDsetCurrent = 0;
+                arma::Col<unsigned int> DsetKtMinus1;
                 arma::Col<unsigned int> tmpIterator = arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
                 //    0.2. Calculate normalized particle weights and cumulative normalized weights.
                 sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
@@ -509,8 +496,9 @@ namespace smc {
                     //Compute (integer part of) expected number of offspring
                     expectedNumberOffspring = std::floor(sampler<Space,Params>::N * sampler<Space,Params>::dRSWeights);
                     //Generate D_i set:
-                    if(expectedNumberOffspring > 0.0) {
+                    if(expectedNumberOffspring > 0) {
                         //Set D_i={numDeterministicOffspring, numDeterministicOffspring + 1, ..., numDeterministicOffspring + expectedNumberOffspring}
+                        // DsetCurrent
                         // Set Card(D_i)=length(D_i)
                         // Set numDeterministicOffspring += Card(D_i);
                     } else {
