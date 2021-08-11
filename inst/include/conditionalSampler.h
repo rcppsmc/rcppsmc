@@ -35,7 +35,57 @@ namespace smc {
     template <class Space, class Params = nullParams> class conditionalSampler:
     public sampler<Space, Params>
     {
+        ///List of inherited members of the base sampler-class
+        ///Number of particles in the system.
+        using sampler<Space,Params>::N;
+        ///The current evolution time of the system.
+        using sampler<Space,Params>::T;
+        ///The resampling mode which is to be employed.
+        using sampler<Space,Params>::rtResampleMode;
+        ///The effective sample size at which resampling should be used.
+        using sampler<Space,Params>::dResampleThreshold;
+        //Structure used internally for resampling.
+        using sampler<Space,Params>::dRSWeights;
+        ///Structure used internally for resampling.
+        using sampler<Space,Params>::uRSIndices;
+
+        ///The particles within the system.
+        using sampler<Space,Params>::pPopulation;
+        ///The set of moves available.
+        using sampler<Space,Params>::pMoves;
+         /// The additional algorithm parameters.
+        using sampler<Space,Params>::algParams;
+        /// An object for adapting additional algorithm parameters
+        using sampler<Space,Params>::pAdapt;
+
+        ///The number of MCMC moves which have been accepted during this iteration
+        using sampler<Space,Params>::nAccepted;
+        ///A flag which tracks whether the ensemble was resampled during this iteration
+        using sampler<Space,Params>::nResampled;
+        ///The number of MCMC repeats to be performed. The default is 1 if an MCMC step is supplied.
+        using sampler<Space,Params>::nRepeats;
+        ///The proportion of accepted MCMC proposals in the most recent MCMC step, with a default of -1 if no MCMC steps have been performed.
+        using sampler<Space,Params>::acceptProb;
+
+        ///An estimate of the log normalising constant ratio over the entire path.
+        using sampler<Space,Params>::dlogNCPath;
+        ///An estimate of the log normalising constant ratio over the last step.
+        using sampler<Space,Params>::dlogNCIt;
+
+        ///A mode flag which indicates whether historical information is stored
+        using sampler<Space,Params>::htHistoryMode;
+        ///The historical process associated with the particle system.
+        using sampler<Space,Params>::History;
+
+        ///Move the particle set by proposing and applying an appropriate move to each particle.
         using sampler<Space,Params>::MoveParticles;
+        ///Returns the crude normalising constant ratio estimate implied by the weights
+        using sampler<Space,Params>::CalcLogNC;
+        ///Returns the Effective Sample Size of the specified particle generation.
+        using sampler<Space,Params>::GetESS;
+        //Returns the current evolution time of the system.
+        using sampler<Space,Params>::GetTime;
+
         private:
             std::vector<Space> referenceTrajectory;
             long maxT = referenceTrajectory.size();
@@ -91,78 +141,78 @@ namespace smc {
     template <class Space, class Params>
     void conditionalSampler<Space,Params>::Initialise(void)
     {
-        sampler<Space,Params>::T = 0;
-        sampler<Space,Params>::dlogNCPath = 0.0;
-        sampler<Space,Params>::acceptProb = -1;
+        T = 0;
+        dlogNCPath = 0.0;
+        acceptProb = -1;
 
         //Set the initial values and log weights of the particles
-        std::vector<Space> InitVal(sampler<Space,Params>::N);
-        arma::vec InitWeights(sampler<Space,Params>::N);
-        sampler<Space,Params>::pPopulation = population<Space>(InitVal,InitWeights);
-        sampler<Space,Params>::pMoves->DoInit(sampler<Space,Params>::pPopulation,sampler<Space,Params>::N,sampler<Space,Params>::algParams);
+        std::vector<Space> InitVal(N);
+        arma::vec InitWeights(N);
+        pPopulation = population<Space>(InitVal,InitWeights);
+        pMoves->DoInit(pPopulation,N,algParams);
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N));
+        referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
 
         //Scaling weights by 1/N (for evidence computation)
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - log(static_cast<double>(sampler<Space,Params>::N)));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
 
         //Estimate the normalising constant
-        sampler<Space,Params>::dlogNCIt = sampler<Space,Params>::CalcLogNC();
-        sampler<Space,Params>::dlogNCPath += sampler<Space,Params>::dlogNCIt;
+        dlogNCIt = CalcLogNC();
+        dlogNCPath += dlogNCIt;
 
         //Normalise the weights
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::dlogNCIt);
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt);
 
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
-        double ESS = sampler<Space,Params>::GetESS();
-        if(ESS < sampler<Space,Params>::dResampleThreshold) {
-            sampler<Space,Params>::nResampled = 1;
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
-            conditionalResample(sampler<Space,Params>::rtResampleMode);
+        double ESS = GetESS();
+        if(ESS < dResampleThreshold) {
+            nResampled = 1;
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
+            conditionalResample(rtResampleMode);
         }
         else {
-            sampler<Space,Params>::nResampled = 0;
-            if(sampler<Space,Params>::htHistoryMode == HistoryType::AL) {
-                sampler<Space,Params>::uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+            nResampled = 0;
+            if(htHistoryMode == HistoryType::AL) {
+                uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
                 //No resampling: set conditional index to previous iteration.
-                referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC =  sampler<Space,Params>::pMoves->DoMCMC(0,sampler<Space,Params>::pPopulation, sampler<Space,Params>::N, sampler<Space,Params>::nRepeats, sampler<Space,Params>::nAccepted, sampler<Space,Params>::algParams);
+        bool didMCMC =  pMoves->DoMCMC(0,pPopulation, N, nRepeats, nAccepted, algParams);
         if (didMCMC){
-            sampler<Space,Params>::acceptProb = static_cast<double>(sampler<Space,Params>::nAccepted)/(static_cast<double>(sampler<Space,Params>::N)*static_cast<double>(sampler<Space,Params>::nRepeats));
+            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
         //Normalise the weights
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::CalcLogNC());
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
 
         //Perform any final updates to the additional algorithm parameters.
-        sampler<Space,Params>::pAdapt->updateEnd(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation);
+        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
-        if(sampler<Space,Params>::htHistoryMode != HistoryType::NONE){
-            sampler<Space,Params>::History.clear();
+        if(htHistoryMode != HistoryType::NONE){
+            History.clear();
             historyelement<Space> histel;
-            switch(sampler<Space,Params>::htHistoryMode) {
+            switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled));
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled), sampler<Space,Params>::uRSIndices);
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
                 break;
             /// To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
                 break;
             }
-            sampler<Space,Params>::History.push_back(histel);
+            History.push_back(histel);
         }
         return;
     }
@@ -175,78 +225,78 @@ namespace smc {
     void conditionalSampler<Space,Params>::Initialise(const std::vector<Space> & referenceTrajectoryInit)
     {
         SetReferenceTrajectory(referenceTrajectoryInit);
-        sampler<Space,Params>::T = 0;
-        sampler<Space,Params>::dlogNCPath = 0.0;
-        sampler<Space,Params>::acceptProb = -1;
+        T = 0;
+        dlogNCPath = 0.0;
+        acceptProb = -1;
 
         //Set the initial values and log weights of the particles
-        std::vector<Space> InitVal(sampler<Space,Params>::N);
-        arma::vec InitWeights(sampler<Space,Params>::N);
-        sampler<Space,Params>::pPopulation = population<Space>(InitVal,InitWeights);
-        sampler<Space,Params>::pMoves->DoInit(sampler<Space,Params>::pPopulation,sampler<Space,Params>::N,sampler<Space,Params>::algParams);
+        std::vector<Space> InitVal(N);
+        arma::vec InitWeights(N);
+        pPopulation = population<Space>(InitVal,InitWeights);
+        pMoves->DoInit(pPopulation,N,algParams);
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        referenceTrajectoryIndices.at(sampler<Space,Params>::T) = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N));
+        referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
 
         //Scaling weights by 1/N (for evidence computation)
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - log(static_cast<double>(sampler<Space,Params>::N)));
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - log(static_cast<double>(N)));
 
         //Estimate the normalising constant
-        sampler<Space,Params>::dlogNCIt = sampler<Space,Params>::CalcLogNC();
-        sampler<Space,Params>::dlogNCPath += sampler<Space,Params>::dlogNCIt;
+        dlogNCIt = CalcLogNC();
+        dlogNCPath += dlogNCIt;
 
         //Normalise the weights
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::dlogNCIt);
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt);
 
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
-        double ESS = sampler<Space,Params>::GetESS();
-        if(ESS < sampler<Space,Params>::dResampleThreshold) {
-            sampler<Space,Params>::nResampled = 1;
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
-            conditionalResample(sampler<Space,Params>::rtResampleMode);
+        double ESS = GetESS();
+        if(ESS < dResampleThreshold) {
+            nResampled = 1;
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
+            conditionalResample(rtResampleMode);
         }
         else {
-            sampler<Space,Params>::nResampled = 0;
-            if(sampler<Space,Params>::htHistoryMode == HistoryType::AL) {
-                sampler<Space,Params>::uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+            nResampled = 0;
+            if(htHistoryMode == HistoryType::AL) {
+                uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
                 // No resampling: set conditional index to previous iteration.
-                referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC =  sampler<Space,Params>::pMoves->DoMCMC(0,sampler<Space,Params>::pPopulation, sampler<Space,Params>::N, sampler<Space,Params>::nRepeats, sampler<Space,Params>::nAccepted, sampler<Space,Params>::algParams);
+        bool didMCMC =  pMoves->DoMCMC(0,pPopulation, N, nRepeats, nAccepted, algParams);
         if (didMCMC){
-            sampler<Space,Params>::acceptProb = static_cast<double>(sampler<Space,Params>::nAccepted)/(static_cast<double>(sampler<Space,Params>::N)*static_cast<double>(sampler<Space,Params>::nRepeats));
+            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
         //Normalise the weights
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::CalcLogNC());
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
 
         //Perform any final updates to the additional algorithm parameters.
-        sampler<Space,Params>::pAdapt->updateEnd(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation);
+        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
-        if(sampler<Space,Params>::htHistoryMode != HistoryType::NONE){
-            sampler<Space,Params>::History.clear();
+        if(htHistoryMode != HistoryType::NONE){
+            History.clear();
             historyelement<Space> histel;
-            switch(sampler<Space,Params>::htHistoryMode) {
+            switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled));
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled), sampler<Space,Params>::uRSIndices);
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
                 break;
             /// To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
                 break;
             }
-            sampler<Space,Params>::History.push_back(histel);
+            History.push_back(histel);
         }
         return;
     }
@@ -254,71 +304,71 @@ namespace smc {
     double conditionalSampler<Space,Params>::IterateEss()
     {
 
-        sampler<Space,Params>::pAdapt->updateForMove(this->algParams,sampler<Space,Params>::pPopulation);
+        pAdapt->updateForMove(this->algParams,pPopulation);
 
         //Move the particle set.
         MoveParticles();
 
         //Do add a conditional conditional move:
         //set reference particle coordinate at conditional value and re-weight.
-        sampler<Space,Params>::pMoves->DoConditionalMove(sampler<Space,Params>::T,sampler<Space,Params>::pPopulation,referenceTrajectory[sampler<Space,Params>::T],referenceTrajectoryIndices.at(sampler<Space,Params>::T),sampler<Space,Params>::algParams);
+        pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
 
         //Estimate the normalising constant.
-        sampler<Space,Params>::dlogNCIt = sampler<Space,Params>::CalcLogNC();
-        sampler<Space,Params>::dlogNCPath += sampler<Space,Params>::dlogNCIt;
+        dlogNCIt = CalcLogNC();
+        dlogNCPath += dlogNCIt;
 
         //Normalise the weights.
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::dlogNCIt);
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - dlogNCIt);
 
         //Check if the ESS is below some reasonable threshold and resample if necessary.
         //A mechanism for setting this threshold is required.
-        double ESS = sampler<Space,Params>::GetESS();
-        if(ESS < sampler<Space,Params>::dResampleThreshold) {
-            sampler<Space,Params>::nResampled = 1;
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
-            conditionalResample(sampler<Space,Params>::rtResampleMode);
+        double ESS = GetESS();
+        if(ESS < dResampleThreshold) {
+            nResampled = 1;
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
+            conditionalResample(rtResampleMode);
         }
         else {
-            sampler<Space,Params>::nResampled = 0;
-            if(sampler<Space,Params>::htHistoryMode == HistoryType::AL) {
-                sampler<Space,Params>::uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+            nResampled = 0;
+            if(htHistoryMode == HistoryType::AL) {
+                uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
                 //No resampling: set conditional index to previous iteration.
-                referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            sampler<Space,Params>::pAdapt->updateForMCMC(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation,sampler<Space,Params>::acceptProb,sampler<Space,Params>::nResampled,sampler<Space,Params>::nRepeats);
+            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
         //A possible MCMC step should be included here.
-        bool didMCMC = sampler<Space,Params>::pMoves->DoMCMC(sampler<Space,Params>::T+1,sampler<Space,Params>::pPopulation, sampler<Space,Params>::N, sampler<Space,Params>::nRepeats, sampler<Space,Params>::nAccepted,sampler<Space,Params>::algParams);
+        bool didMCMC = pMoves->DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted,algParams);
         if (didMCMC){
-            sampler<Space,Params>::acceptProb = static_cast<double>(sampler<Space,Params>::nAccepted)/(static_cast<double>(sampler<Space,Params>::N)*static_cast<double>(sampler<Space,Params>::nRepeats));
+            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
         }
 
 
         //Normalise the weights
-        sampler<Space,Params>::pPopulation.SetLogWeight(sampler<Space,Params>::pPopulation.GetLogWeight() - sampler<Space,Params>::CalcLogNC());
+        pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
 
         //Perform any final updates to the additional algorithm parameters.
-        sampler<Space,Params>::pAdapt->updateEnd(sampler<Space,Params>::algParams,sampler<Space,Params>::pPopulation);
+        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
-        if(sampler<Space,Params>::htHistoryMode != HistoryType::NONE){
+        if(htHistoryMode != HistoryType::NONE){
             historyelement<Space> histel;
-            switch(sampler<Space,Params>::htHistoryMode) {
+            switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled));
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(sampler<Space,Params>::N, sampler<Space,Params>::pPopulation, sampler<Space,Params>::nAccepted, sampler<Space,Params>::nRepeats, historyflags(sampler<Space,Params>::nResampled), sampler<Space,Params>::uRSIndices);
+                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
                 break;
             /// To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
                 break;
             }
-            sampler<Space,Params>::History.push_back(histel);
+            History.push_back(histel);
         }
         // Increment the evolution time.
-        sampler<Space,Params>::T++;
+        T++;
 
         return ESS;
     }
@@ -331,7 +381,7 @@ namespace smc {
     template <class Space, class Params>
     void conditionalSampler<Space,Params>::IterateUntil(long lTerminate)
     {
-        while(sampler<Space,Params>::GetTime() < lTerminate)
+        while(GetTime() < lTerminate)
         Iterate();
     }
     template <class Space, class Params>
@@ -339,7 +389,7 @@ namespace smc {
     {
         //Conditional resampling performed following the algorithms outlined in Appendix C of the paper "...".
 
-        sampler<Space,Params>::uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(sampler<Space,Params>::N));
+        uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
 
         switch(lMode) {
         case ResampleType::MULTINOMIAL:
@@ -348,26 +398,26 @@ namespace smc {
                 //Algorithm 3
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. uniformly on {1,...,N} in case of Multinmial resampling.
-                long Kt = floor(unif_rand()*static_cast<double>(sampler<Space,Params>::N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
-                referenceTrajectoryIndices.at(sampler<Space,Params>::T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
+                long Kt = floor(unif_rand()*static_cast<double>(N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                referenceTrajectoryIndices.at(T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
-                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
                 //Step 2:
                 //Sample remaining ancestors A_{t - 1}^{-K_t} i.i.d. from a categorical distribution.
                 //    2.1. Generate weights for categorical distribution.
-                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
                 //    2.2 Sample remaining N-1 ancestor indices from {1,...,N}.
-                Rcpp::IntegerVector tmpAncestorIndices(sampler<Space,Params>::N - 1);
-                tmpAncestorIndices = Rcpp::sample(sampler<Space,Params>::N, sampler<Space,Params>::N - 1, true,  Rcpp::as<Rcpp::NumericVector>(Rcpp::wrap(sampler<Space,Params>::dRSWeights))) - 1;
+                Rcpp::IntegerVector tmpAncestorIndices(N - 1);
+                tmpAncestorIndices = Rcpp::sample(N, N - 1, true,  Rcpp::as<Rcpp::NumericVector>(Rcpp::wrap(dRSWeights))) - 1;
                 //    2.3. Assign ancestor indices to offspring {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N);
+                std::vector<unsigned int> tmpIterator(N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); //exclude the previoiusly sampled conditional index K_t.
                 long intIncrement = 0;
                 // assign sampled ancestors to children
                 for (int i : tmpIterator) {
-                    sampler<Space,Params>::uRSIndices.at(i) = tmpAncestorIndices(intIncrement);
+                    uRSIndices.at(i) = tmpAncestorIndices(intIncrement);
                     ++intIncrement;
                 }
                 break;
@@ -378,60 +428,47 @@ namespace smc {
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
                 //    0.1. Calculate normalized particle weights and cumulative normalized weights.
-                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-                arma::vec dRSWeightsCumulative = arma::cumsum(sampler<Space,Params>::dRSWeights);
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
                 //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, sampler<Space,Params>::N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(sampler<Space,Params>::N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(sampler<Space,Params>::N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T));
+                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
+                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
+                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
+                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
                 double maxWeights = 0;
-                if(sampler<Space,Params>::T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T - 1));
+                if(T != 0){
+                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
                 }
                 //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
-                arma::Col<double> strataWeights(sampler<Space,Params>::N);
+                arma::Col<double> strataWeights(N);
                 strataWeights.fill(0.0);
-                for(int i = 0; i < sampler<Space,Params>::N; ++i) {
+                for(int i = 0; i < N; ++i) {
                     strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
+                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(sampler<Space,Params>::N, 1, false, lambdaWeightsStratified)[0] - 1;
+                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
-                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
                 //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::vector<unsigned int> tmpIterator(N - 1);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
-                arma::Col<unsigned int> minimalJs = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
                 long minimalJ = 0;
                 // generate ancestor index and assign to offspring
                 double tmpUnifRnd;
                 for (int i : tmpIterator) {
                     tmpUnifRnd = unif_rand();
                     tmpUnifRnd += i;//mathematical 'i' starts at 1; here at 0
-                    tmpUnifRnd /= sampler<Space,Params>::N;
-                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(sampler<Space,Params>::N - minimalJ) > tmpUnifRnd, 1, "first"));
-                    Rcpp::Rcout << "Left indices: " << std::endl;
-                    Rcpp::Rcout << minimalJs.tail(sampler<Space,Params>::N - minimalJ) << std::endl;
-                    Rcpp::Rcout << "Min index as j taken: " << std::endl;
-                    Rcpp::Rcout << minimalJ << std::endl;
-                    Rcpp::Rcout << "Because random number was " << std::endl;
-                    Rcpp::Rcout << tmpUnifRnd << std::endl;
-                    Rcpp::Rcout << "But cumulative weight was " << std::endl;
-                    Rcpp::Rcout << dRSWeightsCumulative.at(minimalJ) << std::endl;
-                    Rcpp::Rcout << "And all cumulative weights are " << std::endl;
-                    Rcpp::Rcout << dRSWeightsCumulative << std::endl;
-                    sampler<Space,Params>::uRSIndices.at(i) = minimalJ;
-                    Rcpp::Rcout << "came thus far 13 at iter" << i << std::endl;
+                    tmpUnifRnd /= N;
+
+                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpUnifRnd, 1, "first"));
+                    uRSIndices.at(i) = minimalJ;
                 }
-                Rcpp::Rcout << "came thus far 14 " << std::endl;
-                break;
             }
         case ResampleType::SYSTEMATIC:
             {
@@ -439,44 +476,37 @@ namespace smc {
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
                 //    0.1. Calculate normalized particle weights and cumulative normalized weights.
-                Rcpp::Rcout << "came thus far 1" << std::endl;
-                sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
-                arma::vec dRSWeightsCumulative = arma::cumsum(sampler<Space,Params>::dRSWeights);
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
                 //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                Rcpp::Rcout << "came thus far 2" << std::endl;
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, sampler<Space,Params>::N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(sampler<Space,Params>::N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(sampler<Space,Params>::N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T));
+                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
+                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
+                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
+                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
                 double maxWeights = 0;
-                Rcpp::Rcout << "came thus far 3" << std::endl;
-                if(sampler<Space,Params>::T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T - 1));
+                if(T != 0){
+                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
                 }
                 //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
-                Rcpp::Rcout << "came thus far 4" << std::endl;
-                arma::Col<double> strataWeights(sampler<Space,Params>::N);
+                arma::Col<double> strataWeights(N);
                 strataWeights.fill(0.0);
-                for(int i = 0; i < sampler<Space,Params>::N; ++i) {
+                for(int i = 0; i < N; ++i) {
                     strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::Rcout << "came thus far 5" << std::endl;
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(sampler<Space,Params>::T)));
+                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(sampler<Space,Params>::N, 1, false, lambdaWeightsStratified)[0];
+                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0];
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
-                sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices.at(sampler<Space,Params>::T);
+                uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
                 //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(sampler<Space,Params>::N - 1);
+                std::vector<unsigned int> tmpIterator(N - 1);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
-                arma::Col<unsigned int> minimalJs = arma::linspace<arma::Col<unsigned int>>(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
                 //precompute necessary uniform random variable before assignment
-                Rcpp::Rcout << "came thus far 6" << std::endl;
                 double tmpVUpperBound = dRSWeightsCumulative.at(Kt);
                 double tmpVLowerBound;
                 if(Kt == 0) {
@@ -484,24 +514,18 @@ namespace smc {
                 } else {
                     tmpVLowerBound = dRSWeightsCumulative.at(Kt - 1);
                 }
-                Rcpp::Rcout << "came thus far 7" << std::endl;
                 double tmpV = R::runif(tmpVLowerBound, tmpVUpperBound);
-                tmpV = sampler<Space,Params>::N * tmpV - std::floor(sampler<Space,Params>::N * tmpV);
+                tmpV = N * tmpV - std::floor(N * tmpV);
                 double tmpU;
                 long minimalJ = 0;
                 // generate ancestor index and assign to offspring
-                Rcpp::Rcout << "came thus far 8" << std::endl;
                 for (int i : tmpIterator) {
-                    Rcpp::Rcout << "came thus far 9" << std::endl;
                     tmpU = tmpV + i;//mathematical 'i' at 1; here it starts at 0
-                    tmpU /= sampler<Space,Params>::N;
+                    tmpU /= N;
 
-                    Rcpp::Rcout << "came thus far 10" << std::endl;
-                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(sampler<Space,Params>::N - minimalJ) > tmpU, 1, "first"));
-                    sampler<Space,Params>::uRSIndices.at(i) = minimalJ;
-                    Rcpp::Rcout << "came thus far 11 at iter " << i << std::endl;
+                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpU, 1, "first"));
+                    uRSIndices.at(i) = minimalJ;
                 }
-                break;
             }
         // case ResampleType::RESIDUAL:
         //     {
@@ -512,18 +536,18 @@ namespace smc {
         //         //    0.1. Container setup
         //         int numDeterministicOffspring = 0; //Counts the number of deterministically assigned offspring.
         //         int expectedNumberOffspring = 0;
-        //         arma::Col<double> dRSWeightsResidual(sampler<Space,Params>::N);
+        //         arma::Col<double> dRSWeightsResidual(N);
         //         arma::Col<unsigned int> DsetCurrent;
         //         int CardDsetCurrent = 0;
         //         arma::Col<unsigned int> DsetKtMinus1;
-        //         arma::Col<unsigned int> tmpIterator = arma::linspace(0, sampler<Space,Params>::N - 1, sampler<Space,Params>::N);
+        //         arma::Col<unsigned int> tmpIterator = arma::linspace(0, N - 1, N);
         //         //    0.2. Calculate normalized particle weights and cumulative normalized weights.
-        //         sampler<Space,Params>::dRSWeights = exp(sampler<Space,Params>::pPopulation.GetLogWeight() - stableLogSumWeights(sampler<Space,Params>::pPopulation.GetLogWeight()));
+        //         dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
         //         //Step 1:
         //         //Assign deterministic offpring indices for each i={1,...,N}.
         //         for (int i : tmpIterator) {
         //             //Compute (integer part of) expected number of offspring
-        //             expectedNumberOffspring = std::floor(sampler<Space,Params>::N * sampler<Space,Params>::dRSWeights);
+        //             expectedNumberOffspring = std::floor(N * dRSWeights);
         //             //Generate D_i set:
         //             if(expectedNumberOffspring > 0) {
         //                 //Set D_i={numDeterministicOffspring, numDeterministicOffspring + 1, ..., numDeterministicOffspring + expectedNumberOffspring}
@@ -536,7 +560,7 @@ namespace smc {
         //             }
         //             //Deterministic component assignment
         //             //for(int j : D_i) {
-        //             //    sampler<Space,Params>::uRSIndices.at(j) = i;
+        //             //    uRSIndices.at(j) = i;
         //             //}
         //             //Convenient way of handling the conditioning path
         //             //if(i == K_{t-1}) store D_{K_{t-1}};
@@ -546,25 +570,25 @@ namespace smc {
         //         //Sample K_t from appropriate lambda distribution
         //         long Kt = 0;
         //         // ...........
-        //         referenceTrajectoryIndices(sampler<Space,Params>::T + 1) = Kt;
+        //         referenceTrajectoryIndices(T + 1) = Kt;
         //         //Step 3:
         //         //Compute residual ancestor indices via sampling from categorical distribution
         //         // ...........
         //         //Step 4: If not done in 1., assign conditional ancestor index:
         //         // if(K_t not in D_{K_{t  1}})
-        //         sampler<Space,Params>::uRSIndices.at(Kt) = referenceTrajectoryIndices(sampler<Space,Params>::T);
+        //         uRSIndices.at(Kt) = referenceTrajectoryIndices(T);
         //         // else already assigned under 1.
         //         break;
         //     }
         }
         //Perform the replication of the chosen.
-        for(int i = 0; i < sampler<Space,Params>::N ; ++i) {
-            if(sampler<Space,Params>::uRSIndices(i) != static_cast<unsigned int>(i)){
-                sampler<Space,Params>::pPopulation.SetValueN(sampler<Space,Params>::pPopulation.GetValueN(static_cast<int>(sampler<Space,Params>::uRSIndices(i))), i);
+        for(int i = 0; i < N ; ++i) {
+            if(uRSIndices(i) != static_cast<unsigned int>(i)){
+                pPopulation.SetValueN(pPopulation.GetValueN(static_cast<int>(uRSIndices(i))), i);
             }
         }
         //After conditional resampling is implemented: a final step is to set equal normalised weights.
-        sampler<Space,Params>::pPopulation.SetLogWeight(- log(static_cast<double>(sampler<Space,Params>::N))*arma::ones(sampler<Space,Params>::N));
+        pPopulation.SetLogWeight(- log(static_cast<double>(N))*arma::ones(N));
     }
 }
 #endif
