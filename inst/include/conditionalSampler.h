@@ -4,6 +4,8 @@
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
+// Copyright (C) 2021         Adam Johansen, Dirk Eddelbuettel, Leah South, and
+// Ilya Zarubin
 //
 // This file is part of RcppSMC.
 //
@@ -292,7 +294,7 @@ namespace smc {
             case HistoryType::AL:
                 histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
                 break;
-            /// To avoid compiler warnings, HistoryType::NONE is handled
+            ///To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
                 break;
             }
@@ -361,13 +363,13 @@ namespace smc {
             case HistoryType::AL:
                 histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
                 break;
-            /// To avoid compiler warnings, HistoryType::NONE is handled
+            //To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
                 break;
             }
             History.push_back(histel);
         }
-        // Increment the evolution time.
+        //Increment the evolution time.
         T++;
 
         return ESS;
@@ -389,6 +391,7 @@ namespace smc {
     {
         //Conditional resampling performed following the algorithms outlined in Appendix C of the paper "...".
 
+        //Initialize container for ancestor indices.
         uRSIndices = arma::zeros<arma::Col<unsigned int> >(static_cast<int>(N));
 
         switch(lMode) {
@@ -527,59 +530,89 @@ namespace smc {
                     uRSIndices.at(i) = minimalJ;
                 }
             }
-        // case ResampleType::RESIDUAL:
-        //     {
-        //         Rcpp::Rcout << "resampling: residual resampling" << std::endl;
-        //         //Algorithm 6
-        //         //Step 0:
-        //         //Declare/initialize container for implementation; compute normalized particle weights.
-        //         //    0.1. Container setup
-        //         int numDeterministicOffspring = 0; //Counts the number of deterministically assigned offspring.
-        //         int expectedNumberOffspring = 0;
-        //         arma::Col<double> dRSWeightsResidual(N);
-        //         arma::Col<unsigned int> DsetCurrent;
-        //         int CardDsetCurrent = 0;
-        //         arma::Col<unsigned int> DsetKtMinus1;
-        //         arma::Col<unsigned int> tmpIterator = arma::linspace(0, N - 1, N);
-        //         //    0.2. Calculate normalized particle weights and cumulative normalized weights.
-        //         dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
-        //         //Step 1:
-        //         //Assign deterministic offpring indices for each i={1,...,N}.
-        //         for (int i : tmpIterator) {
-        //             //Compute (integer part of) expected number of offspring
-        //             expectedNumberOffspring = std::floor(N * dRSWeights);
-        //             //Generate D_i set:
-        //             if(expectedNumberOffspring > 0) {
-        //                 //Set D_i={numDeterministicOffspring, numDeterministicOffspring + 1, ..., numDeterministicOffspring + expectedNumberOffspring}
-        //                 // DsetCurrent
-        //                 // Set Card(D_i)=length(D_i)
-        //                 // Set numDeterministicOffspring += Card(D_i);
-        //             } else {
-        //                 //Set D_i=EMPTYSET
-        //                 //Set Card(D_i)= 0;
-        //             }
-        //             //Deterministic component assignment
-        //             //for(int j : D_i) {
-        //             //    uRSIndices.at(j) = i;
-        //             //}
-        //             //Convenient way of handling the conditioning path
-        //             //if(i == K_{t-1}) store D_{K_{t-1}};
-        //             //Compute normalized residual weights \tilde{W}_{t-1}^i
-        //         }
-        //         //Step 2:
-        //         //Sample K_t from appropriate lambda distribution
-        //         long Kt = 0;
-        //         // ...........
-        //         referenceTrajectoryIndices(T + 1) = Kt;
-        //         //Step 3:
-        //         //Compute residual ancestor indices via sampling from categorical distribution
-        //         // ...........
-        //         //Step 4: If not done in 1., assign conditional ancestor index:
-        //         // if(K_t not in D_{K_{t  1}})
-        //         uRSIndices.at(Kt) = referenceTrajectoryIndices(T);
-        //         // else already assigned under 1.
-        //         break;
-        //     }
+        case ResampleType::RESIDUAL:
+            {
+                //Algorithm 6
+                //Step 0:
+                //Declare/initialize container for implementation; compute normalized particle weights.
+                //    0.1. Container setup
+                int l = 0; //Counts the number of deterministically assigned offspring.
+                int expectedNumberOffspring = 0; //Integer part of N*W_{t - 1}.
+                arma::Col<double> dRSWeightsResidual(N);
+                arma::Col<unsigned int> DsetCurrent; //D_i
+                int CardDsetCurrent = 0;//|D_i|
+                arma::Col<unsigned int> DsetKtMinus1; //D_{K_{t - 1}}
+                arma::Col<unsigned int> DsetDeterministic; //The set of indices that are sampled deterministically.
+                arma::Col<unsigned int> tmpIterator = arma::linspace<arma::Col<unsigned int> >(0, N - 1, N);
+                //    0.2. Calculate normalized particle weights and cumulative normalized weights.
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
+                //Step 1:
+                //Assign deterministic offpring indices for each i={1,...,N}.
+                for (int i : tmpIterator) {
+                    //Compute (integer part of) expected number of offspring
+                    expectedNumberOffspring = std::floor(N * dRSWeights.at(i));
+                    //Generate D_i set:
+                    if(expectedNumberOffspring > 0) {
+                        //Set D_i={l + 1, ..., l + expectedNumberOffspring}
+                        DsetCurrent = arma::linspace<arma::Col<unsigned int> >(l + 1, l + expectedNumberOffspring);
+                        // Set Card(D_i)=length(D_i);
+                        CardDsetCurrent = expectedNumberOffspring;
+                        // Set l += Card(D_i);
+                        l += CardDsetCurrent;
+                    } else {
+                        //Set D_i=EMPTYSET
+                        //Set Card(D_i)= 0;
+                        CardDsetCurrent = 0;
+                    }
+                    //Compute unnormalized residual weights \hat{W}_{t-1}^i.
+                    dRSWeightsResidual.at(i) = dRSWeights.at(i) - static_cast<double>(CardDsetCurrent)/N;
+                    //Compute normalized residual weights \tilde{W}_{t-1}^i.
+                    dRSWeightsResidual.at(i) = dRSWeightsResidual.at(i)/arma::sum(dRSWeightsResidual);
+                    //Deterministic component assignment
+                    for (int j : DsetCurrent) {
+                        uRSIndices.at(j) = i;
+                    }
+                    //Convenient way of handling the conditioning path
+                    //if(i == K_{t-1}) store D_{K_{t-1}};
+                    if(i == static_cast<int>(referenceTrajectoryIndices.at(T))) {
+                        DsetKtMinus1 = DsetCurrent;
+                    }
+                }
+                //Step 2:
+                //Sample K_t from appropriate lambda distribution
+                //    2.1 Initializes container
+                arma::Col<double> lambdaProbs(N);
+                double prob1 = 1/(N * dRSWeights.at(referenceTrajectoryIndices.at(T)));
+                double prob2 = dRSWeightsResidual.at(referenceTrajectoryIndices.at(T))/(N * dRSWeights.at(referenceTrajectoryIndices.at(T)) * (N - l));
+                //Defines the complement set of DsetKtMinus1 relative to {1,...,N} i.e. {1,...,N}\DsetKtMinus1
+                //    2.2 Fills a vector with probabilities to sample from \lambda(k_t|k_{t - 1}, x_{t - 1}^{1:N})
+                for (int n = 0; n < N; ++n) {
+                    if (any(arma::find(DsetKtMinus1 == n))) {
+                        lambdaProbs.at(n) = prob1;
+                    } else {
+                        lambdaProbs.at(n) = prob2;
+                    }
+                }
+                //    2.3 Sample Kt from eq. 4 on p.8 of the WP
+                long Kt = Rcpp::sample(N, 1, false, Rcpp::wrap(lambdaProbs))[0];
+                referenceTrajectoryIndices(T + 1) = Kt;
+                //Step 3:
+                //Compute residual ancestor indices via sampling from categorical distribution
+                if (l < N) {
+                    DsetDeterministic = arma::linspace<arma::Col<unsigned int> >(l + 1, N, N - l);
+                    arma::uvec DsetFinalIndices = arma::find(DsetDeterministic != Kt);
+                    DsetDeterministic = DsetDeterministic.elem(DsetFinalIndices);
+                    for(int k : DsetDeterministic) {
+                        uRSIndices.at(k) = Rcpp::sample(N, 1, false, Rcpp::wrap(dRSWeightsResidual))[0];
+                    }
+                }
+                //Step 4: If not done in 1., assign conditional ancestor index:
+                if(arma::any(DsetKtMinus1 == Kt)) {
+                    uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
+                }
+                // else already assigned under 1.
+                break;
+            }
         }
         //Perform the replication of the chosen.
         for(int i = 0; i < N ; ++i) {
