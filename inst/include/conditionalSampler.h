@@ -57,17 +57,9 @@ namespace smc {
         using sampler<Space,Params>::pMoves;
          /// The additional algorithm parameters.
         using sampler<Space,Params>::algParams;
-        /// An object for adapting additional algorithm parameters
-        using sampler<Space,Params>::pAdapt;
 
-        ///The number of MCMC moves which have been accepted during this iteration
-        using sampler<Space,Params>::nAccepted;
         ///A flag which tracks whether the ensemble was resampled during this iteration
         using sampler<Space,Params>::nResampled;
-        ///The number of MCMC repeats to be performed. The default is 1 if an MCMC step is supplied.
-        using sampler<Space,Params>::nRepeats;
-        ///The proportion of accepted MCMC proposals in the most recent MCMC step, with a default of -1 if no MCMC steps have been performed.
-        using sampler<Space,Params>::acceptProb;
 
         ///An estimate of the log normalising constant ratio over the entire path.
         using sampler<Space,Params>::dlogNCPath;
@@ -134,6 +126,16 @@ namespace smc {
             void IterateUntil(long lTerminate);
             ///Resample the particle set using the specified resampling scheme specifically adjusted for conditional resampling
             void conditionalResample(ResampleType::Enum lMode);
+            ///Throws exception when adaptation related members of the base sampler class are used:
+            void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_ADAPTATION, "Adaptation methods not supported for conditional sampler class.");}
+            ///Throws exception when members related to MCMC moves of the base sampler class are used:
+            void SetMcmcRepeats(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            void OstreamMCMCRecordToStream(std::ostream &os) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            int GetAccepted(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            int GetMcmcRepeats(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            int GetHistorymcmcRepeats(long n) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            ///Sets the number of MCMC repeats
+            void SetMcmcRepeats(int reps) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
     };
     /// At present this function resets the system evolution time to 0 and calls the moveset initialisor to assign each particle in the ensemble.
     ///
@@ -145,7 +147,6 @@ namespace smc {
     {
         T = 0;
         dlogNCPath = 0.0;
-        acceptProb = -1;
 
         //Set the initial values and log weights of the particles
         std::vector<Space> InitVal(N);
@@ -175,7 +176,6 @@ namespace smc {
         double ESS = GetESS();
         if(ESS < dResampleThreshold) {
             nResampled = 1;
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
             conditionalResample(rtResampleMode);
         }
         else {
@@ -185,19 +185,10 @@ namespace smc {
                 //No resampling: set conditional index to previous iteration.
                 referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
-        //A possible MCMC step should be included here.
-        bool didMCMC =  pMoves->DoMCMC(0,pPopulation, N, nRepeats, nAccepted, algParams);
-        if (didMCMC){
-            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
-        }
         //Normalise the weights
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
-
-        //Perform any final updates to the additional algorithm parameters.
-        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
@@ -205,10 +196,10 @@ namespace smc {
             historyelement<Space> histel;
             switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+                histel.Set(N, pPopulation, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
+                histel.Set(N, pPopulation, historyflags(nResampled), uRSIndices);
                 break;
             /// To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
@@ -229,7 +220,6 @@ namespace smc {
         SetReferenceTrajectory(referenceTrajectoryInit);
         T = 0;
         dlogNCPath = 0.0;
-        acceptProb = -1;
 
         //Set the initial values and log weights of the particles
         std::vector<Space> InitVal(N);
@@ -259,7 +249,6 @@ namespace smc {
         double ESS = GetESS();
         if(ESS < dResampleThreshold) {
             nResampled = 1;
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
             conditionalResample(rtResampleMode);
         }
         else {
@@ -269,19 +258,10 @@ namespace smc {
                 // No resampling: set conditional index to previous iteration.
                 referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
 
-        //A possible MCMC step should be included here.
-        bool didMCMC =  pMoves->DoMCMC(0,pPopulation, N, nRepeats, nAccepted, algParams);
-        if (didMCMC){
-            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
-        }
         //Normalise the weights
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
-
-        //Perform any final updates to the additional algorithm parameters.
-        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
@@ -289,10 +269,10 @@ namespace smc {
             historyelement<Space> histel;
             switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+                histel.Set(N, pPopulation, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
+                histel.Set(N, pPopulation, historyflags(nResampled), uRSIndices);
                 break;
             ///To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:
@@ -305,9 +285,6 @@ namespace smc {
     template <class Space, class Params>
     double conditionalSampler<Space,Params>::IterateEss()
     {
-
-        pAdapt->updateForMove(this->algParams,pPopulation);
-
         //Move the particle set.
         MoveParticles();
 
@@ -327,7 +304,6 @@ namespace smc {
         double ESS = GetESS();
         if(ESS < dResampleThreshold) {
             nResampled = 1;
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
             conditionalResample(rtResampleMode);
         }
         else {
@@ -337,31 +313,20 @@ namespace smc {
                 //No resampling: set conditional index to previous iteration.
                 referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
-            pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
         }
-
-        //A possible MCMC step should be included here.
-        bool didMCMC = pMoves->DoMCMC(T+1,pPopulation, N, nRepeats, nAccepted,algParams);
-        if (didMCMC){
-            acceptProb = static_cast<double>(nAccepted)/(static_cast<double>(N)*static_cast<double>(nRepeats));
-        }
-
 
         //Normalise the weights
         pPopulation.SetLogWeight(pPopulation.GetLogWeight() - CalcLogNC());
-
-        //Perform any final updates to the additional algorithm parameters.
-        pAdapt->updateEnd(algParams,pPopulation);
 
         //Finally, the current particle set should be appended to the historical process.
         if(htHistoryMode != HistoryType::NONE){
             historyelement<Space> histel;
             switch(htHistoryMode) {
             case HistoryType::RAM:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled));
+                histel.Set(N, pPopulation, historyflags(nResampled));
                 break;
             case HistoryType::AL:
-                histel.Set(N, pPopulation, nAccepted, nRepeats, historyflags(nResampled), uRSIndices);
+                histel.Set(N, pPopulation, historyflags(nResampled), uRSIndices);
                 break;
             //To avoid compiler warnings, HistoryType::NONE is handled
             case HistoryType::NONE:

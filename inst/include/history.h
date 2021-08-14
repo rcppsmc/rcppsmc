@@ -103,6 +103,10 @@ namespace smc {
         void Set(long lNumber, const population<Space> &New, int inAccepted, int nRepeats, const historyflags &histflags){number = lNumber; pop = New; nAccepted = inAccepted; nRepeat = nRepeats; flags = histflags;};
         /// Sets the particle set to the specified values including ancestors.
         void Set(long lNumber, const population<Space> &New, int inAccepted, int nRepeats, const historyflags &histflags, const arma::Col<unsigned int> & newAindices){number = lNumber; pop = New; nAccepted = inAccepted; nRepeat = nRepeats; flags = histflags; ancestorIndices = newAindices;};
+        /// Sets the particle set to the specified values including ancestors specifically to use with the derived conditional sampler class where adaptation and MCMC moves are not supported.
+        void Set(long lNumber, const population<Space> &New, const historyflags &histflags, const arma::Col<unsigned int> & newAindices){number = lNumber; pop = New; flags = histflags; ancestorIndices = newAindices;};
+        /// Sets the particle set to the specified values excluding ancestors for the derived conditional sampler class.
+        void Set(long lNumber, const population<Space> &New, const historyflags &histflags){number = lNumber; pop = New; flags = histflags;};
         /// Returns the number of MCMC moves accepted during this iteration.
         int AcceptCount(void) {return nAccepted; }
         /// Returns the number of MCMC iterations performed during this iteration.
