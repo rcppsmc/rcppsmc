@@ -34,8 +34,13 @@
 #include "sampler.h"
 
 namespace smc {
-    template <class Space, class Params = nullParams> class conditionalSampler:
-    public sampler<Space, Params>
+    //Pre-declare the derived template class itself is necessary so that operator overloading for template (friend) functions works properlery.
+    template<class Space, class Params> class conditionalSampler;
+    //The compiler has to know that the overloaded operator friend function below is a template, hence the pre-declaration of operator<<.
+    template<class Space, class Params> std::ostream& operator<< (std::ostream&, const conditionalSampler<Space,Params>&);
+
+    template<class Space, class Params = nullParams> class conditionalSampler:
+    public sampler<Space,Params>
     {
         ///List of inherited members of the base sampler-class
         ///Number of particles in the system.
@@ -84,6 +89,8 @@ namespace smc {
             std::vector<Space> referenceTrajectory;
             long maxT = referenceTrajectory.size();
             arma::Col<unsigned int> referenceTrajectoryIndices;
+
+            int digitsPrint = 6;
         public:
             ///Create an particle system containing lSize uninitialised particles with the specified mode.
             conditionalSampler(long lSize, HistoryType::Enum htHistoryMode, std::vector<Space> referenceTrajectoryInit)
@@ -99,6 +106,10 @@ namespace smc {
                 referenceTrajectoryIndices(maxT, arma::fill::zeros)
             {
             }
+            ///Get the number of digits used in ostream<< operator printing
+            int GetDigitsPrint(void) const {return digitsPrint;}
+            ///Set the number of digits used in ostream<< operator printing
+            void SetDigitsPrint(int newDigitsPrint) {digitsPrint = newDigitsPrint;}
             ///Returns the reference trajectory
             std::vector<Space> GetReferenceTrajectory(void) const {return referenceTrajectory;}
             ///Returns a constant reference to the reference trajectory
@@ -126,6 +137,12 @@ namespace smc {
             void IterateUntil(long lTerminate);
             ///Resample the particle set using the specified resampling scheme specifically adjusted for conditional resampling
             void conditionalResample(ResampleType::Enum lMode);
+            ///Dump a specified particle to the specified output stream in a human readable form
+            std::ostream & StreamParticle(std::ostream & os, long n) const;
+            ///Dump the entire particle set to the specified output stream in a human readable form
+            std::ostream & StreamParticles(std::ostream & os, int digits) const;
+            friend std::ostream& operator << <>(std::ostream &, const conditionalSampler<Space,Params>&);
+
             ///Throws exception when adaptation related members of the base sampler class are used:
             void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_ADAPTATION, "Adaptation methods not supported for conditional sampler class.");}
             ///Throws exception when members related to MCMC moves of the base sampler class are used:
@@ -255,7 +272,7 @@ namespace smc {
             nResampled = 0;
             if(htHistoryMode == HistoryType::AL) {
                 uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
-                // No resampling: set conditional index to previous iteration.
+                //No resampling: set conditional index to previous iteration.
                 referenceTrajectoryIndices.at(T + 1) = referenceTrajectoryIndices.at(T);
             }
         }
@@ -588,5 +605,64 @@ namespace smc {
         //After conditional resampling is implemented: a final step is to set equal normalised weights.
         pPopulation.SetLogWeight(- log(static_cast<double>(N))*arma::ones(N));
     }
+
+    /// Produce a human-readable display of the current particle values and log weights.
+    ///
+    /// \param os The output stream to which the display should be made.
+    template <class Space, class Params>
+    std::ostream & conditionalSampler<Space,Params>::StreamParticles(std::ostream & os, int digits) const
+    {
+        Space val;
+        double unw;
+        double nw;
+        int roundDigits = pow(10, digits);
+        for(int i = 0; i < pPopulation.GetNumber() - 1; ++i){
+            val = pPopulation.GetValueN(i);
+            val = static_cast<int>(val * roundDigits + 0.5);
+            val = static_cast<double>(val)/roundDigits;
+
+            unw = pPopulation.GetLogWeightN(i);
+            unw = static_cast<int>(unw * roundDigits + 0.5);
+            unw = static_cast<double>(unw)/roundDigits;
+
+            nw  = pPopulation.GetWeightN(i);
+
+            std::string offsetPositiveVal = "";
+            if(val>0.0) offsetPositiveVal = " ";
+            std::string offsetPositiveUNW = "";
+            if(unw>0.0) offsetPositiveUNW = " ";
+
+            os << "Particle value: " << offsetPositiveVal << val << "  unnormalized weight: " << offsetPositiveUNW << unw << "  normalized weight: " << nw << std::endl;
+        }
+        return os;
+    }
+    /// Produce a human-readable display of the current n'th particle value and log weight.
+    ///
+    /// \param os The output stream to which the display should be made.
+    /// \param n The index of the particle of interest
+    template <class Space, class Params>
+    std::ostream & conditionalSampler<Space,Params>::StreamParticle(std::ostream & os, long n) const
+    {
+        os << pPopulation.GetValueN(n) << "," << pPopulation.GetWeightN(n) << std::endl;
+        return os;
+    }
+    /// Produce a human-readable display of the state of an smc::sampler class using the stream operator.
+    /// \param os The output stream to which the display should be made.
+    /// \param s  The sampler which is to be displayed.
+    template <class Space, class Params>
+    std::ostream & operator<<(std::ostream & os, const conditionalSampler<Space,Params> & CS)
+    {
+        os << "Sampler Configuration:" << std::endl;
+        os << "======================" << std::endl;
+        os << "Evolution Time:    " << CS.GetTime() << std::endl;
+        os << "Particle Set Size: " << CS.GetNumber() << std::endl;
+        os << "Effective Sample Size: " << CS.GetESS() << std::endl;
+        os << std::endl;
+        os << "Particle Set: " << std::endl;
+        CS.StreamParticles(os, CS.GetDigitsPrint());
+        os << std::endl;
+        return os;
+    }
+
 }
 #endif
