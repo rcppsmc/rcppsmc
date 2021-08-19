@@ -1,11 +1,12 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
 // population.h: Rcpp integration of SMC library -- storing and manipulating
-// particles 
+// particles
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
 // Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// 
+// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel, Leah South and Ilya Zarubin
+//
 // This file is part of RcppSMC.
 //
 // RcppSMC is free software: you can redistribute it and/or modify it
@@ -15,12 +16,11 @@
 //
 // RcppSMC is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
-//
+// along with RcppSMC. If not, see <http://www.gnu.org/licenses/>.
 
 //! \file
 //! \brief Class used to store and manipulate the population of particles.
@@ -48,7 +48,7 @@ namespace smc {
         double sum = arma::sum(exp(logw - dMaxWeight));
         return (dMaxWeight + log(sum));
     }
-    
+
     /// A template class for the particles of an SMC algorithm
     template <class Space> class population
     {

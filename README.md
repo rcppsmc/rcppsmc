@@ -19,9 +19,11 @@ planned.
 
 ### More Examples
 
-See the packages [ToyPackage](https://github.com/rcppsmc/ToyPackage) and
-[RickerExample](https://github.com/rcppsmc/RickerExample) repositories next
-to this one in the [RcppSMC](https://github.com/rcppsmc) organization.
+See the packages [ToyPackage](https://github.com/rcppsmc/ToyPackage),
+[RickerExample](https://github.com/rcppsmc/RickerExample),
+[SVmodelRcppSMC](https://github.com/ilyaZar/SVmodelRcppSMC), and
+demo repository [SVmodelExamples](https://github.com/ilyaZar/SVmodelExamples)
+next to this one in the [RcppSMC](https://github.com/rcppsmc) organization.
 
 ### Help
 
