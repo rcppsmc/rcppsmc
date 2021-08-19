@@ -2,10 +2,7 @@
 //
 // sampler.h: Rcpp integration of SMC library -- sampler object
 //
-// Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// Copyright (C) 2021         Adam Johansen, Dirk Eddelbuettel, Leah South, and
-// Ilya Zarubin
+// Copyright (C) 2021 Adam Johansen, Dirk Eddelbuettel, Leah South, Ilya Zarubin
 //
 // This file is part of RcppSMC.
 //
@@ -16,16 +13,16 @@
 //
 // RcppSMC is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
+// along with RcppSMC. If not, see <http://www.gnu.org/licenses/>.
 
 //! \file
 //! \brief Defines the overall sampler object.
 //!
-//! This file defines the smc::sampler class which is used to implement entire particle systems.
+//! This file defines the smc::conditionalSampler class which is used to implement entire particle systems for conditional sequential Monte Carlo.
 
 #ifndef __SMC_CONDITIONAL_SAMPLER_HH
 
@@ -137,6 +134,8 @@ namespace smc {
             void IterateUntil(long lTerminate);
             ///Resample the particle set using the specified resampling scheme specifically adjusted for conditional resampling
             void conditionalResample(ResampleType::Enum lMode);
+            ///Move the reference particle by setting the coordinate to the reference value and re-weighting.
+            void MoveReferenceParticle(void);
             ///Dump a specified particle to the specified output stream in a human readable form
             std::ostream & StreamParticle(std::ostream & os, long n) const;
             ///Dump the entire particle set to the specified output stream in a human readable form
@@ -173,7 +172,8 @@ namespace smc {
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
+        // referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
+        referenceTrajectoryIndices.at(T) = 0;
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
         pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
@@ -246,7 +246,8 @@ namespace smc {
 
         //Initialise the conditonal trajectory:
         //1. Sample uniformly initial period, T = 0, conditional index
-        referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
+        // referenceTrajectoryIndices.at(T) = floor(unif_rand()*static_cast<double>(N));
+        referenceTrajectoryIndices.at(T) = 0;
         //2. Set first particle coordinate to conditional value at above index,
         //and re-weight using the DoConditionalMove-function (that, despite its name, works at initialization, T=0, as well as moves for subsequent T>=1 iterations)
         pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
@@ -307,7 +308,7 @@ namespace smc {
 
         //Do add a conditional conditional move:
         //set reference particle coordinate at conditional value and re-weight.
-        pMoves->DoConditionalMove(T,pPopulation,referenceTrajectory[T],referenceTrajectoryIndices.at(T),algParams);
+        MoveReferenceParticle();
 
         //Estimate the normalising constant.
         dlogNCIt = CalcLogNC();
@@ -383,7 +384,8 @@ namespace smc {
                 //Algorithm 3
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. uniformly on {1,...,N} in case of Multinmial resampling.
-                long Kt = floor(unif_rand()*static_cast<double>(N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                // long Kt = floor(unif_rand()*static_cast<double>(N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                long Kt = 0;
                 referenceTrajectoryIndices.at(T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
@@ -526,7 +528,7 @@ namespace smc {
                 arma::Col<unsigned int> DsetKtMinus1; //D_{K_{t - 1}}
                 arma::Col<unsigned int> DsetDeterministic; //The set of indices that are sampled deterministically.
                 arma::Col<unsigned int> tmpIterator = arma::linspace<arma::Col<unsigned int> >(0, N - 1, N);
-                //    0.2. Calculate normalized particle weights and cumulative normalized weights.
+                //    0.2. Calculate normalized particle weights.
                 dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
                 //Step 1:
                 //Assign deterministic offpring indices for each i={1,...,N}.
@@ -588,11 +590,11 @@ namespace smc {
                         uRSIndices.at(k) = Rcpp::sample(N, 1, false, Rcpp::wrap(dRSWeightsResidual))[0];
                     }
                 }
-                //Step 4: If not done in 1., assign conditional ancestor index:
-                if(arma::any(DsetKtMinus1 == Kt)) {
+                //Step 4: If not done in 1. assign conditional ancestor index:
+                if(arma::all(DsetKtMinus1 != Kt)) {
                     uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
                 }
-                // else already assigned under 1.
+                //else already assigned under 1.
                 break;
             }
         }
@@ -605,7 +607,12 @@ namespace smc {
         //After conditional resampling is implemented: a final step is to set equal normalised weights.
         pPopulation.SetLogWeight(- log(static_cast<double>(N))*arma::ones(N));
     }
-
+    ///Move the reference particle by setting the coordinate to the reference value and re-weighting.
+    template<class Space, class Params>
+    void conditionalSampler<Space,Params>::MoveReferenceParticle(void)
+    {
+        pMoves->DoConditionalMove(T + 1,pPopulation,referenceTrajectory[T + 1],referenceTrajectoryIndices.at(T + 1),algParams);
+    }
     /// Produce a human-readable display of the current particle values and log weights.
     ///
     /// \param os The output stream to which the display should be made.
@@ -618,11 +625,9 @@ namespace smc {
         int roundDigits = pow(10, digits);
         for(int i = 0; i < pPopulation.GetNumber() - 1; ++i){
             val = pPopulation.GetValueN(i);
-            val = static_cast<int>(val * roundDigits + 0.5);
-            val = static_cast<double>(val)/roundDigits;
 
             unw = pPopulation.GetLogWeightN(i);
-            unw = static_cast<int>(unw * roundDigits + 0.5);
+            unw = static_cast<int>(unw * roundDigits >= 0 ? unw * roundDigits + 0.5 : unw * roundDigits - 0.5);
             unw = static_cast<double>(unw)/roundDigits;
 
             nw  = pPopulation.GetWeightN(i);
