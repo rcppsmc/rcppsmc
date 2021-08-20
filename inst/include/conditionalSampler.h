@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 //
-// sampler.h: Rcpp integration of SMC library -- sampler object
+// conditionalSampler.h: Rcpp integration of SMC library -- conditional sampler class that provides support for conditional sequential Monte Carlo algorithms.
 //
 // Copyright (C) 2021 Adam Johansen, Dirk Eddelbuettel, Leah South, Ilya Zarubin
 //
@@ -20,9 +20,9 @@
 // along with RcppSMC. If not, see <http://www.gnu.org/licenses/>.
 
 //! \file
-//! \brief Defines the overall sampler object.
+//! \brief Defines the conditionalSampler class derived from base sampler.
 //!
-//! This file defines the smc::conditionalSampler class which is used to implement entire particle systems for conditional sequential Monte Carlo.
+//! This file defines the smc::conditionalSampler class which is used to implement entire particle systems for conditional sequential Monte Carlo. The class is derived from the base class 'sampler' but currently does not implement facilities of the base class that are not striclty required for conditional SMC (such as MCMC moves or adaptation). Conditional resampling for (some) common resampling mechanisms are implemented.
 
 #ifndef __SMC_CONDITIONAL_SAMPLER_HH
 
@@ -143,15 +143,15 @@ namespace smc {
             friend std::ostream& operator << <>(std::ostream &, const conditionalSampler<Space,Params>&);
 
             ///Throws exception when adaptation related members of the base sampler class are used:
-            void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_ADAPTATION, "Adaptation methods not supported for conditional sampler class.");}
+            void SetAdaptMethods(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_ADAPTATION, "Adaptation methods not currently supported for conditional sampler class.");}
             ///Throws exception when members related to MCMC moves of the base sampler class are used:
-            void SetMcmcRepeats(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
-            void OstreamMCMCRecordToStream(std::ostream &os) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
-            int GetAccepted(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
-            int GetMcmcRepeats(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
-            int GetHistorymcmcRepeats(long n) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            void SetMcmcRepeats(adaptMethods<Space,Params>* adaptMethod) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
+            void OstreamMCMCRecordToStream(std::ostream &os) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
+            int GetAccepted(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
+            int GetMcmcRepeats(void) const {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
+            int GetHistorymcmcRepeats(long n) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
             ///Sets the number of MCMC repeats
-            void SetMcmcRepeats(int reps) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not supported for conditional sampler class.");}
+            void SetMcmcRepeats(int reps) {throw SMC_EXCEPTION(CSMCX_USING_MCMC, "MCMC moves not currently supported for conditional sampler class.");}
     };
     /// At present this function resets the system evolution time to 0 and calls the moveset initialisor to assign each particle in the ensemble.
     ///
@@ -385,6 +385,7 @@ namespace smc {
                 //Step 0:
                 //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. uniformly on {1,...,N} in case of Multinmial resampling.
                 // long Kt = floor(unif_rand()*static_cast<double>(N)); // sample lamba(k_{t}|w_{t-1}, k_{t-1})=1/N
+                //Set conditional index K_t to zero implementing a sepcial case that works for conditional multinomial resampling (saving one draw compared to the implementation above).
                 long Kt = 0;
                 referenceTrajectoryIndices.at(T + 1) = Kt; // update referenceTrajectoryIndices with newly sampled K_t index.
                 //Step 1:
@@ -598,10 +599,12 @@ namespace smc {
                 break;
             }
         }
+        //Copy values of pre-resampling particle set.
+        std::vector<Space> populationValueCopy(pPopulation.GetValue().begin(), pPopulation.GetValue().end());
         //Perform the replication of the chosen.
         for(int i = 0; i < N ; ++i) {
             if(uRSIndices(i) != static_cast<unsigned int>(i)){
-                pPopulation.SetValueN(pPopulation.GetValueN(static_cast<int>(uRSIndices(i))), i);
+                pPopulation.SetValueN(populationValueCopy[static_cast<int>(uRSIndices(i))], i);
             }
         }
         //After conditional resampling is implemented: a final step is to set equal normalised weights.
