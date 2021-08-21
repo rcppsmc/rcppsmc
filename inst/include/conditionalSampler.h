@@ -443,7 +443,7 @@ namespace smc {
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
                 //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(N - 1);
+                std::vector<unsigned int> tmpIterator(N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
                 long minimalJ = 0;
@@ -457,6 +457,7 @@ namespace smc {
                     minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpUnifRnd, 1, "first"));
                     uRSIndices.at(i) = minimalJ;
                 }
+                break;
             }
         case ResampleType::SYSTEMATIC:
             {
@@ -491,7 +492,7 @@ namespace smc {
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
                 //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
-                std::vector<unsigned int> tmpIterator(N - 1);
+                std::vector<unsigned int> tmpIterator(N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
                 //precompute necessary uniform random variable before assignment
@@ -514,6 +515,7 @@ namespace smc {
                     minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpU, 1, "first"));
                     uRSIndices.at(i) = minimalJ;
                 }
+                break;
             }
         case ResampleType::RESIDUAL:
             {
@@ -539,7 +541,7 @@ namespace smc {
                     //Generate D_i set:
                     if(expectedNumberOffspring > 0) {
                         //Set D_i={l + 1, ..., l + expectedNumberOffspring}
-                        DsetCurrent = arma::linspace<arma::Col<unsigned int> >(l + 1, l + expectedNumberOffspring);
+                        DsetCurrent = arma::linspace<arma::Col<unsigned int> >(l + 1, l + expectedNumberOffspring, expectedNumberOffspring);
                         // Set Card(D_i)=length(D_i);
                         CardDsetCurrent = expectedNumberOffspring;
                         // Set l += Card(D_i);

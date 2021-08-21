@@ -20,7 +20,8 @@
 2021-08-11  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
 	* inst/include/conditionalSampler.h: resolve nondependent name look-up in
-	derived conditionalSampler class via using-statements instead of explicit naming to make code cleaner and facilitate readability (implicit name
+	derived conditionalSampler class via using-statements instead of explicit
+	naming to make code cleaner and facilitate readability (implicit name
 	look- up via this-> pointer remains where necessary)
 
 
@@ -32,7 +33,8 @@
 
 2021-08-07  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
-	* inst/include/conditionalSampler.h: improve sampling step from discrete uniform distribution + some minor fixes
+	* inst/include/conditionalSampler.h: improve sampling step from discrete
+	uniform distribution + some minor fixes
 
 2021-08-04  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
@@ -93,7 +95,8 @@
 
 2021-05-20  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
-	* src/nonLinPMMH.cpp: add user output (mcmc diagnostics) and return acceptance
+	* src/nonLinPMMH.cpp: add user output (mcmc diagnostics) and return
+	acceptance
 	rate for this example
 	* R/nonLinPMMH.R: adjust call to the nonLinPMMH_impl() function accordingly
 
