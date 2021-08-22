@@ -1,3 +1,81 @@
+ 2021-08-15  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: add support for printing of conditional
+	sampler class to print particle value, log-weight and normalized output with
+	possibility to round values before prinint
+
+2021-08-14  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: override redundant methods derived from
+	base class sampler to throw an exception (error) when using them to prohibit
+	the user from accessing these unsupported facilities
+	* inst/include/conditionalSampler.h: remove all calls to methods of
+	unsupported adaptation and MCMC-move facilities and adjust histel.Set()
+	calls to not use parameters related to adaptation or MCMC-moves
+	* inst/include/history.h: overload histel.Set() s.th. setting of data
+	members that are related to adaptation or MCMC-move facilities is prohibited
+	* inst/include/smc-exception.h: add exception macros for exceptions related
+	to calls of redundant methods (see first bullet point)
+
+2021-08-11  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: resolve nondependent name look-up in
+	derived conditionalSampler class via using-statements instead of explicit
+	naming to make code cleaner and facilitate readability (implicit name
+	look- up via this-> pointer remains where necessary)
+
+
+2021-08-09  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: small Bugfix related to stratified and
+	systematic conditional resampling
+
+
+2021-08-07  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: improve sampling step from discrete
+	uniform distribution + some minor fixes
+
+2021-08-04  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: add blueprint version of conditional
+	residual resampling: currently WIP to be finished later
+
+2021-08-04  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: add preliminary implementation of
+	multinomial, stratified, and systematic conditional resampling
+
+2021-08-03  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/conditionalSampler.h: copy conditional sampler content from
+	inst/include/sampler.h to new file inst/include/conditionalSampler.handled
+	* inst/include/sampler.h: delete content of conditional Sampler from this
+	file
+	* inst/include/RcppSMC.h: add new header file conditionalSampler.h to list
+	of all headers
+
+2021-08-01  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/sampler.h: add random permutation as a preliminary quick fix
+	of current facilities to support conditional multinomial resampling
+
+2021-07-28  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	* inst/include/moveset.h: add virtual functions for setting conditional
+	particle coordinate and re-weighting of that; update construct for moveset
+	* inst/include/sampler.h: add container and getters/setters for reference
+	trajectory, conditional multinomial resampling and and some minor bufixes
+
+2021-07-23  Ilya Zarubin  <ilya.a.zarub@gmail.com>
+
+	[brief summary of commits 2f30971, a40bf66, 8abdc6e, e631e51, e2a10ff]
+	* inst/include/sampler.h: add facilities for conditional SMC
+	* inst/include/moveset.h: add user specified weighting facilities for
+	conditional coordinates
+	* inst/include/population.h: add function to set just one particle log
+	weight
+
 2021-06-23  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
 	* inst/include/history.h: add facilities for tracking of ancestral lines
@@ -17,7 +95,8 @@
 
 2021-05-20  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
-	* src/nonLinPMMH.cpp: add user output (mcmc diagnostics) and return acceptance
+	* src/nonLinPMMH.cpp: add user output (mcmc diagnostics) and return
+	acceptance
 	rate for this example
 	* R/nonLinPMMH.R: adjust call to the nonLinPMMH_impl() function accordingly
 

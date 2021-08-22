@@ -87,10 +87,10 @@ namespace smc {
         arma::vec GetWeight(void) const {return exp(logweight);}
         /// Returns the nth particle's unnormalised weight.
         double GetWeightN(long n) const {return exp(logweight(n));}
-        
+
         /// \brief Sets the particle values and weights explicitly
         ///
-        /// \param sValue The particle values to use 
+        /// \param sValue The particle values to use
         /// \param dLogWeight The natural logarithm of the new particle weights
         void Set(const std::vector<Space> & sValue,const arma::vec & dLogWeight){value = sValue; logweight = dLogWeight;}
         /// \brief Sets the particle values explicitly
@@ -103,8 +103,12 @@ namespace smc {
         void SetValueN(const Space & sValue, long n){value[n] = sValue;}
         /// \brief Sets the particle log weights explicitly
         ///
-        /// \param dLogWeight The natural logarithm of the new particle weights
+        /// \param dLogWeight The natural logarithm of the new particle weights to use
         void SetLogWeight(const arma::vec & dLogWeight) {logweight = dLogWeight;}
+        /// \brief Sets the nth particle log weight explicitly
+        ///
+        /// \param dLogWeight The natural logarithm of the new particle weight to use
+        void SetLogWeightN(const double & dLogWeight, long n) {logweight(n) = dLogWeight;}
     };
 
 

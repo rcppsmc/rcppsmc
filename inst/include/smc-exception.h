@@ -38,6 +38,10 @@
 #define SMCX_MISSING_HISTORY 0x0010
 ///Exception thrown if an attempt is made to instantiate a class of which a single instance is permitted more than once.
 #define SMCX_MULTIPLE_INSTANTIATION 0x1000
+///Exception thrown if an attempt is made to use facilities of the base sampler class related to MCMC moves.
+#define CSMCX_USING_MCMC 0x0100
+///Exception thrown if an attempt is made to use facilities of the base sampler class related to adaptation.
+#define CSMCX_USING_ADAPTATION 0x0001
 
 namespace smc {
   ///SMC Exception class

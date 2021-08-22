@@ -75,7 +75,7 @@ namespace smc {
     template <class Space, class Params = nullParams>
     class sampler
     {
-    private:
+    protected:
         ///Number of particles in the system.
         long N;
         ///The current evolution time of the system.
@@ -444,7 +444,6 @@ namespace smc {
     template <class Space, class Params>
     arma::Col<unsigned int> sampler<Space, Params>::GetALineInd(long n) const
     {
-        long N = GetNumber();
         long historyLength = GetHistoryLength();
 
         /// Get final iteration indices and final iteration particle values
@@ -461,7 +460,6 @@ namespace smc {
     template <class Space, class Params>
     std::vector<Space> sampler<Space,Params>::GetALineSpace(long n) const
     {
-        long N = GetNumber();
         long historyLength = GetHistoryLength();
 
         std::vector<Space> ALineSpace(historyLength);
@@ -512,7 +510,7 @@ namespace smc {
         }
         else {
             nResampled = 0;
-            if(HistoryType::AL) {
+            if(htHistoryMode == HistoryType::AL) {
                 uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
             }
             pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
@@ -724,7 +722,7 @@ namespace smc {
         }
         else {
             nResampled = 0;
-            if(HistoryType::AL) {
+            if(htHistoryMode == HistoryType::AL) {
                 uRSIndices = arma::linspace<arma::Col<unsigned int>>(0, N - 1, N);
             }
             pAdapt->updateForMCMC(algParams,pPopulation,acceptProb,nResampled,nRepeats);
