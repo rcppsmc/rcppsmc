@@ -2,8 +2,8 @@
 //
 // exception.h: Rcpp integration of SMC library -- handling exceptions
 //
-// Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2008 - 2009  Adam Johansen and Ilya Zarubin
+// Copyright (C) 2008 - 2020  Adam Johansen
+// Copyright (C) 2021         Adam Johansen and Ilya Zarubin
 //
 // This file is part of RcppSMC.
 //

@@ -3,8 +3,8 @@
 // sampler.h: Rcpp integration of SMC library -- sampler object
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
-// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel, Leah South and Ilya Zarubin
+// Copyright (C) 2017 - 2020  Adam Johansen, Dirk Eddelbuettel and Leah South
+// Copyright (C) 2021         Adam Johansen, Dirk Eddelbuettel, Leah South and Ilya Zarubin
 //
 // This file is part of RcppSMC.
 //
