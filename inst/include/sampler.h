@@ -3,7 +3,8 @@
 // sampler.h: Rcpp integration of SMC library -- sampler object
 //
 // Copyright (C) 2008 - 2009  Adam Johansen
-// Copyright (C) 2017         Adam Johansen, Dirk Eddelbuettel and Leah South
+// Copyright (C) 2017 - 2020  Adam Johansen, Dirk Eddelbuettel and Leah South
+// Copyright (C) 2021         Adam Johansen, Dirk Eddelbuettel, Leah South and Ilya Zarubin
 //
 // This file is part of RcppSMC.
 //
@@ -14,11 +15,11 @@
 //
 // RcppSMC is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
+// along with RcppSMC. If not, see <http://www.gnu.org/licenses/>.
 
 //! \file
 //! \brief Defines the overall sampler object.
@@ -245,7 +246,7 @@ namespace smc {
     /// store the particle set.
     ///
     /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
-    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and HistoryType::NONE to avoid doing so.
     /// \param pNewMoves Pointer to a moveset.
     /// \tparam Space The class used to represent a point in the sample space.
     /// \tparam Params (optional) The class used for any additional parameters.
@@ -275,7 +276,7 @@ namespace smc {
     /// store the particle set.
     ///
     /// \param lSize The number of particles present in the ensemble (at time 0 if this is a variable quantity)
-    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and SMC_HISTORY_NONE to avoid doing so.
+    /// \param htHM The history mode to use: set this to HistoryType::RAM to store the whole history of the system and HistoryType::NONE to avoid doing so.
     /// \tparam Space The class used to represent a point in the sample space.
     /// \tparam Params (optional) The class used for any additional parameters.
     template <class Space, class Params>

@@ -1,28 +1,24 @@
- * Update and standardise copyright headers
- 
  * Move objects specific to examples into appropriate namespaces
- 
+
  * Use Rcpp attributes, which also allows for removal of rngR.h
- 
+
  * Make the data a data component of the package
- 
+
  * Add log evidence estimation capabilities and add additional integration
-   methods to IntegratePathSampling 
- 
+   methods to IntegratePathSampling
+
  * Add more examples
- 
+
  * Make it easier to add additional parameters (for example the covariance
    matrix used in a random walk proposal in MCMC) and to adapt these parameters
    using the population of particles
-   
+
  * For blockpfGaussianOpt et al, we could be fancy and return an S3 object
    with a plot method.  Maybe later.
 
  * Add support for an arma::mat version of the particle values.
-   
+
  * Add other interesting SMC algorithms, e.g.
    * The iterated auxiliary particle filter of Guarniero et al. (2015)
    * Divide-and-Conquer SMC (Lindsten et al., 2016)
    * Particle MCMC (Andrieu et al., 2010)
-   
- * Add extra functionality to the history to store all particles and ancestral lines
