@@ -1,3 +1,7 @@
+2021-09-01  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.2.4
+
 2021-08-15  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
 	* inst/include/conditionalSampler.h: add support for printing of
@@ -28,12 +32,10 @@
 	readability (implicit name look- up via this-> pointer remains where
 	necessary)
 
-
 2021-08-09  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 
 	* inst/include/conditionalSampler.h: small Bugfix related to
 	stratified and systematic conditional resampling
-
 
 2021-08-07  Ilya Zarubin  <ilya.a.zarub@gmail.com>
 

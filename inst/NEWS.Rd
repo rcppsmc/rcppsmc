@@ -3,16 +3,20 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
-\section{Changes in RcppSMC version 0.2.4 (2021-09-xx)}{
+\section{Changes in RcppSMC version 0.2.4 (2021-09-01)}{
   \itemize{
-    \item Provide informative user output (convergence diagnostics) for PMMH
-     example #50 (Ilya in \ghpr{50} and \ghpr{52} addressing \ghit{25}, bullet
-     point 5)
+    \item Multiple Sequential Monte Carlo extensions (Ilya Zarubin as part of
+    Google Summer of Code 2021)
+    \itemize{
+      \item Provide informative user output (convergence diagnostics) for PMMH
+      example #50 (Ilya in \ghpr{50} and \ghpr{52} addressing \ghit{25}, bullet
+      point 5)
+      \item Support for tracking of ancestral lines for base sampler class (Ilya
+      in \ghpr{56})
+      \item Support for conditional SMC via derived conditionalSampler
+      class (Ilya in \ghpr{60})
+    }
     \item Add URL and BugReports to DESCRIPTION (Dirk in \ghpr{53})
-    \item Support for tracking of ancestral lines for base sampler class (Ilya
-    in \ghpr{56})
-    \item Support for conditional SMC via derived conditionalSampler
-    class (Ilya in \ghpr{60})
   }
 }
 
