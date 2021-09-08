@@ -1,3 +1,11 @@
+2021-09-08  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* inst/include/conditionalSampler.h: Use std::pow
+
+	* README.md: Belatedly add Ilya
+
 2021-09-01  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.2.4

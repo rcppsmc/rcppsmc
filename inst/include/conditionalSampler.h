@@ -627,7 +627,7 @@ namespace smc {
         Space val;
         double unw;
         double nw;
-        int roundDigits = pow(10, digits);
+        int roundDigits = std::pow(10, digits);
         for(int i = 0; i < pPopulation.GetNumber() - 1; ++i){
             val = pPopulation.GetValueN(i);
 
