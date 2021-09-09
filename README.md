@@ -31,7 +31,7 @@ For support and discussion please make us of the [rcppsmc mailing list](https://
 
 ### Authors
 
-Dirk Eddelbuettel, Adam M. Johansen and Leah F. South
+Dirk Eddelbuettel, Adam M. Johansen, Leah F. South and Ilya Zarubin
 
 ### License
 
