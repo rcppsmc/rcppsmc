@@ -3,6 +3,13 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.5 (2021-09-09)}{
+  \itemize{
+    \item Compilation under Solaris is aiding via \code{std::pow} use
+    (Dirk in \ghpr{65} fixing \ghit{64})
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.4 (2021-09-01)}{
   \itemize{
     \item Multiple Sequential Monte Carlo extensions (Ilya Zarubin as part of
