@@ -16,7 +16,9 @@ export("blockpfGaussianOpt",
        "LinRegLA",
        "LinRegLA_adapt",
        "nonLinPMMH",
+       "compareNCestimates",
        "simGaussian",
+       "simGaussianSSM",
        "simLineart",
        "simNonlin")
 
