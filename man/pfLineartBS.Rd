@@ -58,7 +58,7 @@
 \references{
   A. M. Johansen. SMCTC: Sequential Monte Carlo in C++.
   Journal of Statistical Software, 30(6):1-41, April
-  2009. \url{https://doi.org/10.18637/jss.v030.i06}
+  2009, \doi{10.18637/jss.v030.i06}.
 }
 \seealso{The SMCTC paper and code at \url{https://doi.org/10.18637/jss.v030.i06}.}
 \examples{
