@@ -1,3 +1,9 @@
+2021-11-25  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/LinReg.cpp: Remove 'using namespace std;' for g++-11 builds
+	* src/LinReg_LA.cpp: Idem
+	* src/LinReg_LA_adapt.cpp: Idem
+
 2021-10-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* README.md: Update JSS url to doi form per JSS request
