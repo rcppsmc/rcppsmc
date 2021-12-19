@@ -4,6 +4,8 @@
 
 	* man/pfLineartBS.Rd: Replace one \url with \doi
 
+	* README.md: Remove unused continuous integration artifact and badge
+
 2021-11-25  Dirk Eddelbuettel  <edd@debian.org>
 
 	* src/LinReg.cpp: Remove 'using namespace std;' for g++-11 builds
