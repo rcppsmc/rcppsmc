@@ -1,7 +1,7 @@
 simGaussianSSM <- function(len = 250,
                            parameters = list(phi = 0.9,
-                                             varInit = 10,
-                                             varEvol = 10,
+                                             varInit = 1,
+                                             varEvol = 1,
                                              varObs = 1)) {
 
 
