@@ -1,0 +1,106 @@
+# Taken from: RcppArmadillo::RcppArmadillo.package.skeleton
+# To-do as taken from JSS paper:code_files
+## - DESCRIPTION:
+##   - add RcppSMC, Rcpp and RcppArmadillo to the LinkingTo section
+##   - this makes underlying C++ code in /include of those packages available
+## - Add RcppSMC to Imports if using any of the R code (which is just the examples so far)
+## - NAMESPACE:
+##    - useDynLib("myPackageName", .registration = TRUE) import(RcppSMC) (more?)
+## C++ FILES add #include "RcppSMC.h" and // [[Rcpp::export]] directly before
+## the function (as always)
+## -> More?
+RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
+                                      environment = .GlobalEnv,path = ".",
+                                      force = FALSE, code_files = character(),
+                                      example_code = TRUE) {
+    env <- parent.frame(1)
+    if (!length(list)) {
+        fake <- TRUE
+        assign("Rcpp.fake.fun", function() {
+        }, envir = env)
+    }
+    else {
+        fake <- FALSE
+    }
+    haveKitten <- requireNamespace("pkgKitten", quietly = TRUE)
+    skelFunUsed <- ifelse(haveKitten, pkgKitten::kitten, package.skeleton)
+    skelFunName <- ifelse(haveKitten, "kitten", "package.skeleton")
+    message("\nCalling ", skelFunName, " to create basic package.")
+    call <- match.call()
+    call[[1]] <- skelFunUsed
+    if ("example_code" %in% names(call)) {
+        call[["example_code"]] <- NULL
+    }
+    if (!haveKitten) {
+        if (fake) {
+            call[["list"]] <- "Rcpp.fake.fun"
+        }
+    }
+    else {
+        if (force) {
+            call[["force"]] <- NULL
+        }
+    }
+    tryCatch(eval(call, envir = env), error  = function(e) {
+        cat(paste(e, "\n"))
+        stop(paste("error while calling `", skelFunName, "`",
+            sep = ""))
+    })
+    message("\nAdding RcppSMC settings")
+    root <- file.path(path, name)
+    DESCRIPTION <- file.path(root, "DESCRIPTION")
+    if (file.exists(DESCRIPTION)) {
+        x <- cbind(read.dcf(DESCRIPTION), Imports = sprintf("Rcpp (>= %s)",
+            packageDescription("Rcpp")[["Version"]]), LinkingTo = "Rcpp, RcppArmadillo")
+        write.dcf(x, file = DESCRIPTION)
+        message(" >> added Imports: Rcpp")
+        message(" >> added LinkingTo: Rcpp, RcppArmadillo")
+    }
+    NAMESPACE <- file.path(root, "NAMESPACE")
+    lines <- readLines(NAMESPACE)
+    lines <- lines[!grepl("^export.*fake\\.fun", lines)]
+    if (!any(grepl("^exportPattern", lines))) {
+        lines <- c(lines, "exportPattern(\"^[[:alpha:]]+\")")
+    }
+    if (!any(grepl("useDynLib", lines))) {
+        lines <- c(sprintf("useDynLib(%s, .registration=TRUE)",
+            name), "importFrom(Rcpp, evalCpp)", lines)
+        writeLines(lines, con = NAMESPACE)
+        message(" >> added useDynLib and importFrom directives to NAMESPACE")
+    }
+    src <- file.path(root, "src")
+    if (!file.exists(src)) {
+        dir.create(src)
+    }
+    man <- file.path(root, "man")
+    if (!file.exists(man)) {
+        dir.create(man)
+    }
+    skeleton <- system.file("skeleton", package = "RcppArmadillo")
+    Makevars <- file.path(src, "Makevars")
+    if (!file.exists(Makevars)) {
+        file.copy(file.path(skeleton, "Makevars"), Makevars)
+        message(" >> added Makevars file with Rcpp settings")
+    }
+    Makevars.win <- file.path(src, "Makevars.win")
+    if (!file.exists(Makevars.win)) {
+        file.copy(file.path(skeleton, "Makevars.win"), Makevars.win)
+        message(" >> added Makevars.win file with RcppArmadillo settings")
+    }
+    if (example_code) {
+        file.copy(file.path(skeleton, "rcpparma_hello_world.cpp"),
+            src)
+        message(" >> added example src file using armadillo classes")
+        file.copy(file.path(skeleton, "rcpparma_hello_world.Rd"),
+            man)
+        message(" >> added example Rd file for using armadillo classes")
+        Rcpp::compileAttributes(root)
+        message(" >> invoked Rcpp::compileAttributes to create wrappers")
+    }
+    if (fake) {
+        rm("Rcpp.fake.fun", envir = env)
+        unlink(file.path(root, "R", "Rcpp.fake.fun.R"))
+        unlink(file.path(root, "man", "Rcpp.fake.fun.Rd"))
+    }
+    invisible(NULL)
+}
