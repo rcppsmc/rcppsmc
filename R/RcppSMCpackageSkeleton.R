@@ -78,24 +78,25 @@ RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
     if (!file.exists(man)) {
         dir.create(man)
     }
-    skeleton <- system.file("skeleton", package = "RcppArmadillo")
+    skeletonArma <- system.file("skeleton", package = "RcppArmadillo")
+    skeletonSMC  <- system.file("skeleton", package = "RcppSMC")
     Makevars <- file.path(src, "Makevars")
     if (!file.exists(Makevars)) {
-        file.copy(file.path(skeleton, "Makevars"), Makevars)
+        file.copy(file.path(skeletonArma, "Makevars"), Makevars)
         message(" >> added Makevars file with Rcpp settings")
     }
     Makevars.win <- file.path(src, "Makevars.win")
     if (!file.exists(Makevars.win)) {
-        file.copy(file.path(skeleton, "Makevars.win"), Makevars.win)
+        file.copy(file.path(skeletonArma, "Makevars.win"), Makevars.win)
         message(" >> added Makevars.win file with RcppArmadillo settings")
     }
     if (example_code) {
-        file.copy(file.path(skeleton, "rcpparma_hello_world.cpp"),
+        file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.cpp"),
             src)
-        message(" >> added example src file using armadillo classes")
-        file.copy(file.path(skeleton, "rcpparma_hello_world.Rd"),
+        message(" >> added example src file using RcppSMC functions/classes")
+        file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.Rd"),
             man)
-        message(" >> added example Rd file for using armadillo classes")
+        message(" >> added example Rd file for using RcppSMC functions/classes")
         Rcpp::compileAttributes(root)
         message(" >> invoked Rcpp::compileAttributes to create wrappers")
     }
