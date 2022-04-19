@@ -1,5 +1,5 @@
 # Taken from: RcppArmadillo::RcppArmadillo.package.skeleton
-# To-do as taken from JSS paper:code_files
+# To-do as taken from JSS paper, p.11
 ## - DESCRIPTION:
 ##   - add RcppSMC, Rcpp and RcppArmadillo to the LinkingTo section
 ##   - this makes underlying C++ code in /include of those packages available

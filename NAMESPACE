@@ -18,5 +18,6 @@ export("blockpfGaussianOpt",
        "nonLinPMMH",
        "simGaussian",
        "simLineart",
-       "simNonlin")
+       "simNonlin",
+       "RcppSMC.package.skeleton")
 

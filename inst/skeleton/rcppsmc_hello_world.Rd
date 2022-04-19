@@ -1,5 +1,5 @@
-\name{RcppArmadillo-Functions}
-\alias{rcppsmc_logNormmWeightsCpp}
+\name{RcppSMC-Functions}
+\alias{rcppsmc_logNormWeightsCpp}
 \title{Example functions for computing stable log sum weights}
 \description{
   This function is created when
@@ -7,13 +7,13 @@
   skeleton packages.
 }
 \usage{
-rcppsmc_logNormmWeightsCpp()
+rcppsmc_logNormWeightsCpp(logWeights)
 }
 \arguments{
   \item{logWeights}{a numeric vector with logarithmic weights}
 }
 \value{
-  \code{rcppsmc_logNormmWeightsCpp()} returns a named list of two, the
+  \code{rcppsmc_logNormWeightsCpp()} returns a named list of two, the
   logarithmic sum of weights and the logarithmic weights as passed via the
   function argument \code{logWeights}.
 }
@@ -28,9 +28,8 @@ rcppsmc_logNormmWeightsCpp()
   See the documentation for RcppSMC for more details.
 }
 \examples{
-  x <- sqrt(1:4)
-  rcpparma_innerproduct(x)
-  rcpparma_outerproduct(x)
+  logWeightVec <- -1 * sqrt(1:4)
+  rcppsmc_logNormWeightsCpp(logWeightVec)
 }
 \author{Dirk Eddelbuettel, Adam Johansen, Leah F. South, Ilya Zarubin}
 
