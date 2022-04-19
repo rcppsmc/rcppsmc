@@ -50,8 +50,10 @@ RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
     root <- file.path(path, name)
     DESCRIPTION <- file.path(root, "DESCRIPTION")
     if (file.exists(DESCRIPTION)) {
-        x <- cbind(read.dcf(DESCRIPTION), Imports = sprintf("Rcpp (>= %s)",
-            packageDescription("Rcpp")[["Version"]]), LinkingTo = "Rcpp, RcppArmadillo")
+        x <- cbind(read.dcf(DESCRIPTION),
+                   Imports = sprintf("Rcpp (>= %s)",
+                   packageDescription("Rcpp")[["Version"]]),
+                   LinkingTo = "Rcpp, RcppArmadillo, RcppSMC")
         write.dcf(x, file = DESCRIPTION)
         message(" >> added Imports: Rcpp")
         message(" >> added LinkingTo: Rcpp, RcppArmadillo")
