@@ -7,29 +7,33 @@ Create a skeleton for a new package that intends to use RcpSMCp
 	\code{RcppSMC.package.skeleton} automates the creation of
 	a new source package that intends to use features of RcppSMC.
 
-	It is based on the \link[utils]{package.skeleton} function
-	which it executes first.
+	It is based on the \link[utils]{package.skeleton} and
+	\link[pkgKitten]{kitten} (from \link[pkgKitten]{pkgKitten}) functions, the
+	latter being a Wrapper around \link[utils]{package.skeleton} to make a
+	package pass \samp{R CMD check}	without	complaints. If
+	\link[pkgKitten]{pkgKitten} is not installed,
+	\link[utils]{package.skeleton} is executed instead.
 }
 \usage{
 RcppSMC.package.skeleton(name = "anRpackage", list = character(),
-	environment = .GlobalEnv, path = ".", force = FALSE,
-	code_files = character(), example_code = TRUE)
+	environment = .GlobalEnv, path = ".",
+	example_code = TRUE)
 }
 \arguments{
 	\item{name}{See \link[utils]{package.skeleton}}
 	\item{list}{See \link[utils]{package.skeleton}}
 	\item{environment}{See \link[utils]{package.skeleton}}
 	\item{path}{See \link[utils]{package.skeleton}}
-	\item{force}{See \link[utils]{package.skeleton}}
-	\item{code_files}{See \link[utils]{package.skeleton}}
-	\item{example_code}{If TRUE, example c++ code using RcppSMC is added to the package}
+	\item{example_code}{If TRUE, example C++ code using RcppSMC is added to the package. If FALSE the resulting package does not contain any C++ code and
+	\samp{R CMD check} will pass only after adding user defined C++ and calling
+	\link[Rcpp]{compileAttributes} manually.}
 }
 \details{
 	In addition to \link[utils]{package.skeleton} :
 
 	The \samp{DESCRIPTION} file gains a Depends line requesting that
-	the package depends on Rcpp and RcppSMC and
-	a LinkingTo line so that the package finds Rcpp and RcppSMC header files.
+	the package depends on Rcpp, RcppArmadillo and RcppSMC and
+	a LinkingTo line so that the package finds the associated header files.
 
 	The \samp{NAMESPACE}, if any, gains a \code{useDynLib} directive.
 
@@ -39,7 +43,7 @@ RcppSMC.package.skeleton(name = "anRpackage", list = character(),
 	to link with the Rcpp library.
 
 	If the \code{example_code} argument is set to \code{TRUE},
-	example files \samp{rcppsmc_hello_world.h} and \samp{rcppsmc_hello_world.cpp}
+	example file \samp{rcppsmc_hello_world.cpp}
 	are also created in the \samp{src}. An R file \samp{rcppsmc_hello_world.R} is
 	expanded in the \samp{R} directory, the \code{rcppsmc_hello_world} function
 	defined in this files makes use of the C++ function \samp{rcppsmc_hello_world}
@@ -51,6 +55,7 @@ Nothing, used for its side effects
 }
 \seealso{
 \link[utils]{package.skeleton}
+\link[pkgKitten]{kitten}
 }
 \references{
 Read the \emph{Writing R Extensions} manual for more details.

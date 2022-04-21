@@ -1,3 +1,30 @@
+2022-04-22  Ilya Zarubin  <ilya.a.zarub@gmail>
+
+	* R/RcppSMCpackageSkeleton.R: add skeleton function for straightforward
+	package creation of external packages that make use of RcppSMC; generates
+	minimal boiler-plate package to enable the user an easy start and interface
+	with RcppSMC
+	* man/RcppSMCpackageSkeleton.Rd: add skeleton function documentation
+
+	* inst/skeleton/rcppsmc_hello_world.cpp: C++ example function to compute
+	sum of logarithmic particle weights; illustrates how to write user-defined
+	C++ functions that make use of RcppSMC functions in a separate package
+	* inst/skeleton/rcppsmc_hello_world.Rd: add documentation of above
+
+2021-12-18  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.2.6
+
+	* man/pfLineartBS.Rd: Replace one \url with \doi
+
+	* README.md: Remove unused continuous integration artifact and badge
+
+2021-11-25  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/LinReg.cpp: Remove 'using namespace std;' for g++-11 builds
+	* src/LinReg_LA.cpp: Idem
+	* src/LinReg_LA_adapt.cpp: Idem
+
 2021-10-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* README.md: Update JSS url to doi form per JSS request

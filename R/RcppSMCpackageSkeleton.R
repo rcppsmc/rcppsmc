@@ -1,17 +1,5 @@
-# Taken from: RcppArmadillo::RcppArmadillo.package.skeleton
-# To-do as taken from JSS paper, p.11
-## - DESCRIPTION:
-##   - add RcppSMC, Rcpp and RcppArmadillo to the LinkingTo section
-##   - this makes underlying C++ code in /include of those packages available
-## - Add RcppSMC to Imports if using any of the R code (which is just the examples so far)
-## - NAMESPACE:
-##    - useDynLib("myPackageName", .registration = TRUE) import(RcppSMC) (more?)
-## C++ FILES add #include "RcppSMC.h" and // [[Rcpp::export]] directly before
-## the function (as always)
-## -> More?
 RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
                                       environment = .GlobalEnv,path = ".",
-                                      force = FALSE, code_files = character(),
                                       example_code = TRUE) {
     env <- parent.frame(1)
     if (!length(list)) {
@@ -34,11 +22,6 @@ RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
     if (!haveKitten) {
         if (fake) {
             call[["list"]] <- "Rcpp.fake.fun"
-        }
-    }
-    else {
-        if (force) {
-            call[["force"]] <- NULL
         }
     }
     tryCatch(eval(call, envir = env), error  = function(e) {
