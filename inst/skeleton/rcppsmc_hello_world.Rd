@@ -14,15 +14,14 @@ rcppsmc_logNormWeightsCpp(logWeights)
 }
 \value{
   \code{rcppsmc_logNormWeightsCpp()} returns a named list of two, the
-  logarithmic sum of weights and the logarithmic weights as passed via the
-  function argument \code{logWeights}.
+  logarithmic sum of weights and the normalised logarithmic weights.
 }
 \details{
   This is an example function which computes stable calculations of the
   logarithm of the sum of weights (which is of interest for computing e.g.
-  normalising constants). This is to demonstrate how to write a function using
-  the RcppSMC C++ internal functions and classes, and to have to such a function
-  accessible from R.
+  normalising constants) as well as the normalised logarithmic weights. This is
+  to demonstrate how to write a function using the RcppSMC C++ internal
+  functions and classes, and to have to such a function accessible from R.
 }
 \references{
   See the documentation for RcppSMC for more details.

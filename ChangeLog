@@ -1,14 +1,11 @@
 2022-04-22  Ilya Zarubin  <ilya.a.zarub@gmail>
 
 	* R/RcppSMCpackageSkeleton.R: add skeleton function for straightforward
-	package creation of external packages that make use of RcppSMC; generates
-	minimal boiler-plate package to enable the user an easy start and interface
-	with RcppSMC
+	package creation of external packages that make use of RcppSMC
 	* man/RcppSMCpackageSkeleton.Rd: add skeleton function documentation
 
 	* inst/skeleton/rcppsmc_hello_world.cpp: C++ example function to compute
-	sum of logarithmic particle weights; illustrates how to write user-defined
-	C++ functions that make use of RcppSMC functions in a separate package
+	sum of logarithmic particle weights
 	* inst/skeleton/rcppsmc_hello_world.Rd: add documentation of above
 
 2021-12-18  Dirk Eddelbuettel  <edd@debian.org>

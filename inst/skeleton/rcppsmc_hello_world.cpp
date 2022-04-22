@@ -8,11 +8,11 @@
 //
 // [[Rcpp::depends(RcppSMC)]]
 
-// simple example of computing stable calculations of the logarithm of the sum
-// of weights which is of interest for computing e.g. normalising constants
+// Simple example of computing stable calculations of the logarithm of the sum
+// of weights which is of interest for computing e.g. normalising constants. The
+// function returns the log-sum as well as the normalized logarithmic weights.
 //
-// via the exports attribute we tell Rcpp to make this function
-// available from R
+// via the exports attribute we tell Rcpp to make this function available from R
 //
 // [[Rcpp::export]]
 Rcpp::List rcppsmc_logNormWeightsCpp(arma::vec logWeights){

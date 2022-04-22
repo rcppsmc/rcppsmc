@@ -1,6 +1,5 @@
 RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
-                                      environment = .GlobalEnv,path = ".",
-                                      example_code = TRUE) {
+                                      environment = .GlobalEnv,path = ".") {
     env <- parent.frame(1)
     if (!length(list)) {
         fake <- TRUE
@@ -39,7 +38,7 @@ RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
                    LinkingTo = "Rcpp, RcppArmadillo, RcppSMC")
         write.dcf(x, file = DESCRIPTION)
         message(" >> added Imports: Rcpp")
-        message(" >> added LinkingTo: Rcpp, RcppArmadillo")
+        message(" >> added LinkingTo: Rcpp, RcppArmadillo and RcppSMC")
     }
     NAMESPACE <- file.path(root, "NAMESPACE")
     lines <- readLines(NAMESPACE)
@@ -66,23 +65,23 @@ RcppSMC.package.skeleton <- function (name = "anRpackage", list = character(),
     Makevars <- file.path(src, "Makevars")
     if (!file.exists(Makevars)) {
         file.copy(file.path(skeletonArma, "Makevars"), Makevars)
-        message(" >> added Makevars file with Rcpp settings")
+        message(" >> added Makevars file for baseline compiler flags")
     }
     Makevars.win <- file.path(src, "Makevars.win")
     if (!file.exists(Makevars.win)) {
         file.copy(file.path(skeletonArma, "Makevars.win"), Makevars.win)
-        message(" >> added Makevars.win file with RcppArmadillo settings")
+        message(" >> added Makevars file for baseline compiler flags (Windows)")
     }
-    if (example_code) {
-        file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.cpp"),
-            src)
-        message(" >> added example src file using RcppSMC functions/classes")
-        file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.Rd"),
-            man)
-        message(" >> added example Rd file for using RcppSMC functions/classes")
-        Rcpp::compileAttributes(root)
-        message(" >> invoked Rcpp::compileAttributes to create wrappers")
-    }
+
+    file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.cpp"), src)
+    message(" >> added example src file using RcppSMC functions/classes")
+
+    file.copy(file.path(skeletonSMC, "rcppsmc_hello_world.Rd"), man)
+    message(" >> added example Rd file for using RcppSMC functions/classes")
+
+    Rcpp::compileAttributes(root)
+    message(" >> invoked Rcpp::compileAttributes to create wrappers")
+
     if (fake) {
         rm("Rcpp.fake.fun", envir = env)
         unlink(file.path(root, "R", "Rcpp.fake.fun.R"))

@@ -16,17 +16,13 @@ Create a skeleton for a new package that intends to use RcpSMCp
 }
 \usage{
 RcppSMC.package.skeleton(name = "anRpackage", list = character(),
-	environment = .GlobalEnv, path = ".",
-	example_code = TRUE)
+	environment = .GlobalEnv, path = ".")
 }
 \arguments{
 	\item{name}{See \link[utils]{package.skeleton}}
 	\item{list}{See \link[utils]{package.skeleton}}
 	\item{environment}{See \link[utils]{package.skeleton}}
 	\item{path}{See \link[utils]{package.skeleton}}
-	\item{example_code}{If TRUE, example C++ code using RcppSMC is added to the package. If FALSE the resulting package does not contain any C++ code and
-	\samp{R CMD check} will pass only after adding user defined C++ and calling
-	\link[Rcpp]{compileAttributes} manually.}
 }
 \details{
 	In addition to \link[utils]{package.skeleton} :
@@ -42,9 +38,7 @@ RcppSMC.package.skeleton(name = "anRpackage", list = character(),
 	\samp{PKG_LIBS} to accomodate the necessary flags
 	to link with the Rcpp library.
 
-	If the \code{example_code} argument is set to \code{TRUE},
-	example file \samp{rcppsmc_hello_world.cpp}
-	are also created in the \samp{src}. An R file \samp{rcppsmc_hello_world.R} is
+	An example file \samp{rcppsmc_hello_world.cpp} is created in the \samp{src}. An R file \samp{rcppsmc_hello_world.R} is
 	expanded in the \samp{R} directory, the \code{rcppsmc_hello_world} function
 	defined in this files makes use of the C++ function \samp{rcppsmc_hello_world}
 	defined in the C++ file. These files are given as an example and should
