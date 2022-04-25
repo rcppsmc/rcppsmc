@@ -60,7 +60,7 @@
   Journal of Statistical Software, 30(6):1-41, April
   2009, \doi{10.18637/jss.v030.i06}.
 }
-\seealso{The SMCTC paper and code at \url{https://doi.org/10.18637/jss.v030.i06}.}
+\seealso{The SMCTC paper and code at \doi{10.18637/jss.v030.i06}.}
 \examples{
   res <- pfLineartBS(plot=TRUE)
   if (interactive()) ## if not running R CMD check etc

@@ -29,7 +29,6 @@ namespace LinReg_LA_adapt {
     const double b_prior = std::pow(2.0*300.0*300.0,-1.0);
 }
 
-using namespace std;
 using namespace LinReg_LA_adapt;
 
 // LinRegLA_adapt_impl() function callable from R via Rcpp::
