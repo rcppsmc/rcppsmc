@@ -6,7 +6,8 @@ importFrom("Rcpp", "evalCpp")               # with Rcpp 0.11.0
 importFrom("grDevices", "dev.new")
 importFrom("graphics", "lines", "par", "plot", "points", "polygon", "title", "abline")
 importFrom("stats", "rnorm", "rt")
-importFrom("utils", "read.table", "data")
+importFrom("utils", "read.table", "data", "package.skeleton",
+           "packageDescription")
 
 export("blockpfGaussianOpt",
        "pfLineartBS",
@@ -18,5 +19,6 @@ export("blockpfGaussianOpt",
        "nonLinPMMH",
        "simGaussian",
        "simLineart",
-       "simNonlin")
+       "simNonlin",
+       "RcppSMC.package.skeleton")
 
