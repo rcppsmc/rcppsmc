@@ -38,7 +38,7 @@ namespace cSMCexamples {
     public:
         arma::vec yObs;
     };
-
+    // Same as above: to be extened for parameters in a multivariate LGSS.
     class Parameters
     {
     public:

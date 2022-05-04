@@ -21,73 +21,113 @@
 
 #include "smctc.h"
 #include "cSMCexamples.h"
-#include <cmath>
 
 namespace cSMCexamples {
     /// Initializing parameters
     const double varInit0 = 10;
     double VarEvol;
     double phi;
-    ///The obsevations
+    /// Class declarations for measurements, states and parameters
     Measurements y;
     States X;
     Parameters params;
 }
 
-using namespace std;
 using namespace cSMCexamples;
 
-// runMonteCarloNCestimateComparisons_impl() function callable from R via Rcpp::
+// compareNCestimates_impl() function callable from R via Rcpp::
 // [[Rcpp::export]]
-Rcpp::DataFrame compareNCestimates_imp(arma::vec data,
-                                       long lParticleNum,
-                                       int simNum,
-                                       Rcpp::List parInits)
+Rcpp::List compareNCestimates_imp(arma::vec data,
+                                  long lParticleNum,
+                                  int simNum,
+                                  Rcpp::List parInits)
 {
+    // Initialize data class/container
+    y.yObs = data;
+
+    // Initialize parameter class
     params.phi = parInits["phi"];
     params.varEvol = parInits["varEvol"];
-    unsigned int tt = data.size();
 
-    double NCestimateBPF;
-    double NCestimateCSMCmultinomial;
-    double NCestimateCSMCsystematic;
-    double NCestimateCSMCstratified;
-    double NCestimateCSMCresidual;
-    double NCestimateKFgroundTruth;
+    // Initialize other constants needed to run the sampler
+    unsigned int tt = y.yObs.size();
 
-    arma::mat outputNCestimates(simNum, 6);
-    outputNCestimates.fill(0.5);
+    // double NCestimateBPF;
+    // double NCestimateCSMCmultinomial;
+    // double NCestimateCSMCsystematic;
+    // double NCestimateCSMCstratified;
+    // double NCestimateCSMCresidual;
+    // double NCestimateKFgroundTruth;
+    // The follwing will be replaced with corresponding Kalman forward Filter or backward smoothing.
+    // NCestimateKFgroundTruth   = 0.0;
+
+    // Initialize output container:
+    arma::mat outputNCestimatesKF(simNum, 2, arma::fill::zeros);
+    arma::mat outputNCestimatesSMC(simNum, 4, arma::fill::zeros);
+    arma::mat outputNCestimatesCSMC(simNum, 4, arma::fill::zeros);
+    Rcpp::List outputNCestimates;
     try
     {
-        // Create move-class object.
+        // Create move-class object: same for SMC and CSMC.
         MyLGSSmove = new cSMCexamples_move;
         // Initialize baseline BPF sampler.
         smc::sampler<States,smc::nullParams> SamplerBPF(lParticleNum,
                                                         HistoryType::NONE,
                                                         MyLGSSmove);
-        SamplerBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
+
+        // smc::conditionalSampler<States,smc::nullParams> SamplerCBPF(lParticleNum, HistoryType::AL,MyLGSSmove);
+
 
         for(int i = 0; i < simNum; ++i) {
             SamplerBPF.Initialise();
+            SamplerBPF.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
             SamplerBPF.IterateUntil(tt - 1);
-            NCestimateBPF = SamplerBPF.GetLogNCPath();
+            outputNCestimatesSMC.at(i, 0) = SamplerBPF.GetLogNCPath();
 
-            // The following will be replaced with corresponding sampler output.
-            NCestimateCSMCmultinomial = 0.0;
-            NCestimateCSMCstratified  = 0.0;             NCestimateCSMCsystematic  = 0.0;
-            NCestimateCSMCresidual    = 0.0;
-            // The follwing will be replaced with corresponding Kalman forward Filter or backward smoothing.
-            NCestimateKFgroundTruth   = 0.0;
+            SamplerBPF.Initialise();
+            SamplerBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
+            SamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesSMC.at(i, 1) = SamplerBPF.GetLogNCPath();
 
-            outputNCestimates.at(i, 0) = NCestimateBPF;
-            outputNCestimates.at(i, 1) = NCestimateCSMCmultinomial;
-            outputNCestimates.at(i, 2) = NCestimateCSMCsystematic;
-            outputNCestimates.at(i, 3) = NCestimateCSMCstratified;
-            outputNCestimates.at(i, 4) = NCestimateCSMCresidual;
-            outputNCestimates.at(i, 5) = NCestimateKFgroundTruth;
+            SamplerBPF.Initialise();
+            SamplerBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
+            SamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesSMC.at(i, 2) = SamplerBPF.GetLogNCPath();
+
+            SamplerBPF.Initialise();
+            SamplerBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
+            SamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesSMC.at(i, 3) = SamplerBPF.GetLogNCPath();
+
+            // SamplerCBPF.Initialise();
+            // SamplerCBPF.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
+            // SamplerCBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 0) = SamplerCBPF.GetLogNCPath();
+
+            // SamplerCBPF.Initialise();
+            // SamplerCBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
+            // SamplerCBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 1) = SamplerCBPF.GetLogNCPath();
+
+            // SamplerCBPF.Initialise();
+            // SamplerCBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
+            // SamplerCBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 2) = SamplerCBPF.GetLogNCPath();
+
+            // SamplerCBPF.Initialise();
+            // SamplerCBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
+            // SamplerCBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 3) = SamplerCBPF.GetLogNCPath();
+
         }
-    }
 
+        outputNCestimates["kfOut"] = outputNCestimatesKF;
+        outputNCestimates["smcOut"] = outputNCestimatesSMC;
+        outputNCestimates["csmcOut"] = outputNCestimatesCSMC;
+
+        delete MyLGSSmove;
+        return outputNCestimates;
+    }
     catch(smc::exception  e)
     {
         Rcpp::Rcout << e;
