@@ -1,6 +1,7 @@
 \name{compareNCestimates}
 \alias{compareNCestimates}
 \alias{simGaussianSSM}
+\alias{kalmanFFBS}
 \title{Conditional Sequential Monte Carlo Examples}
 \description{
   The \code{compareNCestimates} function generates a Monte Carlo study to
@@ -12,50 +13,76 @@
 
   The \code{simGaussianSSM} function simulates data from a LGSS model (can be
   used manually to simulate \code{data} or runs as a default, if no \code{data} is provided, with a default parameter setup, see \code{parameters}).
+
+  The \code{kalmanFFBS} function runs a Kalman (exact) forward filter, computes
+  a log-likelihood estimate and generates a joint smoothing state trajectory
+  via a backward simulation pass.
 }
 \usage{
-  compareNCestimates(data,
+  compareNCestimates(dataY,
+                     trueStates = NULL,
                      numParticles = 1000L,
-                     simNumber = 10L,
-                     parameters = list(phi = 0.9,
-                                       varStateInit = 1,
-                                       varStateEvol = 1,
-                                       varObs = 1),
+                     simNumber = 100L,
+                     modelParameters = list(stateInit = 0,
+                                            phi = 0.9,
+                                            varStateEvol = 1,
+                                            varObs = 1),
                      plot = FALSE)
-  simGaussianSSM(len = 250,
-                 parameters = list(phi = 0.9,
-                                   varStateInit = 1,
-                                   varStateEvol = 1,
-                                   varObs = 1))
+  simGaussianSSM(len = 100,
+                 stateInit = 0,
+                 phi = 0.9,
+                 varStateEvol = 1,
+                 varObs = 1)
+  kalmanFFBS(dataY,
+             stateInit,
+             phi,
+             varStateEvol,
+             varObs)
 }
 \arguments{
-  \item{data}{A one-column matrix or dataframe or vector containing measurements
-   (y values) from a standard linear Gaussian SSM. If not provided, defaults
-   to a LGSS model with time series lenght \code{len=250} and parameter
-   setup specified with default values in the \code{parameters} argument, see \code{\link{simGaussianSSM}} or \code{\link{compareNCestimates}}.}
-  \item{particles}{An integer specifying the number of particles.}
+  \item{dataY}{A one-column matrix or dataframe or vector containing
+  measurements (y values) from a standard linear Gaussian SSM. If not provided, defaults to a LGSS model with time series lenght \code{len=250} and parameter
+  setup specified with default values in the \code{parameters} argument, see \code{\link{simGaussianSSM}} or \code{\link{compareNCestimates}}.}
+  \item{trueStates}{defaults to \code{NULL} for a real dataset as the true state
+  values are not observed; for simulated data, these can be passed and then will alse be plotted if \code{plot=TRUE}}
+  \item{numParticles}{An integer specifying the number of particles.}
   \item{simNumber}{An integer specifying the number of repeated simulation runs of each of which produces 2x4=8 normalizing constant esimtates: BPF and conditional BPF esimates under four conditional resampling schemes, as well as
   a ground truth Kalman forward filter estimate and a backward filter output
   required for the reference trajectory of the conditional sampler.}
-  \item{parameters}{a named \code{list} of parameters for the LGSSM model in the following order:
+  \item{modelParameters}{a named \code{list} of parameters of the LGSSM model
+  in the following order:
   \itemize{
-    \item phi (autoregressive parameter)
-    \item varStateInit (initial variance of state process)
-    \item varStateEvol (state process variance)
-    \item varObs (measurement/observation process variance)
-  }}
+    \item \code{phi:} autoregressive parameter
+    \item \code{stateInit:} initial state value (i.e. \eqn{X_0})
+    \item \code{varStateEvol:} state process variance
+    \item \code{varObs:} measurement/observation process variance
+  }
+  These parameters are used to for the Kalman forward filtering and backward
+  simulation pass, and, if no \code{data} argument is provided, to simulate
+  data from a linear Gaussian state space model internally via
+  \code{simGaussianSSM}.}
+  \item{phi}{autoregressive parameter}
+  \item{stateInit}{initial state value (i.e. \eqn{X_0})}
+  \item{varStateEvol}{state process variance}
+  \item{varObs}{measurement/observation process variance}
   \item{plot}{A boolean variable describing whether plot should
-    illustrate the estimated path along with the data.}
+    illustrate the estimated results along with the data.}
   \item{len}{Length of data series to simulate.}
 }
 \value{
-  The \code{compareNCestimates} function returns a \code{data.frame} containing as many rows as in
+  \code{compareNCestimates} function returns a \code{data.frame} containing as many rows as in
   the input data, and four columns corresponding to the estimated \eqn{x}{x} and
   \eqn{y}{y} coordinates as well as the estimated velocity in these two
   directions.
 
-  The \code{simLineart} function returns a list containing the vector of
+  \code{simLineart} function returns a list containing the vector of
   states and the associated vector of observations.
+
+  \code{kalmanFFBS} returns a named list of two:
+    \itemize{
+      \item{\code{logLikeliEstim:}}{(exact) estimate of the log-likelihood}
+      \item{\code{xBackwardSimul:}}{a backward simulation (joint smoothing) trajectory of latent states given parameters and measurement}
+    }
 }
 \details{
   The \code{compareNCestimates} The estimates are obtained from \code{sumNumber} runs of the standard BPF and the conditional BPF under four

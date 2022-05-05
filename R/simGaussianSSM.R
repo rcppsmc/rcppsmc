@@ -1,17 +1,21 @@
-simGaussianSSM <- function(len = 250,
-                           parameters = list(phi = 0.9,
-                                             varStateInit = 1,
-                                             varStateEvol = 1,
-                                             varObs = 1)) {
+simGaussianSSM <- function(len = 100,
+                           stateInit = 0,
+                           phi = 0.9,
+                           varStateEvol = 1,
+                           varObs = 1) {
 
+    sim <- list("states" = rep(0, times = len),
+                "measurements"  = rep(0, times = len))
+    stateEvol   <- rnorm(len) * sqrt(varStateEvol)
+    observErr   <- rnorm(len) * sqrt(varObs)
 
-    sim <- list("state" = rep(0, times = len),
-                "data"  = rep(0, times = len))
-    sim$state[1] <- rnorm(1) * sqrt(parameters$varStateInit)
-    innovations  <- rnorm(len - 1) * sqrt(parameters$varStateEvol)
-    for (i in 2:len) {
-        sim$state[i] <- parameters$phi * sim$state[i - 1] + innovations[i - 1]
+    if (is.null(stateInit)) {
+        stateInit <- rnorm(1, 0, sqrt(varStateEvol / (1 - phi^2)))
     }
-    sim$data <- sim$state + rnorm(len) * sqrt(parameters$varObs)
+    sim$states[1] <- phi * stateInit + stateEvol[1]
+    for (i in 2:len) {
+        sim$states[i] <- phi * sim$states[i - 1] + stateEvol[i]
+    }
+    sim$measurements <- sim$states + observErr
     return(sim)
 }

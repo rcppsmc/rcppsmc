@@ -57,11 +57,18 @@ namespace cSMCexamples {
                     States& stateValue,
                     double& logweight,
                     smc::nullParams& param);
+        void pfWeight(long lTime,
+                      States& condStateValue,
+                      double& logweight,
+                      smc::nullParams& param);
         ~cSMCexamples_move() {};
     };
 
-    // II. Helper function declaration; only log-likelihood computation needed.
+    // II. Helper function declaration: log-likelihood computation and copying
+    // of reference trajectory from arma::vec to std::vect<States> container.
     double computeLogLikelihood(long lTime, const States& stateValue);
+    void copyReferenceTrajectory(const arma::vec& refArma,
+                                 std::vector<States>& refStd);
 
     // III. Pointer declaration for moveset-class
     smc::moveset<States, smc::nullParams>* MyLGSSmove;

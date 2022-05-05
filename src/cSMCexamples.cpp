@@ -20,12 +20,14 @@
 #include "RcppArmadillo.h"
 
 #include "smctc.h"
+#include "conditionalSampler.h"
 #include "cSMCexamples.h"
 
 namespace cSMCexamples {
     /// Initializing parameters
-    const double varStateInit = 1;
-    double varObs = 1.0;
+    double varStateInit;
+    double varObs;
+    double stateInit;
     /// Class declarations for measurements, states and parameters
     Measurements y;
     States X;
@@ -39,29 +41,28 @@ using namespace cSMCexamples;
 Rcpp::List compareNCestimates_imp(arma::vec data,
                                   long lParticleNum,
                                   int simNum,
-                                  Rcpp::List parInits)
+                                  Rcpp::List parInits,
+                                  arma::vec referenceTraj)
 {
     // Initialize data class/container
     y.yObs = data;
-
     // Initialize parameter class
     params.statePhi = parInits["phi"];
-    params.stateVarEvol = parInits["varEvol"];
+    params.stateVarEvol = parInits["varStateEvol"];
+    // Initialize other parameters: initial state and measurement variances
+    stateInit = parInits["stateInit"];
+    varObs = parInits["varObs"];
+    // varStateInit = parInits["varStateEvol"];
+
 
     // Initialize other constants needed to run the sampler
-    unsigned int tt = y.yObs.size();
-
-    // double NCestimateBPF;
-    // double NCestimateCSMCmultinomial;
-    // double NCestimateCSMCsystematic;
-    // double NCestimateCSMCstratified;
-    // double NCestimateCSMCresidual;
-    // double NCestimateKFgroundTruth;
-    // The follwing will be replaced with corresponding Kalman forward Filter or backward smoothing.
-    // NCestimateKFgroundTruth   = 0.0;
+    const unsigned int tt = y.yObs.size();
+    // Transform reference Trajectory of doubles to std::vector<States> type
+    std::vector<States> referenceTrajectory(tt);
+    copyReferenceTrajectory(referenceTraj, referenceTrajectory);
 
     // Initialize output container:
-    arma::mat outputNCestimatesKF(simNum, 2, arma::fill::zeros);
+    // arma::mat outputNCestimatesKF(simNum, 2, arma::fill::zeros);
     arma::mat outputNCestimatesSMC(simNum, 4, arma::fill::zeros);
     arma::mat outputNCestimatesCSMC(simNum, 4, arma::fill::zeros);
     Rcpp::List outputNCestimates;
@@ -74,8 +75,10 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
                                                         HistoryType::NONE,
                                                         MyLGSSmove);
 
-        // smc::conditionalSampler<States,smc::nullParams> SamplerCBPF(lParticleNum, HistoryType::AL,MyLGSSmove);
-
+        smc::conditionalSampler<States, smc::nullParams> cSamplerBPF(lParticleNum,
+                                                                     HistoryType::AL,
+                                                                     MyLGSSmove,
+                                                                     referenceTrajectory);
 
         for(int i = 0; i < simNum; ++i) {
             SamplerBPF.Initialise();
@@ -98,28 +101,31 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
             SamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesSMC.at(i, 3) = SamplerBPF.GetLogNCPath();
 
-            // SamplerCBPF.Initialise();
-            // SamplerCBPF.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
-            // SamplerCBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 0) = SamplerCBPF.GetLogNCPath();
+            cSamplerBPF.Initialise();
+            cSamplerBPF.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
+            cSamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesCSMC.at(i, 0) = cSamplerBPF.GetLogNCPath();
 
-            // SamplerCBPF.Initialise();
-            // SamplerCBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
-            // SamplerCBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 1) = SamplerCBPF.GetLogNCPath();
+            // cSamplerBPF.Initialise();
+            // cSamplerBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
+            // cSamplerBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 1) = cSamplerBPF.GetLogNCPath();
 
-            // SamplerCBPF.Initialise();
-            // SamplerCBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
-            // SamplerCBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 2) = SamplerCBPF.GetLogNCPath();
+            // Rcpp::Rcout << "seems to not work here" << std::endl;
+            // cSamplerBPF.Initialise();
+            // cSamplerBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
+            // cSamplerBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 2) = cSamplerBPF.GetLogNCPath();
 
-            // SamplerCBPF.Initialise();
-            // SamplerCBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
-            // SamplerCBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 3) = SamplerCBPF.GetLogNCPath();
+            // Rcpp::Rcout << "seems to not work here2" << std::endl;
+            // cSamplerBPF.Initialise();
+            // cSamplerBPF.Initialise();
+            // cSamplerBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
+            // cSamplerBPF.IterateUntil(tt - 1);
+            // outputNCestimatesCSMC.at(i, 3) = cSamplerBPF.GetLogNCPath();
 
         }
-        outputNCestimates["kfOut"] = outputNCestimatesKF;
+        // outputNCestimates["kfOut"] = outputNCestimatesKF;
         outputNCestimates["smcOut"] = outputNCestimatesSMC;
         outputNCestimates["csmcOut"] = outputNCestimatesCSMC;
 
@@ -136,9 +142,10 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
 
 namespace cSMCexamples
 {
-    ///The function corresponding to the log likelihood at specified time and position (up to normalisation)
+    ///The function corresponding to the log likelihood at specified time and
+    ///position (up to normalisation)
 
-    ///  \param lTime The current time (i.e. the index of the current distribution)
+    ///  \param lTime The current time (i.e. index of the current distribution)
     ///  \param X     The state to consider
     double computeLogLikelihood(long lTime, const States& stateValue)
     {
@@ -156,7 +163,8 @@ namespace cSMCexamples
                                          smc::nullParams& param)
     {
         // Initialize state value
-        stateValue.xState = R::rnorm(0.0, sqrt(varStateInit));
+        // stateValue.xState = R::rnorm(0.0, sqrt(varStateInit));
+        stateValue.xState = stateInit;
         // Initilialize log-weight
         logweight = computeLogLikelihood(0, stateValue);
     }
@@ -176,5 +184,30 @@ namespace cSMCexamples
         stateValue.xState = params.statePhi * stateValue.xState + R::rnorm(0.0,sqrt(params.stateVarEvol));
         //Compute particle log-weight and increment
         logweight += computeLogLikelihood(lTime, stateValue);
+    }
+    ///Weighting function of the conditional/reference particle coordinate.
+    ///
+    ///Used implicitly by MyLGSSmove at the corresponding (derived) conditional
+    ///SMC class.
+    ///
+    ///\param lTime            The sampler iteration.
+    ///\param condStateValue   A reference to the current particle value
+    ///\param logweight        A reference to the current particle log weight
+    ///\param param            additional algorithm parameters
+    void cSMCexamples_move::pfWeight(long lTime,
+                                     States& condStateValue,
+                                     double& logweight,
+                                     smc::nullParams& param)
+    {
+        //Compute particle log-weight and increment
+        logweight += computeLogLikelihood(lTime, condStateValue);
+    }
+    void copyReferenceTrajectory(const arma::vec& refArma,
+                                 std::vector<States>& refStd)
+    {
+        int lenT = refArma.size();
+        for (int i = 0; i < lenT; ++i) {
+            refStd[i].xState = refArma[i];
+        }
     }
 }
