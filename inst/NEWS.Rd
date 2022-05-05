@@ -3,6 +3,13 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.6 (2021-12-17)}{
+  \itemize{
+    \item Updated URLs to JSS for the new DOI scheme upon their request
+    \item Adjusted three source files for C++17 compilation under g++-11
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.5 (2021-09-09)}{
   \itemize{
     \item Compilation under Solaris is aiding via \code{std::pow} use

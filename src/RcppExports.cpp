@@ -65,7 +65,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // compareNCestimates_imp
-Rcpp::DataFrame compareNCestimates_imp(arma::vec data, long lParticleNum, int simNum, Rcpp::List parInits);
+Rcpp::List compareNCestimates_imp(arma::vec data, long lParticleNum, int simNum, Rcpp::List parInits);
 RcppExport SEXP _RcppSMC_compareNCestimates_imp(SEXP dataSEXP, SEXP lParticleNumSEXP, SEXP simNumSEXP, SEXP parInitsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

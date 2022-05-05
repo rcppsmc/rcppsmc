@@ -1,9 +1,9 @@
 compareNCestimates <- function(data,
-                               particles = 1000L,
+                               numParticles = 1000L,
                                simNumber = 10L,
                                parameters = list(phi = 0.9,
-                                                 varInit = 10,
-                                                 varEvol = 10,
+                                                 varStateInit = 10,
+                                                 varStateEvol = 10,
                                                  varObs = 1),
                                plot = FALSE) {
 
@@ -16,7 +16,7 @@ compareNCestimates <- function(data,
 
     browser()
     res <- compareNCestimates_imp(as.vector(data),
-                                  particles,
+                                  numParticles,
                                   simNum = simNumber,
                                   parInits = parameters)
 

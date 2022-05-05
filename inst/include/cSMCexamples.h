@@ -42,8 +42,8 @@ namespace cSMCexamples {
     class Parameters
     {
     public:
-        double phi;
-        double varEvol;
+        double statePhi;
+        double stateVarEvol;
     };
 
     class cSMCexamples_move:
@@ -61,8 +61,8 @@ namespace cSMCexamples {
     };
 
     // II. Helper function declaration; only log-likelihood computation needed.
-    double computeLogLikelihood(long lTime, const States& X);
+    double computeLogLikelihood(long lTime, const States& stateValue);
 
     // III. Pointer declaration for moveset-class
-    smc::moveset<States,smc::nullParams>* MyLGSSmove;
+    smc::moveset<States, smc::nullParams>* MyLGSSmove;
 }

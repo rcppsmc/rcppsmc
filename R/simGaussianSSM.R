@@ -1,13 +1,14 @@
 simGaussianSSM <- function(len = 250,
                            parameters = list(phi = 0.9,
-                                             varInit = 1,
-                                             varEvol = 1,
+                                             varStateInit = 1,
+                                             varStateEvol = 1,
                                              varObs = 1)) {
 
 
-    sim <- list()
-    sim$state[1] <- rnorm(1) * sqrt(parameters$varInit)
-    innovations  <- rnorm(len - 1) * sqrt(parameters$varEvol)
+    sim <- list("state" = rep(0, times = len),
+                "data"  = rep(0, times = len))
+    sim$state[1] <- rnorm(1) * sqrt(parameters$varStateInit)
+    innovations  <- rnorm(len - 1) * sqrt(parameters$varStateEvol)
     for (i in 2:len) {
         sim$state[i] <- parameters$phi * sim$state[i - 1] + innovations[i - 1]
     }

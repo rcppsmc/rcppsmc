@@ -24,9 +24,8 @@
 
 namespace cSMCexamples {
     /// Initializing parameters
-    const double varInit0 = 10;
-    double VarEvol;
-    double phi;
+    const double varStateInit = 1;
+    double varObs = 1.0;
     /// Class declarations for measurements, states and parameters
     Measurements y;
     States X;
@@ -46,8 +45,8 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
     y.yObs = data;
 
     // Initialize parameter class
-    params.phi = parInits["phi"];
-    params.varEvol = parInits["varEvol"];
+    params.statePhi = parInits["phi"];
+    params.stateVarEvol = parInits["varEvol"];
 
     // Initialize other constants needed to run the sampler
     unsigned int tt = y.yObs.size();
@@ -120,7 +119,6 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
             // outputNCestimatesCSMC.at(i, 3) = SamplerCBPF.GetLogNCPath();
 
         }
-
         outputNCestimates["kfOut"] = outputNCestimatesKF;
         outputNCestimates["smcOut"] = outputNCestimatesSMC;
         outputNCestimates["csmcOut"] = outputNCestimatesCSMC;
@@ -142,10 +140,10 @@ namespace cSMCexamples
 
     ///  \param lTime The current time (i.e. the index of the current distribution)
     ///  \param X     The state to consider
-    double computeLogLikelihood(long lTime, const States& X)
+    double computeLogLikelihood(long lTime, const States& stateValue)
     {
         return R::dnorm(arma::as_scalar(y.yObs[lTime]),
-                        X.xState, 1.0, 1);
+                        stateValue.xState, sqrt(varObs), 1);
     }
 
     ///A function to initialise particles
@@ -158,7 +156,7 @@ namespace cSMCexamples
                                          smc::nullParams& param)
     {
         // Initialize state value
-        stateValue.xState = R::rnorm(0.0,sqrt(varInit0));
+        stateValue.xState = R::rnorm(0.0, sqrt(varStateInit));
         // Initilialize log-weight
         logweight = computeLogLikelihood(0, stateValue);
     }
@@ -175,7 +173,7 @@ namespace cSMCexamples
                                    smc::nullParams& param)
     {
         //Move/propose particles
-        stateValue.xState = params.phi * stateValue.xState + R::rnorm(0.0,sqrt(params.varEvol));
+        stateValue.xState = params.statePhi * stateValue.xState + R::rnorm(0.0,sqrt(params.stateVarEvol));
         //Compute particle log-weight and increment
         logweight += computeLogLikelihood(lTime, stateValue);
     }
