@@ -367,7 +367,10 @@ namespace smc {
     void conditionalSampler<Space,Params>::IterateUntil(long lTerminate)
     {
         while(GetTime() < lTerminate)
+        // {
         Iterate();
+        // Rcpp::Rcout << "Not failing at iteration t: " << GetTime() << std::endl;
+        // }
     }
     template <class Space, class Params>
     void conditionalSampler<Space, Params>::conditionalResample(ResampleType::Enum lMode)
@@ -414,35 +417,51 @@ namespace smc {
             {
                 //Algorithm 4
                 //Step 0:
-                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
-                //    0.1. Calculate normalized particle weights and cumulative normalized weights.
-                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
-                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
-                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //0.0 Housekeeping for step 0.1 - 0.5
+                //     k_{t - 1}
+                int kt1 = referenceTrajectoryIndices.at(T);
+                //    sum_{k=1}^{k_{t-1}}\hat{w}_{t-1}^k
+                double minWeights = 0;
+                //    sum_{k=1}^{k_{t-1} - 1}\hat{w}_{t-1}^k
                 double maxWeights = 0;
-                if(T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
-                }
-                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
+                //    For N different strata (N being the number of particles)
+                //    all strata boundaries: 0/N,...,c/N,...,N/N for c = 0,...,N
+                arma::Col<double> stBoundsAll = arma::linspace(0.0, 1.0, N + 1);
+                ///    upper sequence part: 1/N,2/N,...c/N,...,1
+                arma::Col<double> stBoundsUpper = stBoundsAll.tail(N);
+                ///   lower sequence part: 0/N,1/N,...c/N,...,(N-1)/N
+                arma::Col<double> stBoundsLower = stBoundsAll.head(N);
+                ///    particle k_{t-1} weight for all strata k_t=1,...,N
                 arma::Col<double> strataWeights(N);
                 strataWeights.fill(0.0);
+                ///    weights of \lambda(k_t|.) distribution for k_t sampling
+                Rcpp::NumericVector lambdaWeightsStratified(N);
+                //0.1. Calculate normalized particle weights and cumulative normalized weights.
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
+                //    0.2. Calculate min() and max() parts of strata weights
+                minWeights = dRSWeightsCumulative.at(kt1);
+                if(kt1 > 0){
+                    maxWeights = dRSWeightsCumulative.at(kt1 - 1);
+                } else {
+                    maxWeights = 0;
+                }
+                //   0.3. Calculate weight of particle k_{t-1} in all strata
+                //   k_t=1,...,N i.e. p_{t-1}^{k_{t-1}}(k_t)
                 for(int i = 0; i < N; ++i) {
-                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                    strataWeights.at(i) = std::max(std::min(minWeights, stBoundsUpper.at(i)) - std::max(maxWeights, stBoundsLower.at(i)), 0.0);
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
+                lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeights.at(kt1));
                 //    0.5. Sample K_t from 0.4.
                 long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
-                uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
+                uRSIndices.at(Kt) = kt1;
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
-                //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
+                //Step 3: Generate ancestor indices and assign to offspring indices {1,...,N}\{Kt}.
                 std::vector<unsigned int> tmpIterator(N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
@@ -463,29 +482,45 @@ namespace smc {
             {
                 //Algorithm 5
                 //Step 0:
-                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} (same as stratified resampling).
+                //0.0 Housekeeping for step 0.1 - 0.5
+                //      k_{t - 1}
+                int kt1 = referenceTrajectoryIndices.at(T);
+                //    sum_{k=1}^{k_{t-1}}\hat{w}_{t-1}^k
+                double minWeights = 0;
+                //    sum_{k=1}^{k_{t-1} - 1}\hat{w}_{t-1}^k
+                double maxWeights = 0;
+                //    For N different strata (N being the number of particles)
+                //    all strata boundaries: 0/N,...,c/N,...,N/N for c = 0,...,N
+                arma::Col<double> stBoundsAll = arma::linspace(0.0, 1.0, N + 1);
+                ///    upper sequence part: 1/N,2/N,...c/N,...,1
+                arma::Col<double> stBoundsUpper = stBoundsAll.tail(N);
+                ///   lower sequence part: 0/N,1/N,...c/N,...,(N-1)/N
+                arma::Col<double> stBoundsLower = stBoundsAll.head(N);
+                ///    particle k_{t-1} weight for all strata k_t=1,...,N
+                arma::Col<double> strataWeights(N);
+                strataWeights.fill(0.0);
+                ///    weights of \lambda(k_t|.) distribution for k_t sampling
+                Rcpp::NumericVector lambdaWeightsStratified(N);
                 //    0.1. Calculate normalized particle weights and cumulative normalized weights.
                 dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
                 arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
-                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
-                double maxWeights = 0;
-                if(T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
+                //    0.2. Calculate min() and max() parts of strata weights
+                minWeights = dRSWeightsCumulative.at(kt1);
+                if(kt1 > 0){
+                    maxWeights = dRSWeightsCumulative.at(kt1 - 1);
+                } else {
+                    maxWeights = 0;
                 }
-                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
-                arma::Col<double> strataWeights(N);
-                strataWeights.fill(0.0);
+                //   0.3. Calculate weight of particle k_{t-1} in all strata
+                //   k_t=1,...,N i.e. p_{t-1}^{k_{t-1}}(k_t)
                 for(int i = 0; i < N; ++i) {
-                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                    strataWeights.at(i) = std::max(std::min(minWeights, stBoundsUpper.at(i)) - std::max(maxWeights, stBoundsLower.at(i)), 0.0);
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
+                lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeights.at(kt1));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0];
+                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
                 uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);

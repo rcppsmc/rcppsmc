@@ -111,18 +111,15 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
             // cSamplerBPF.IterateUntil(tt - 1);
             // outputNCestimatesCSMC.at(i, 1) = cSamplerBPF.GetLogNCPath();
 
-            // Rcpp::Rcout << "seems to not work here" << std::endl;
-            // cSamplerBPF.Initialise();
-            // cSamplerBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
-            // cSamplerBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 2) = cSamplerBPF.GetLogNCPath();
+            cSamplerBPF.Initialise();
+            cSamplerBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
+            cSamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesCSMC.at(i, 2) = cSamplerBPF.GetLogNCPath();
 
-            // Rcpp::Rcout << "seems to not work here2" << std::endl;
-            // cSamplerBPF.Initialise();
-            // cSamplerBPF.Initialise();
-            // cSamplerBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
-            // cSamplerBPF.IterateUntil(tt - 1);
-            // outputNCestimatesCSMC.at(i, 3) = cSamplerBPF.GetLogNCPath();
+            cSamplerBPF.Initialise();
+            cSamplerBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
+            cSamplerBPF.IterateUntil(tt - 1);
+            outputNCestimatesCSMC.at(i, 3) = cSamplerBPF.GetLogNCPath();
 
         }
         // outputNCestimates["kfOut"] = outputNCestimatesKF;

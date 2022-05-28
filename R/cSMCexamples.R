@@ -7,25 +7,30 @@ compareNCestimates <- function(dataY,
                                                       varStateEvol = 1,
                                                       varObs = 1),
                                plot = FALSE) {
-    # more eloquent tests can be added
-    # stopifnot(nrow(data) > 0,
-    #           ncol(data) != 2)
-
     # if no data supplied, use default
     if (missing(dataY)) {
         dataSim  <- simGaussianSSM()
         dataY    <- dataSim$measurements
+        lT <- length(dataY)
         # for simulated data, the true states are available
         trueStates <- dataSim$states
+    } else if (is.data.frame(dataY) && length(dataY) == 1 ||
+          is.matrix(dataY) && ncol(dataY) == 1) {
+        dataY <- as.vector(dataY)
+        lT <- length(dataY)
+    } else if (is.vector(dataY)) {
+      lT <- length(dataY)
+    } else {
+        stop("Wrong data format: either dataframe/matrix with single column or vector.")
     }
 
     browser()
-    resFFBS <- kalmanFFBS(as.vector(dataY),
+    resFFBS <- kalmanFFBS(dataY,
                           stateInit = modelParameters$stateInit,
                           phi = modelParameters$phi,
                           varStateEvol = modelParameters$varStateEvol,
                           varObs = modelParameters$varObs)
-    resSMC <- compareNCestimates_imp(as.vector(dataY),
+    resSMC <- compareNCestimates_imp(dataY,
                                      numParticles,
                                      simNum = simNumber,
                                      parInits = modelParameters,
@@ -33,49 +38,61 @@ compareNCestimates <- function(dataY,
     if (isTRUE(plot)) {
       par(mfrow = c(3, 2))
       if (!is.null(trueStates)) {
-          layoutMatrix <- matrix(c(1, 1, 2, 2,
-                                   3, 4, 5, 6,
-                                   7, 0, 0, 0), nrow = 3, ncol = 4,
+          layoutMatrix <- matrix(c(1, 2,
+                                   3, 3,
+                                   4, 4), nrow = 3, ncol = 2,
                                    byrow = TRUE)
 
           layout(mat = layoutMatrix,
-                 heights = c(1, 1, 1), # Heights of the two rows
-                 widths = c(1, 1, 1, 1)) # Widths of the two columns
+                 heights = c(1, 2, 2),   # Heights of the rows
+                 widths = c(1, 1))       # Widths of the columns
 
         title1 <- "measurements (green) vs. true latent states (red)"
         title2 <- "true latent states (red) vs. backward simulation path (blue)"
-        plot(data$measurements, type = "l", col = "blue", main = title1)
+        plot(dataY, type = "l", col = "forestgreen",
+             main = title1, ylab = "", xlab = "time index t")
         lines(trueStates, type = "l", col = "red")
-        plot(trueStates, type = "l", col = "red", main = title2)
+        plot(trueStates, type = "l", col = "red",
+             main = title2, ylab = "", xlab = "time index t")
         lines(resFFBS$xBackwardSimul, type = "l", col = "blue")
       } else {
         title3 <- "measurements (green) vs. backward simulation path (blue)"
-        plot(data$measurements, type = "l", col = "blue", main = title3)
-        lines(resFFBS$xBackwardSimul, type = "l", col = "red")
+        plot(dataY, type = "l", col = "forestgreen",
+             main = title3, ylab = "", xlab = "time index t")
+        lines(resFFBS$xBackwardSimul, type = "l", col = "blue")
         plot.new()
       }
-      boxplot(resSMC$SMC$smcOut[, 1])
-      abline(h = resFFBS$Kalman$logLikeliEstim, col = "red")
-      boxplot(resSMC$SMC$smcOut[, 2])
-      abline(h = resFFBS$Kalman$logLikeliEstim, col = "red")
-      boxplot(resSMC$SMC$smcOut[, 3])
-      abline(h = resFFBS$Kalman$logLikeliEstim, col = "red")
-      boxplot(resSMC$SMC$smcOut[, 4])
-      abline(h = resFFBS$Kalman$logLikeliEstim, col = "red")
-      boxplot(resSMC$SMC$csmcOut[, 1])
-      abline(h = resFFBS$Kalman$logLikeliEstim, col = "red")
+      dataBoxplotsSMC  <- data.frame(llEstimates = as.vector(resSMC$smcOut), 
+                                     type = c(rep("multinomial", times = simNumber),
+                                              rep("residual", times = simNumber),
+                                              rep("stratified", times = simNumber),
+                                              rep("systematic", times = simNumber)))
+      dataBoxplotsCSMC <- data.frame(llEstimates = as.vector(resSMC$csmcOut), 
+                                     type = c(rep("multinomial", times = simNumber),
+                                              rep("residual", times = simNumber),
+                                              rep("stratified", times = simNumber),
+                                              rep("systematic", times = simNumber)))
+      browser()
+      boxplot(llEstimates ~ type, data = dataBoxplotsSMC, col = "bisque",
+              xlab = "resampling type",
+              main = "Standard BPF likelihood estimates",
+              sub = "(red: Kalman forward filtering/backward smoothing estimate)")
+      abline(h = resFFBS$logLikeliEstim, col = "red")
+      boxplot(llEstimates ~ type, data = dataBoxplotsCSMC, col = "bisque",
+              xlab = "resampling type",
+              main = "Conditional BPF likelihood estimates",
+              sub = "(red: Kalman forward filtering/backward smoothing estimate)")
+      abline(h = resFFBS$logLikeliEstim, col = "red")
     }
-
-
     # invisible(res)
     return(list(SMC = resSMC, Kalman = resFFBS))
 }
-kalmanFFBS <- function(data,
+kalmanFFBS <- function(dataY,
                        stateInit,
                        phi,
                        varStateEvol,
                        varObs) {
-    y   <- data
+    y   <- dataY
     len <- length(y)
     # KF part:
     # Housekeeping:
