@@ -3,7 +3,7 @@ compareNCestimates <- function(dataY,
                                numParticles = 1000L,
                                simNumber = 100L,
                                modelParameters = list(stateInit = 0,
-                                                      phi = 0.9,
+                                                      phi = 0.7,
                                                       varStateEvol = 1,
                                                       varObs = 1),
                                plot = FALSE) {
@@ -11,20 +11,15 @@ compareNCestimates <- function(dataY,
     if (missing(dataY)) {
         dataSim  <- simGaussianSSM()
         dataY    <- dataSim$measurements
-        lT <- length(dataY)
         # for simulated data, the true states are available
         trueStates <- dataSim$states
     } else if (is.data.frame(dataY) && length(dataY) == 1 ||
           is.matrix(dataY) && ncol(dataY) == 1) {
         dataY <- as.vector(dataY)
-        lT <- length(dataY)
-    } else if (is.vector(dataY)) {
-      lT <- length(dataY)
-    } else {
+    } else if (!is.vector(dataY)) {
         stop("Wrong data format: either dataframe/matrix with single column or vector.")
     }
 
-    browser()
     resFFBS <- kalmanFFBS(dataY,
                           stateInit = modelParameters$stateInit,
                           phi = modelParameters$phi,
@@ -39,12 +34,11 @@ compareNCestimates <- function(dataY,
       par(mfrow = c(3, 2))
       if (!is.null(trueStates)) {
           layoutMatrix <- matrix(c(1, 2,
-                                   3, 3,
-                                   4, 4), nrow = 3, ncol = 2,
+                                   3, 4), nrow = 2, ncol = 2,
                                    byrow = TRUE)
 
           layout(mat = layoutMatrix,
-                 heights = c(1, 2, 2),   # Heights of the rows
+                 heights = c(1, 2),   # Heights of the rows
                  widths = c(1, 1))       # Widths of the columns
 
         title1 <- "measurements (green) vs. true latent states (red)"
@@ -62,30 +56,32 @@ compareNCestimates <- function(dataY,
         lines(resFFBS$xBackwardSimul, type = "l", col = "blue")
         plot.new()
       }
-      dataBoxplotsSMC  <- data.frame(llEstimates = as.vector(resSMC$smcOut), 
+      dataBoxplotsSMC  <- data.frame(llEstimates = as.vector(resSMC$smcOut),
                                      type = c(rep("multinomial", times = simNumber),
                                               rep("residual", times = simNumber),
                                               rep("stratified", times = simNumber),
                                               rep("systematic", times = simNumber)))
-      dataBoxplotsCSMC <- data.frame(llEstimates = as.vector(resSMC$csmcOut), 
+      dataBoxplotsCSMC <- data.frame(llEstimates = as.vector(resSMC$csmcOut),
                                      type = c(rep("multinomial", times = simNumber),
                                               rep("residual", times = simNumber),
                                               rep("stratified", times = simNumber),
                                               rep("systematic", times = simNumber)))
-      browser()
       boxplot(llEstimates ~ type, data = dataBoxplotsSMC, col = "bisque",
-              xlab = "resampling type",
-              main = "Standard BPF likelihood estimates",
-              sub = "(red: Kalman forward filtering/backward smoothing estimate)")
-      abline(h = resFFBS$logLikeliEstim, col = "red")
+              ylab = "resampling type",
+              xlab = "log-likelihood value",
+              main = "Standard BPF log-likelihood estimates",
+              sub = "(red: Kalman log-likelihood estimate)",
+              horizontal = TRUE)
+      abline(v = resFFBS$logLikeliEstim, col = "red")
       boxplot(llEstimates ~ type, data = dataBoxplotsCSMC, col = "bisque",
-              xlab = "resampling type",
-              main = "Conditional BPF likelihood estimates",
-              sub = "(red: Kalman forward filtering/backward smoothing estimate)")
-      abline(h = resFFBS$logLikeliEstim, col = "red")
+              ylab = "resampling type",
+              xlab = "log-likelihood value",
+              main = "Conditional BPF log-likelihood estimates",
+              sub = "(red: Kalman log-likelihood estimate)",
+              horizontal = TRUE)
+      abline(v = resFFBS$logLikeliEstim, col = "red")
     }
-    # invisible(res)
-    return(list(SMC = resSMC, Kalman = resFFBS))
+    return(list(outSMC = resSMC, outKalman = resFFBS))
 }
 kalmanFFBS <- function(dataY,
                        stateInit,

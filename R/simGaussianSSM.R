@@ -1,6 +1,6 @@
 simGaussianSSM <- function(len = 100,
                            stateInit = 0,
-                           phi = 0.9,
+                           phi = 0.7,
                            varStateEvol = 1,
                            varObs = 1) {
 

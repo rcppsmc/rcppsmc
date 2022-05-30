@@ -5,7 +5,7 @@
 \title{Conditional Sequential Monte Carlo Examples}
 \description{
   The \code{compareNCestimates} function generates a Monte Carlo study to
-  compare likelihood (normalizing constant) estimates in the standard linear
+  compare log-likelihood (normalizing constant) estimates in the standard linear
   Gaussian state space (LGSS) model: Kalman filter estimates, as the benchmark,
   are compared to the standard bootstrap particle filter and the conditional
   bootstrap particle filter estimates (see \code{Details}).
@@ -24,13 +24,13 @@
                      numParticles = 1000L,
                      simNumber = 100L,
                      modelParameters = list(stateInit = 0,
-                                            phi = 0.9,
+                                            phi = 0.7,
                                             varStateEvol = 1,
                                             varObs = 1),
                      plot = FALSE)
   simGaussianSSM(len = 100,
                  stateInit = 0,
-                 phi = 0.9,
+                 phi = 0.7,
                  varStateEvol = 1,
                  varObs = 1)
   kalmanFFBS(dataY,
@@ -70,23 +70,29 @@
   \item{len}{Length of data series to simulate.}
 }
 \value{
-  \code{compareNCestimates} function returns a \code{data.frame} containing as many rows as in
-  the input data, and four columns corresponding to the estimated \eqn{x}{x} and
-  \eqn{y}{y} coordinates as well as the estimated velocity in these two
-  directions.
-
-  \code{simLineart} function returns a list containing the vector of
-  states and the associated vector of observations.
-
+  \code{compareNCestimates} returns a named list of two
+  \itemize{
+    \item{\code{outSMC}} a named list of two:
+    \itemize{
+      \item{\code{smcOut}: }{a matrix of dimension \code{simNum x 4} which
+      contains single log-likelihood estimates of the standard BPF for each of
+      the 4 resampling schemes and for each simulation run}
+      \item{\code{csmcOut}: }{a matrix of dimension \code{simNum x 4} which
+      contains single log-likelihood estimates of the conditional BPF for each
+      of the 4 resampling schemes and for each simulation run}
+    }
+    \item{\code{outKalman}} the output of \code{kalmanFFBS}, see below
+  }
   \code{kalmanFFBS} returns a named list of two:
     \itemize{
-      \item{\code{logLikeliEstim:}}{(exact) estimate of the log-likelihood}
-      \item{\code{xBackwardSimul:}}{a backward simulation (joint smoothing) trajectory of latent states given parameters and measurement}
+      \item{\code{logLikeliEstim: }}{(exact) estimate of the log-likelihood}
+      \item{\code{xBackwardSimul: }}{a backward simulation (joint smoothing) trajectory of latent states given parameters and measurement}
     }
 }
 \details{
-  The \code{compareNCestimates} The estimates are obtained from \code{sumNumber} runs of the standard BPF and the conditional BPF under four
-  resampling schmes:
+  \code{compareNCestimates} runs a simulation study that provides
+  log-likelihood (normalizing constant) estimates; there are \code{simNumber}
+  runs of the standard BPF and the conditional BPF under four resampling schmes:
   \itemize{
     \item multinomial
     \item stratified
@@ -102,6 +108,15 @@
   Box plots illustrate the unbiasedness of standard BPF and conditional BPF
   estimates for the normailizing constant estimate in the linear Gaussian SSM, and serve as an small example for to illustrate conditional SMC
   algorithms (in their most basic BPF version) with different conditonal resampling schemes as implemented within \pkg{RcppSMC}.
+
+  \code{simGaussianSSM} simulates from a Linear Gaussian state space model of
+  the following form:
+  \deqn{x_t=\phi x_{t-1} + u_t}
+  \deqn{y_t= x_{t} + w_t}
+  where \eqn{\phi} is set via the \code{phi} argument,
+  \eqn{u_t \sim N(0, \sigma_x^2)}, \eqn{w_t \sim N(0, \sigma_y^2)} for which the
+  innovation (\eqn{\sigma_x^2}) and measurement (\eqn{\sigma_y^2}) variances are
+  set via arguments \code{varStateEvol} and \code{varObs}, respectively.
 }
 \references{
   A. M. Johansen. SMCTC: Sequential Monte Carlo in C++.

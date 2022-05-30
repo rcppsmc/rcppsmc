@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with RcppSMC.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "smctc.h"
+#include "RcppSMC.h"
 
 namespace cSMCexamples {
 
@@ -64,9 +64,11 @@ namespace cSMCexamples {
         ~cSMCexamples_move() {};
     };
 
-    // II. Helper function declaration: log-likelihood computation and copying
+    // II. Helper function declaration:
+    // 1. log-likelihood computation and copying
     // of reference trajectory from arma::vec to std::vect<States> container.
     double computeLogLikelihood(long lTime, const States& stateValue);
+    // 2. Transform reference Trajectory of doubles to std::vector<States> type
     void copyReferenceTrajectory(const arma::vec& refArma,
                                  std::vector<States>& refStd);
 

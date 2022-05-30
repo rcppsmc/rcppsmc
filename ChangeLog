@@ -1,3 +1,18 @@
+2022-06-06  Ilya Zarubin  <ilya.a.zarub@gmail>
+
+	* R/cSMCexamples.R: add facilities for testing of conditional SMC and
+	corresponding cond. resampling via a simulation study that compares
+	estimates of the normalizing constant for standard, conditional BPF to KF
+	output in a LGSSM and visualizes the output
+	* R/simGaussianSSM.R: simulates artificial data from a LGSSM
+	* inst/include/cSMCexamples.h: header file for compareNCestimates_imp
+	* src/cSMCexamples.cpp: define compareNCestimates_imp as the main workhorse
+	of the simulation study
+	* man/cSMCexamples.Rd: add function documentation and model description
+	* inst/include/conditionalSampler.h: major revision of conditional
+	resampling with 2 bugfixes for stratified/systematic resampling and adding
+	conditional residual resampling
+
 2022-04-26  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Roll minor version
