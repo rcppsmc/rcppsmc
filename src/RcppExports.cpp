@@ -65,7 +65,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // compareNCestimates_imp
-Rcpp::List compareNCestimates_imp(arma::vec data, long lParticleNum, int simNum, Rcpp::List parInits, arma::vec referenceTraj);
+Rcpp::List compareNCestimates_imp(arma::vec data, long lParticleNum, int simNum, Rcpp::List parInits, arma::mat referenceTraj);
 RcppExport SEXP _RcppSMC_compareNCestimates_imp(SEXP dataSEXP, SEXP lParticleNumSEXP, SEXP simNumSEXP, SEXP parInitsSEXP, SEXP referenceTrajSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -74,7 +74,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< long >::type lParticleNum(lParticleNumSEXP);
     Rcpp::traits::input_parameter< int >::type simNum(simNumSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type parInits(parInitsSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type referenceTraj(referenceTrajSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type referenceTraj(referenceTrajSEXP);
     rcpp_result_gen = Rcpp::wrap(compareNCestimates_imp(data, lParticleNum, simNum, parInits, referenceTraj));
     return rcpp_result_gen;
 END_RCPP

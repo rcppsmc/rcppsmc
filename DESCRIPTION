@@ -11,7 +11,7 @@ Description: R access to the Sequential Monte Carlo Template Classes
  paper has been extended. Further integration and extensions are planned.
 License: GPL (>= 2)
 LazyLoad: yes
-Imports: Rcpp (>= 0.11.0), methods
+Imports: Rcpp (>= 0.11.0), methods, FKF
 Suggests: pkgKitten (>= 0.2.2)
 LinkingTo: Rcpp, RcppArmadillo
 LazyData: true

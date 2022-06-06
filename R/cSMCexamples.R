@@ -24,7 +24,8 @@ compareNCestimates <- function(dataY,
                           stateInit = modelParameters$stateInit,
                           phi = modelParameters$phi,
                           varStateEvol = modelParameters$varStateEvol,
-                          varObs = modelParameters$varObs)
+                          varObs = modelParameters$varObs,
+                          simNumber = simNumber)
     resSMC <- compareNCestimates_imp(dataY,
                                      numParticles,
                                      simNum = simNumber,
@@ -42,18 +43,18 @@ compareNCestimates <- function(dataY,
                  widths = c(1, 1))       # Widths of the columns
 
         title1 <- "measurements (green) vs. true latent states (red)"
-        title2 <- "true latent states (red) vs. backward simulation path (blue)"
+        title2 <- "true latent states (red) vs. avg. backward simulation path (blue)"
         plot(dataY, type = "l", col = "forestgreen",
              main = title1, ylab = "", xlab = "time index t")
         lines(trueStates, type = "l", col = "red")
         plot(trueStates, type = "l", col = "red",
              main = title2, ylab = "", xlab = "time index t")
-        lines(resFFBS$xBackwardSimul, type = "l", col = "blue")
+        lines(rowMeans(resFFBS$xBackwardSimul), type = "l", col = "blue")
       } else {
-        title3 <- "measurements (green) vs. backward simulation path (blue)"
+        title3 <- "measurements (green) vs. avg. backward simulation path (blue)"
         plot(dataY, type = "l", col = "forestgreen",
              main = title3, ylab = "", xlab = "time index t")
-        lines(resFFBS$xBackwardSimul, type = "l", col = "blue")
+        lines(rowMeans(resFFBS$xBackwardSimul), type = "l", col = "blue")
         plot.new()
       }
       dataBoxplotsSMC  <- data.frame(llEstimates = as.vector(resSMC$smcOut),
@@ -87,54 +88,29 @@ kalmanFFBS <- function(dataY,
                        stateInit,
                        phi,
                        varStateEvol,
-                       varObs) {
-    y   <- dataY
-    len <- length(y)
-    # KF part:
-    # Housekeeping:
-    ## Forward Filtering Container:
-    xt  <- numeric(len)
-    Pt  <- numeric(len)
-    xt1 <- numeric(len + 1)
-    Pt1 <- numeric(len + 1)
-    ## Backward Simulation Container:
-    xBS <- numeric(len)
-    mut <- numeric(len)
-    Lt  <- numeric(len)
-    ## Likekihood Estimation Container:
-    yt1 <- numeric(len)
-    Ft1 <- numeric(len)
-    # I. FORWARD FILTERING:
-    # 0. Initialization
-    x00 <- stateInit
-    P00 <- varStateEvol / (1 - phi^2)
-    xt1[1] <- phi * x00
-    Pt1[1] <- phi^2 * P00 + varStateEvol
-    # 1. Iteration: t=1, ...,len
-    for (t in 1:len) {
-      yt1[t] <- xt1[t]
-      Ft1[t] <- Pt1[t] + varObs
-      Ft1Inv <- Ft1[t]^(-1)
-
-      xt[t] <- xt1[t] + Pt1[t] * Ft1Inv * (y[t] - yt1[t])
-      Pt[t] <- Pt1[t] - Pt1[t] * Ft1Inv * Pt1[t]
-
-      xt1[t + 1] <- phi * xt[t]
-      Pt1[t + 1] <- phi^2 * Pt[t] + varStateEvol
-    }
+                       varObs,
+                       simNumber) {
+    len <- length(dataY)
+    xBS <- matrix(0, nrow = len, ncol = simNumber)
+    outKF <- FKF::fkf(a0 = stateInit,
+                      P0 = matrix(varStateEvol / (1 - phi^2)),
+                      dt = matrix(0, nrow = 1, ncol = 1),
+                      ct = matrix(0, nrow = 1, ncol = 1),
+                      Tt = array(phi, c(1, 1, 1)),
+                      Zt = array(1, c(1, 1, 1)),
+                      HHt = array(varStateEvol, c(1, 1, 1)),
+                      GGt = array(varObs, c(1, 1, 1)),
+                      yt = matrix(dataY, nrow = 1))
+    outKS <- FKF::fks(outKF)
     # II. BACKWARD SMOOTHING/SIMULATION
-    xBS[len] <- rnorm(1, xt[len], sqrt(Pt[len]))
-    for (t in (len - 1):1) {
-        tmpVCM <- Pt[t] * phi * (phi^2 * Pt[t] + varStateEvol)^(-1)
-        mut[t] <- xt[t] + tmpVCM * (xBS[t + 1] - phi * xt[t])
-        Lt[t]  <- Pt[t] - tmpVCM * phi * Pt[t]
-
-        xBS[t] <- rnorm(1, mut[t], sqrt(Lt[t]))
+    for (n in 1:simNumber) {
+        xBS[len, n] <- rnorm(1, outKS$ahat[len], sqrt(outKS$Vt[, , len]))
+        for (t in (len - 1):1) {
+            xBS[t, n] <- rnorm(1, outKS$ahat[t], sqrt(outKS$Vt[, , t]))
+        }
     }
     # III. LOG-LIKELIHOOD COMPUTATION
-    llOut1 <- -len / 2 * log(2 * pi)
-    llOut2 <- sum(log(Ft1)) + sum((y - yt1)^2 / Ft1)
-    llEst  <- llOut1 - 0.5 * llOut2
+    llEst  <- outKF$logLik
 
     return(list(logLikeliEstim = llEst,
                 xBackwardSimul = xBS))

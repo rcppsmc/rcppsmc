@@ -37,7 +37,7 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
                                   long lParticleNum,
                                   int simNum,
                                   Rcpp::List parInits,
-                                  arma::vec referenceTraj)
+                                  arma::mat referenceTraj)
 {
     // Initialize data class/container
     y.yObs = data;
@@ -53,7 +53,7 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
     const unsigned int tt = y.yObs.size();
     // Transform reference Trajectory of doubles to std::vector<States> type
     std::vector<States> referenceTrajectory(tt);
-    copyReferenceTrajectory(referenceTraj, referenceTrajectory);
+    copyReferenceTrajectory(referenceTraj.col(0), referenceTrajectory);
 
     // Initialize output container:
     arma::mat outputNCestimatesSMC(simNum, 4, arma::fill::zeros);
@@ -98,27 +98,33 @@ Rcpp::List compareNCestimates_imp(arma::vec data,
             SamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesSMC.at(i, 3) = SamplerBPF.GetLogNCPath();
 
+            copyReferenceTrajectory(referenceTraj.col(i), referenceTrajectory);
+
             cSamplerBPF.SetResampleParams(ResampleType::MULTINOMIAL, 0.5);
+            cSamplerBPF.SetReferenceTrajectory(referenceTrajectory);
             cSamplerBPF.Initialise();
             cSamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesCSMC.at(i, 0) = cSamplerBPF.GetLogNCPath();
 
             cSamplerBPF.SetResampleParams(ResampleType::RESIDUAL, 0.5);
+            cSamplerBPF.SetReferenceTrajectory(referenceTrajectory);
             cSamplerBPF.Initialise();
             cSamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesCSMC.at(i, 1) = cSamplerBPF.GetLogNCPath();
 
             cSamplerBPF.SetResampleParams(ResampleType::STRATIFIED, 0.5);
+            cSamplerBPF.SetReferenceTrajectory(referenceTrajectory);
             cSamplerBPF.Initialise();
             cSamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesCSMC.at(i, 2) = cSamplerBPF.GetLogNCPath();
 
             cSamplerBPF.SetResampleParams(ResampleType::SYSTEMATIC, 0.5);
+            cSamplerBPF.SetReferenceTrajectory(referenceTrajectory);
             cSamplerBPF.Initialise();
             cSamplerBPF.IterateUntil(tt - 1);
             outputNCestimatesCSMC.at(i, 3) = cSamplerBPF.GetLogNCPath();
 
-            Rcpp::Rcout << "simulation run: " << i << "out of total: "<< simNum << std::endl;
+            Rcpp::Rcout << "simulation run: " << i << ", out of total: "<< simNum << std::endl;
         }
         // add simulatio results to output, delete Move-class object and return
         outputNCestimates["smcOut"] = outputNCestimatesSMC;

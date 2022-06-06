@@ -37,7 +37,8 @@
              stateInit,
              phi,
              varStateEvol,
-             varObs)
+             varObs,
+             simNumber)
 }
 \arguments{
   \item{dataY}{A one-column matrix or dataframe or vector containing
