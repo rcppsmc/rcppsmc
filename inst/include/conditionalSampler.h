@@ -367,7 +367,10 @@ namespace smc {
     void conditionalSampler<Space,Params>::IterateUntil(long lTerminate)
     {
         while(GetTime() < lTerminate)
+        // {
         Iterate();
+        // Rcpp::Rcout << "Not failing at iteration t: " << GetTime() << std::endl;
+        // }
     }
     template <class Space, class Params>
     void conditionalSampler<Space, Params>::conditionalResample(ResampleType::Enum lMode)
@@ -414,35 +417,51 @@ namespace smc {
             {
                 //Algorithm 4
                 //Step 0:
-                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
-                //    0.1. Calculate normalized particle weights and cumulative normalized weights.
-                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
-                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
-                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //0.0 Housekeeping for step 0.1 - 0.5
+                //     k_{t - 1}
+                int kt1 = referenceTrajectoryIndices.at(T);
+                //    sum_{k=1}^{k_{t-1}}\hat{w}_{t-1}^k
+                double minWeights = 0;
+                //    sum_{k=1}^{k_{t-1} - 1}\hat{w}_{t-1}^k
                 double maxWeights = 0;
-                if(T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
-                }
-                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
+                //    For N different strata (N being the number of particles)
+                //    all strata boundaries: 0/N,...,c/N,...,N/N for c = 0,...,N
+                arma::Col<double> stBoundsAll = arma::linspace(0.0, 1.0, N + 1);
+                ///    upper sequence part: 1/N,2/N,...c/N,...,1
+                arma::Col<double> stBoundsUpper = stBoundsAll.tail(N);
+                ///   lower sequence part: 0/N,1/N,...c/N,...,(N-1)/N
+                arma::Col<double> stBoundsLower = stBoundsAll.head(N);
+                ///    particle k_{t-1} weight for all strata k_t=1,...,N
                 arma::Col<double> strataWeights(N);
                 strataWeights.fill(0.0);
+                ///    weights of \lambda(k_t|.) distribution for k_t sampling
+                Rcpp::NumericVector lambdaWeightsStratified(N);
+                //0.1. Calculate normalized particle weights and cumulative normalized weights.
+                dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
+                arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
+                //    0.2. Calculate min() and max() parts of strata weights
+                minWeights = dRSWeightsCumulative.at(kt1);
+                if(kt1 > 0){
+                    maxWeights = dRSWeightsCumulative.at(kt1 - 1);
+                } else {
+                    maxWeights = 0;
+                }
+                //   0.3. Calculate weight of particle k_{t-1} in all strata
+                //   k_t=1,...,N i.e. p_{t-1}^{k_{t-1}}(k_t)
                 for(int i = 0; i < N; ++i) {
-                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                    strataWeights.at(i) = std::max(std::min(minWeights, stBoundsUpper.at(i)) - std::max(maxWeights, stBoundsLower.at(i)), 0.0);
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
+                lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeights.at(kt1));
                 //    0.5. Sample K_t from 0.4.
                 long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
-                uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
+                uRSIndices.at(Kt) = kt1;
                 //Step 2:
                 //Calculation of empirical distribution function F_{t - 1}^N(i) is done and equal to computation of cumulative normalized weights stored in dRSWeightsCumulative.
-                //Step 3: Generate ancestor indices and sssign to offspring indices {1,...,N}\{Kt}.
+                //Step 3: Generate ancestor indices and assign to offspring indices {1,...,N}\{Kt}.
                 std::vector<unsigned int> tmpIterator(N);
                 std::iota(tmpIterator.begin(), tmpIterator.end(), 0); // define appropriate tmpIterator as a sequence from 0 to N-1
                 tmpIterator.erase(tmpIterator.begin() + Kt); // exclude the previoiusly sampled conditional index K_t
@@ -463,29 +482,45 @@ namespace smc {
             {
                 //Algorithm 5
                 //Step 0:
-                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} in case of stratified resampling.
+                //Sample conditional index K_t from appropriate version of the "lambda" distribution i.e. the distribution over the stratum with \lambda(k_t|w_{t - 1}^{1:N}, k_{t - 1})=p_{t - 1}^{k_{t - 1}(k_t)/W_{t - 1}^{k_{t - 1}} (same as stratified resampling).
+                //0.0 Housekeeping for step 0.1 - 0.5
+                //      k_{t - 1}
+                int kt1 = referenceTrajectoryIndices.at(T);
+                //    sum_{k=1}^{k_{t-1}}\hat{w}_{t-1}^k
+                double minWeights = 0;
+                //    sum_{k=1}^{k_{t-1} - 1}\hat{w}_{t-1}^k
+                double maxWeights = 0;
+                //    For N different strata (N being the number of particles)
+                //    all strata boundaries: 0/N,...,c/N,...,N/N for c = 0,...,N
+                arma::Col<double> stBoundsAll = arma::linspace(0.0, 1.0, N + 1);
+                ///    upper sequence part: 1/N,2/N,...c/N,...,1
+                arma::Col<double> stBoundsUpper = stBoundsAll.tail(N);
+                ///   lower sequence part: 0/N,1/N,...c/N,...,(N-1)/N
+                arma::Col<double> stBoundsLower = stBoundsAll.head(N);
+                ///    particle k_{t-1} weight for all strata k_t=1,...,N
+                arma::Col<double> strataWeights(N);
+                strataWeights.fill(0.0);
+                ///    weights of \lambda(k_t|.) distribution for k_t sampling
+                Rcpp::NumericVector lambdaWeightsStratified(N);
                 //    0.1. Calculate normalized particle weights and cumulative normalized weights.
                 dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
                 arma::vec dRSWeightsCumulative = arma::cumsum(dRSWeights);
-                //    0.2. Calculate strata boundaries cumulative weight components for min() and max() computation parts.
-                arma::Col<double> strataBoundariesAll = arma::linspace(0.0, 1.0, N + 1);
-                arma::Col<double> strataBoundariesUpper = strataBoundariesAll.tail(N);
-                arma::Col<double> strataBoundariesLower = strataBoundariesAll.head(N);
-                double minWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T));
-                double maxWeights = 0;
-                if(T != 0){
-                    maxWeights = dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T - 1));
+                //    0.2. Calculate min() and max() parts of strata weights
+                minWeights = dRSWeightsCumulative.at(kt1);
+                if(kt1 > 0){
+                    maxWeights = dRSWeightsCumulative.at(kt1 - 1);
+                } else {
+                    maxWeights = 0;
                 }
-                //    0.3. Calculate strata weights p_{t - 1}^{k_{t - 1}}(k_t).
-                arma::Col<double> strataWeights(N);
-                strataWeights.fill(0.0);
+                //   0.3. Calculate weight of particle k_{t-1} in all strata
+                //   k_t=1,...,N i.e. p_{t-1}^{k_{t-1}}(k_t)
                 for(int i = 0; i < N; ++i) {
-                    strataWeights.at(i) = std::min(minWeights, strataBoundariesUpper.at(i)) - std::max(maxWeights, strataBoundariesLower.at(i));
+                    strataWeights.at(i) = std::max(std::min(minWeights, stBoundsUpper.at(i)) - std::max(maxWeights, stBoundsLower.at(i)), 0.0);
                 }
                 //    0.4. Calculate \lambda(k_t|.) distribution.
-                Rcpp::NumericVector lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeightsCumulative.at(referenceTrajectoryIndices.at(T)));
+                lambdaWeightsStratified = Rcpp::wrap(strataWeights/dRSWeights.at(kt1));
                 //    0.5. Sample K_t from 0.4.
-                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0];
+                long Kt = Rcpp::sample(N, 1, false, lambdaWeightsStratified)[0] - 1;
                 //Step 1:
                 //Connect the "chosen" ancestor index to previous reference trajectory: A_{t - 1}^{K_t} = K_{t - 1}
                 uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
@@ -521,83 +556,89 @@ namespace smc {
             {
                 //Algorithm 6
                 //Step 0:
-                //Declare/initialize container for implementation; compute normalized particle weights.
+                //Initialize container for implementation; pre-compute normalized/unnormalized residual weights; perform deterministic component assignment and compute other quantities
                 //    0.1. Container setup
                 int l = 0; //Counts the number of deterministically assigned offspring.
+                double kt1 = referenceTrajectoryIndices.at(T); // k_{t-1}
                 int expectedNumberOffspring = 0; //Integer part of N*W_{t - 1}.
                 arma::Col<double> dRSWeightsResidual(N);
+                arma::Col<double> dRSWeightsResidualNormalized(N);
                 arma::Col<unsigned int> DsetCurrent; //D_i
                 int CardDsetCurrent = 0;//|D_i|
                 arma::Col<unsigned int> DsetKtMinus1; //D_{K_{t - 1}}
                 arma::Col<unsigned int> DsetDeterministic; //The set of indices that are sampled deterministically.
+                arma::Col<unsigned int> DsetStochastic; //The set of indices that are sampled stochastically.
                 arma::Col<unsigned int> tmpIterator = arma::linspace<arma::Col<unsigned int> >(0, N - 1, N);
                 //    0.2. Calculate normalized particle weights.
                 dRSWeights = exp(pPopulation.GetLogWeight() - stableLogSumWeights(pPopulation.GetLogWeight()));
-                //Step 1:
-                //Assign deterministic offpring indices for each i={1,...,N}.
+
                 for (int i : tmpIterator) {
                     //Compute (integer part of) expected number of offspring
                     expectedNumberOffspring = std::floor(N * dRSWeights.at(i));
                     //Generate D_i set:
                     if(expectedNumberOffspring > 0) {
                         //Set D_i={l + 1, ..., l + expectedNumberOffspring}
-                        DsetCurrent = arma::linspace<arma::Col<unsigned int> >(l + 1, l + expectedNumberOffspring, expectedNumberOffspring);
-                        // Set Card(D_i)=length(D_i);
+                        DsetCurrent = arma::linspace<arma::Col<unsigned int> >(l, l + expectedNumberOffspring - 1, expectedNumberOffspring);
+                        // Set Card(D_i)=length(D_i) = floor(N*W_{t-1});
                         CardDsetCurrent = expectedNumberOffspring;
                         // Set l += Card(D_i);
                         l += CardDsetCurrent;
                     } else {
                         //Set D_i=EMPTYSET
                         //Set Card(D_i)= 0;
+                        DsetCurrent.reset();
                         CardDsetCurrent = 0;
                     }
-                    //Compute unnormalized residual weights \hat{W}_{t-1}^i.
-                    dRSWeightsResidual.at(i) = dRSWeights.at(i) - static_cast<double>(CardDsetCurrent)/N;
-                    //Compute normalized residual weights \tilde{W}_{t-1}^i.
-                    dRSWeightsResidual.at(i) = dRSWeightsResidual.at(i)/arma::sum(dRSWeightsResidual);
-                    //Deterministic component assignment
+                    //Assign deterministic offpring indices for each i={1,...,N}
                     for (int j : DsetCurrent) {
                         uRSIndices.at(j) = i;
                     }
-                    //Convenient way of handling the conditioning path
-                    //if(i == K_{t-1}) store D_{K_{t-1}};
+                    //Compute unnormalized residual weights \hat{W}_{t-1}^i.
+                    dRSWeightsResidual.at(i) = dRSWeights.at(i) * N - static_cast<double>(CardDsetCurrent)/N;
+                    //Check if convenient way of handling the conditioning path
+                    //is possible: if(i == K_{t-1}) store D_{K_{t-1}}
+                    //and check K_t \notin D_{K_{t-1}} later!
                     if(i == static_cast<int>(referenceTrajectoryIndices.at(T))) {
                         DsetKtMinus1 = DsetCurrent;
                     }
                 }
-                //Step 2:
-                //Sample K_t from appropriate lambda distribution
-                //    2.1 Initializes container
-                arma::Col<double> lambdaProbs(N);
-                double prob1 = 1/(N * dRSWeights.at(referenceTrajectoryIndices.at(T)));
-                double prob2 = dRSWeightsResidual.at(referenceTrajectoryIndices.at(T))/(N * dRSWeights.at(referenceTrajectoryIndices.at(T)) * (N - l));
-                //Defines the complement set of DsetKtMinus1 relative to {1,...,N} i.e. {1,...,N}\DsetKtMinus1
-                //    2.2 Fills a vector with probabilities to sample from \lambda(k_t|k_{t - 1}, x_{t - 1}^{1:N})
-                for (int n = 0; n < N; ++n) {
-                    if (any(arma::find(DsetKtMinus1 == n))) {
-                        lambdaProbs.at(n) = prob1;
-                    } else {
-                        lambdaProbs.at(n) = prob2;
-                    }
+                //Define deterministic and stochastic sets for index assignment
+                DsetDeterministic = arma::linspace<arma::Col<unsigned int> >(0, l - 1, l);
+                if (l < N) {
+                    DsetStochastic = arma::linspace<arma::Col<unsigned int> >(l, N - 1, N - l);
+                } else {
+                    DsetStochastic = arma::linspace<arma::Col<unsigned int> >(N - 1, N - 1, 1);
                 }
-                //    2.3 Sample Kt from eq. 4 on p.8 of the WP
-                long Kt = Rcpp::sample(N, 1, false, Rcpp::wrap(lambdaProbs))[0];
+                //Compute normalized residual weights \tilde{W}_{t-1}^i.
+                dRSWeightsResidualNormalized = dRSWeightsResidual/arma::sum(dRSWeightsResidual);
+                //Step 1:
+                //Sample K_t from appropriate lambda distribution
+                //    1.1 Initializes container
+                arma::Col<double> lambdaProbs(N);
+                lambdaProbs.zeros();
+                double prob1 = 1.0/(N * dRSWeights.at(kt1));
+                double prob2 = dRSWeightsResidual.at(kt1)/(N * dRSWeights.at(kt1) * (N - l));
+                //Defines the complement set of DsetKtMinus1 relative to {1,...,N} i.e. {1,...,N}\DsetKtMinus1
+                //    1.2 Fills a vector with probabilities to sample from \lambda(k_t|k_{t - 1}, x_{t - 1}^{1:N})
+                lambdaProbs.elem(DsetKtMinus1).fill(prob1);
+                lambdaProbs.elem(DsetStochastic).fill(prob2);
+                //    1.3 Sample Kt from eq. 4 on p.8 of the WP
+                long Kt = Rcpp::sample(N, 1, false, Rcpp::wrap(lambdaProbs))[0] - 1;
                 referenceTrajectoryIndices(T + 1) = Kt;
-                //Step 3:
+                //    1.4 If Kt \notin D_{K_{t-1}}
+                if (DsetKtMinus1.size() == 0) {         //the set is empty
+                    uRSIndices.at(Kt) = kt1;
+                } else if (Kt < arma::as_scalar(DsetKtMinus1.head(1)) && Kt > arma::as_scalar(DsetKtMinus1.tail(1))) {//Kt notin (ordered) set
+                    uRSIndices.at(Kt) = kt1;
+                }
+                //Step 2:
                 //Compute residual ancestor indices via sampling from categorical distribution
                 if (l < N) {
-                    DsetDeterministic = arma::linspace<arma::Col<unsigned int> >(l + 1, N, N - l);
-                    arma::uvec DsetFinalIndices = arma::find(DsetDeterministic != Kt);
-                    DsetDeterministic = DsetDeterministic.elem(DsetFinalIndices);
-                    for(int k : DsetDeterministic) {
-                        uRSIndices.at(k) = Rcpp::sample(N, 1, false, Rcpp::wrap(dRSWeightsResidual))[0];
+                    for(int k : DsetStochastic) {
+                        if (k == Kt) continue; // skip since A^{K_t} already set
+                        uRSIndices.at(k) = Rcpp::sample(N, 1, false, Rcpp::wrap(dRSWeightsResidualNormalized))[0] - 1;
                     }
                 }
-                //Step 4: If not done in 1. assign conditional ancestor index:
-                if(arma::all(DsetKtMinus1 != Kt)) {
-                    uRSIndices.at(Kt) = referenceTrajectoryIndices.at(T);
-                }
-                //else already assigned under 1.
                 break;
             }
         }

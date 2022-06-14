@@ -17,6 +17,10 @@ blockpfGaussianOpt_impl <- function(data, part, lag) {
     .Call(`_RcppSMC_blockpfGaussianOpt_impl`, data, part, lag)
 }
 
+compareNCestimates_imp <- function(data, lParticleNum, simNum, parInits, referenceTraj) {
+    .Call(`_RcppSMC_compareNCestimates_imp`, data, lParticleNum, simNum, parInits, referenceTraj)
+}
+
 nonLinPMMH_impl <- function(data, lNumber, lMCMCits, verbose = FALSE, msg_freq = 100L) {
     .Call(`_RcppSMC_nonLinPMMH_impl`, data, lNumber, lMCMCits, verbose, msg_freq)
 }

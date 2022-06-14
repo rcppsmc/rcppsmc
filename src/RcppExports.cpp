@@ -64,6 +64,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compareNCestimates_imp
+Rcpp::List compareNCestimates_imp(arma::vec data, long lParticleNum, int simNum, Rcpp::List parInits, arma::mat referenceTraj);
+RcppExport SEXP _RcppSMC_compareNCestimates_imp(SEXP dataSEXP, SEXP lParticleNumSEXP, SEXP simNumSEXP, SEXP parInitsSEXP, SEXP referenceTrajSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< long >::type lParticleNum(lParticleNumSEXP);
+    Rcpp::traits::input_parameter< int >::type simNum(simNumSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type parInits(parInitsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type referenceTraj(referenceTrajSEXP);
+    rcpp_result_gen = Rcpp::wrap(compareNCestimates_imp(data, lParticleNum, simNum, parInits, referenceTraj));
+    return rcpp_result_gen;
+END_RCPP
+}
 // nonLinPMMH_impl
 Rcpp::DataFrame nonLinPMMH_impl(arma::vec data, unsigned long lNumber, unsigned long lMCMCits, bool verbose, int msg_freq);
 RcppExport SEXP _RcppSMC_nonLinPMMH_impl(SEXP dataSEXP, SEXP lNumberSEXP, SEXP lMCMCitsSEXP, SEXP verboseSEXP, SEXP msg_freqSEXP) {
@@ -111,6 +126,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_RcppSMC_LinRegLA_impl", (DL_FUNC) &_RcppSMC_LinRegLA_impl, 3},
     {"_RcppSMC_LinRegLA_adapt_impl", (DL_FUNC) &_RcppSMC_LinRegLA_adapt_impl, 4},
     {"_RcppSMC_blockpfGaussianOpt_impl", (DL_FUNC) &_RcppSMC_blockpfGaussianOpt_impl, 3},
+    {"_RcppSMC_compareNCestimates_imp", (DL_FUNC) &_RcppSMC_compareNCestimates_imp, 5},
     {"_RcppSMC_nonLinPMMH_impl", (DL_FUNC) &_RcppSMC_nonLinPMMH_impl, 5},
     {"_RcppSMC_pfLineartBS_impl", (DL_FUNC) &_RcppSMC_pfLineartBS_impl, 4},
     {"_RcppSMC_pfNonlinBS_impl", (DL_FUNC) &_RcppSMC_pfNonlinBS_impl, 2},
