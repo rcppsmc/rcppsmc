@@ -1,3 +1,7 @@
+2022-11-29  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/ci.yaml (jobs): Update to actions/checkout@v3
+
 2022-06-06  Ilya Zarubin  <ilya.a.zarub@gmail>
 
 	* R/cSMCexamples.R: add facilities for testing of conditional SMC and
