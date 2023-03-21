@@ -63,9 +63,9 @@ namespace smc {
     template <class Space>class historyelement
     {
     private:
-        long number; //!< The number of particles (presently redundant as this is not a function of iteration)
-        int nAccepted; //!< Number of MCMC moves accepted during this iteration.
-        int nRepeat; //!< Number of MCMC iterations performed at this iteration (per particle)
+        long number = 0; //!< The number of particles (presently redundant as this is not a function of iteration)
+        int nAccepted = 0; //!< Number of MCMC moves accepted during this iteration.
+        int nRepeat = 0; //!< Number of MCMC iterations performed at this iteration (per particle)
         population<Space> pop; //!< The particles themselves (values and weights)
         arma::Col<unsigned int> ancestorIndices = arma::Col<unsigned int>(number);
         historyflags flags; //!< Flags associated with this iteration.

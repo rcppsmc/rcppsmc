@@ -122,10 +122,10 @@
 \references{
   A. M. Johansen. SMCTC: Sequential Monte Carlo in C++.
   Journal of Statistical Software, 30(6):1-41, April
-  2009. \url{https://www.jstatsoft.org/v30/i06/paper}
+  2009. \url{https://www.jstatsoft.org/article/view/v030i06}
 }
 
-\seealso{The SMCTC paper and code at \url{https://www.jstatsoft.org/v30/i06/paper}.}
+\seealso{The SMCTC paper and code at \url{https://www.jstatsoft.org/article/view/v030i06}.}
 
 \author{Adam M. Johansen, Dirk Eddelbuettel, Leah South and Ilya Zarubin}
 \keyword{programming}
