@@ -5,6 +5,8 @@
 	* inst/include/history.h (historyelement): Initialize three variable
 	which addresses a clang++ notice
 
+	* man/cSMCexamples.Rd: URL update to please R CMD check
+
 2022-11-29  Dirk Eddelbuettel  <edd@debian.org>
 
 	* .github/workflows/ci.yaml (jobs): Update to actions/checkout@v3
