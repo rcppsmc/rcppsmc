@@ -3,6 +3,15 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.7 (2023-03-22)}{
+  \itemize{
+    \item Extensive extensions for conditional SMC and resample, updated
+    \code{hello_world} example, added skeleton function for easier package
+    creation (Ilya in \ghpr{67},\ghpr{72})
+    \item Small package updates (Dirk in \ghpr{75} fixing \ghit{74})
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.6 (2021-12-17)}{
   \itemize{
     \item Updated URLs to JSS for the new DOI scheme upon their request

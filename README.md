@@ -10,7 +10,8 @@
 
 This package provides R with access to the
 [Sequential Monte Carlo Template Classes](https://doi.org/10.18637/jss.v030.i06)
-by Johansen (Journal of Statistical Software, 2009, v30, i6).
+by Johansen (Journal of Statistical Software, 2009, v30, i6,
+[doi:10.18637/jss.v030.i06](https://doi.org/10.18637/jss.v030.i06)).
 
 At present, four additional examples have been added, and the first example
 from the JSS paper has been extended. Further integration and extensions are
