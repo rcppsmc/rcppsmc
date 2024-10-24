@@ -7,7 +7,8 @@ Authors@R: c(person("Dirk", "Eddelbuettel", role = c("aut", "cre"), email = "edd
                     comment = c(ORCID = "0000-0001-6419-907X")),
              person("Adam M.", "Johansen", role = "aut", email="adam.johansen@gmail.com",
 	            comment = c(ORCID = "0000-0002-3531-7628")),
-             person("Leah F.", "South", role = "aut"),
+             person("Leah F.", "South", role = "aut", email="leah.south@hdr.qut.edu.au",
+	            comment = c(ORCID = "0000-0002-5646-2963")),
              person("Ilya", "Zarubin", role = "aut", email = "ilya.a.zarub@googlemail.com"))
 Description: R access to the Sequential Monte Carlo Template Classes
  by Johansen <doi:10.18637/jss.v030.i06> is provided. At present, four
