@@ -1,3 +1,7 @@
+2025-01-08  Dirk Eddelbuettel  <edd@debian.org>
+
+	* man/cSMCexamples.Rd: Correct use of \itemize and \item
+
 2024-10-24  Leah South  <leah.south@hdr.qut.edu.au>
 
 	* DESCRIPTION (Authors@R): Added my email address and ORCID.

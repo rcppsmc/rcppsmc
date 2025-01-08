@@ -73,21 +73,21 @@
 \value{
   \code{compareNCestimates} returns a named list of two
   \itemize{
-    \item{\code{outSMC}} a named list of two:
+    \item \code{outSMC} a named list of two:
     \itemize{
-      \item{\code{smcOut}: }{a matrix of dimension \code{simNum x 4} which
+      \item \code{smcOut}: a matrix of dimension \code{simNum x 4} which
       contains single log-likelihood estimates of the standard BPF for each of
-      the 4 resampling schemes and for each simulation run}
-      \item{\code{csmcOut}: }{a matrix of dimension \code{simNum x 4} which
+      the 4 resampling schemes and for each simulation run
+      \item \code{csmcOut}: a matrix of dimension \code{simNum x 4} which
       contains single log-likelihood estimates of the conditional BPF for each
-      of the 4 resampling schemes and for each simulation run}
+      of the 4 resampling schemes and for each simulation run
     }
-    \item{\code{outKalman}} the output of \code{kalmanFFBS}, see below
+    \item \code{outKalman} the output of \code{kalmanFFBS}, see below
   }
   \code{kalmanFFBS} returns a named list of two:
     \itemize{
-      \item{\code{logLikeliEstim: }}{(exact) estimate of the log-likelihood}
-      \item{\code{xBackwardSimul: }}{a backward simulation (joint smoothing) trajectory of latent states given parameters and measurement}
+      \item \code{logLikeliEstim:} (exact) estimate of the log-likelihood
+      \item \code{xBackwardSimul:} a backward simulation (joint smoothing) trajectory of latent states given parameters and measurement
     }
 }
 \details{
