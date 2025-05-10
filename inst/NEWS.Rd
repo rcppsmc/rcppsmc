@@ -3,6 +3,14 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.8 (2025-05-10)}{
+  \itemize{
+    \item Updated continuous integration script
+    \item Updated package metadata now using Authors@R
+    \item Corrected use of itemized list in one manual page
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.7 (2023-03-22)}{
   \itemize{
     \item Extensive extensions for conditional SMC and resample, updated
