@@ -473,7 +473,7 @@ namespace smc {
                     tmpUnifRnd += i;//mathematical 'i' starts at 1; here at 0
                     tmpUnifRnd /= N;
 
-                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpUnifRnd, 1, "first"));
+                    minimalJ += arma::as_scalar(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpUnifRnd, 1, "first"));
                     uRSIndices.at(i) = minimalJ;
                 }
                 break;
@@ -547,7 +547,7 @@ namespace smc {
                     tmpU = tmpV + i;//mathematical 'i' at 1; here it starts at 0
                     tmpU /= N;
 
-                    minimalJ += arma::conv_to<long>::from(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpU, 1, "first"));
+                    minimalJ += arma::as_scalar(arma::find(dRSWeightsCumulative.tail(N - minimalJ) > tmpU, 1, "first"));
                     uRSIndices.at(i) = minimalJ;
                 }
                 break;
