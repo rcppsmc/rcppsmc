@@ -1,3 +1,14 @@
+2025-09-06  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/ci.yaml: Use r-ci action with embedded setup
+
+2025-08-31  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/Makevars: Set -DARMA_USE_CURRENT for RcppArmadillo 15.0.1-1
+
+	* inst/include/conditionalSampler.h: Switch to non-deprecated scalar
+	conversion
+
 2025-05-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.2.8
