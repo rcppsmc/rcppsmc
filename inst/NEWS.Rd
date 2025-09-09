@@ -3,6 +3,14 @@
 \newcommand{\ghpr}{\href{https://github.com/rcppsmc/rcppsmc/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/rcppsmc/rcppsmc/issues/#1}{##1}}
 
+\section{Changes in RcppSMC version 0.2.9 (2025-09-09)}{
+  \itemize{
+    \item Adjust to \pkg{RcppArmadillo} 15.0.* by setting
+    \code{ARMA_USE_CURRENT} and updating two expressions from deprecated code
+    \item Rely on r-ci GitHub Action which includes the bootstrap step
+  }
+}
+
 \section{Changes in RcppSMC version 0.2.8 (2025-05-10)}{
   \itemize{
     \item Updated continuous integration script
